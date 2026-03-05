@@ -3,7 +3,7 @@ name = "omnikernal"
 version = "0.1.0"
 description = "A secure, database-driven, multi-platform bot automation engine using a Microkernel (Plugin) Architecture"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [
     { name = "BITS-Rohit", email = "rohitguptaradheradhe2004@gmail.com" }
@@ -20,7 +20,7 @@ keywords = [
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
@@ -64,7 +64,6 @@ docs = [
     "mkdocstrings[python]>=0.25.0",
 ]
 database-extras = [
-    # SQLite is built-in; add these for other backends
     "aiosqlite>=0.20.0",   # async SQLite support
     "aiomysql>=0.2.0",     # async MySQL support (optional)
     "asyncpg>=0.29.0",     # async PostgreSQL support (optional)
@@ -99,7 +98,7 @@ dev-dependencies = [
 # ---------------------------------------------------------------------------
 [tool.ruff]
 line-length    = 100
-target-version = "py314"
+target-version = "py312"
 
 [tool.ruff.lint]
 select  = ["E", "W", "F", "I", "UP", "B", "SIM"]
@@ -115,7 +114,7 @@ skip-magic-trailing-comma = false
 # Mypy (type checking)
 # ---------------------------------------------------------------------------
 [tool.mypy]
-python_version         = "3.14"
+python_version         = "3.12"
 strict                 = true
 ignore_missing_imports = true
 warn_return_any        = true
