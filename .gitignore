@@ -64,5 +64,4 @@ Thumbs.db
 # Keep profiles/.gitkeep but exclude all runtime subdirectories and their contents
 profiles/*/
 
-claude.md
-bug_analysis.md
+
