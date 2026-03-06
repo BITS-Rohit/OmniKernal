@@ -9,10 +9,11 @@ Demonstrates the full Core Engine loop using AdapterLoader:
 """
 
 import asyncio
-from src.core.engine import OmniKernal
-from src.database.session import async_session_factory, ensure_db_initialized  # BUG 43
-from src.database.repository import OmniRepository
+
 from src.adapters.loader import AdapterLoader
+from src.core.engine import OmniKernal
+from src.database.repository import OmniRepository
+from src.database.session import async_session_factory, ensure_db_initialized  # BUG 43
 
 
 async def run_smoke_test():

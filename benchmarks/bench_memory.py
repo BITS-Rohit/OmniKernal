@@ -10,13 +10,15 @@ Output: benchmarks/results/memory.json
 """
 
 import asyncio
-import psutil
 import os
 import sys
+
+import psutil
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from src.profiles.manager import ProfileManager
 from benchmarks.harness import save_results
+from src.profiles.manager import ProfileManager
 
 
 def get_memory_mb() -> float:

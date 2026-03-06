@@ -5,7 +5,6 @@ Merged unique cases from the now-deleted tests/test_security/test_sanitizer.py
 into this canonical location.
 """
 
-import pytest
 from src.security.sanitizer import CommandSanitizer
 
 

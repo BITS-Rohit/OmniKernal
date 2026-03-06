@@ -13,8 +13,8 @@ Usage:
     3. Run: AdapterLoader.load("whatsapp_playwright")
 """
 
-from src.core.interfaces.platform_adapter import PlatformAdapter
 from src.core.contracts.message import Message
+from src.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class WhatsAppPlaywrightAdapter(PlatformAdapter):

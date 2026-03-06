@@ -3,15 +3,17 @@ Tests for Phase 6 — Execution Modes (SelfMode, CoopMode, ModeManager).
 """
 
 import asyncio
-import pytest
-from unittest.mock import AsyncMock, MagicMock
+import contextlib
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock
 
-from src.modes.self_mode import SelfMode
-from src.modes.coop_mode import CoopMode
-from src.modes.mode_manager import ModeManager
+import pytest
+
 from src.core.contracts.message import Message
 from src.core.contracts.user import User
+from src.modes.coop_mode import CoopMode
+from src.modes.mode_manager import ModeManager
+from src.modes.self_mode import SelfMode
 
 
 def make_mock_msg(msg_id: str = "m1", text: str = "!echo hi") -> Message:
@@ -104,10 +106,8 @@ class TestCoopMode:
 
         core.is_running = False
         task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
         core.process.assert_called_once_with(msg)
 
@@ -125,10 +125,8 @@ class TestCoopMode:
         await asyncio.sleep(0.05)
 
         task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
         core.process.assert_not_called()
 

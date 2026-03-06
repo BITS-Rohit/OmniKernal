@@ -5,18 +5,17 @@ Provides a reusable engine boot, message injection, and timing utilities
 for all benchmark scripts.
 """
 
-import asyncio
-import time
 import json
 import os
-from datetime import datetime, timezone
-from typing import Any, Callable, Coroutine
+import time
+from collections.abc import Coroutine
+from datetime import UTC, datetime
+from typing import Any
 
-from src.database.session import async_session_factory, init_db
-from src.database.repository import OmniRepository
 from src.adapters.loader import AdapterLoader
 from src.core.engine import OmniKernal
-
+from src.database.repository import OmniRepository
+from src.database.session import async_session_factory, init_db
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
 
@@ -39,8 +38,8 @@ async def build_engine(mode: str = "self", profile_name: str = "bench") -> tuple
             mode=mode,
         )
         # Partial boot: init DB, profile, plugins, dispatcher — skip poll loop
-        from src.core.loader import PluginEngine
         from src.core.dispatcher import EventDispatcher
+        from src.core.loader import PluginEngine
         from src.profiles.manager import ProfileManager
 
         await init_db()
@@ -72,7 +71,7 @@ def save_results(filename: str, data: dict) -> str:
     """Saves benchmark results as JSON to benchmarks/results/."""
     os.makedirs(RESULTS_DIR, exist_ok=True)
     path = os.path.join(RESULTS_DIR, filename)
-    data["_timestamp"] = datetime.now(timezone.utc).isoformat()
+    data["_timestamp"] = datetime.now(UTC).isoformat()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     print(f"[SAVED] {path}")

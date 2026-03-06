@@ -6,10 +6,11 @@ Implements the full PlatformAdapter contract using in-memory queues.
 No SDK, no browser, no network — purely synthetic.
 """
 
-from datetime import datetime, timezone          # BUG 8 fix: import timezone
-from src.core.interfaces.platform_adapter import PlatformAdapter
+from datetime import UTC, datetime  # BUG 8 fix: import timezone
+
 from src.core.contracts.message import Message
 from src.core.contracts.user import User
+from src.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class ConsoleMockAdapter(PlatformAdapter):
@@ -65,7 +66,7 @@ class ConsoleMockAdapter(PlatformAdapter):
             raw_text=raw_text,
             user=User(id=user_id, display_name="TestUser", platform="console", role="admin"),
             # BUG 8 fix: was datetime.now() (timezone-naive), now timezone-aware UTC
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             platform="console"
         )
         self._message_queue.append(msg)

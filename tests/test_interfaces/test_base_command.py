@@ -1,5 +1,6 @@
 """Test stubs for BaseCommand ABC — structural correctness only."""
 import pytest
+
 from src.core.interfaces.base_command import BaseCommand
 
 
@@ -20,7 +21,7 @@ def test_base_command_missing_methods_raises():
 
 def test_base_command_full_concrete_instantiates():
     """A fully implemented subclass instantiates correctly."""
-    from src.core.contracts import CommandContext, CommandResult
+    from src.core.contracts import CommandResult
 
     class ConcreteCommand(BaseCommand):
         @property

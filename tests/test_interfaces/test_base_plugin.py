@@ -1,5 +1,6 @@
 """Test stubs for BasePlugin ABC — structural correctness only."""
 import pytest
+
 from src.core.interfaces.base_plugin import BasePlugin
 
 

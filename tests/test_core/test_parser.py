@@ -1,5 +1,5 @@
-import pytest
 from src.core.parser import CommandParser
+
 
 def test_parser_single_arg():
     pattern = "!echo <text>"

@@ -1,9 +1,11 @@
 """Test stubs for Message contract — construction and immutability."""
-import pytest
 from dataclasses import FrozenInstanceError
 from datetime import datetime
-from src.core.contracts.user import User
+
+import pytest
+
 from src.core.contracts.message import Message
+from src.core.contracts.user import User
 
 
 def _make_user() -> User:

@@ -8,21 +8,23 @@ Output: benchmarks/results/fault_isolation.json
 """
 
 import asyncio
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from datetime import datetime
+
+from benchmarks.harness import save_results
+from src.adapters.loader import AdapterLoader
 from src.core.contracts.message import Message
 from src.core.contracts.user import User
-from src.database.session import async_session_factory, init_db
-from src.database.repository import OmniRepository
-from src.adapters.loader import AdapterLoader
-from src.core.loader import PluginEngine
 from src.core.dispatcher import EventDispatcher
 from src.core.engine import OmniKernal
+from src.core.loader import PluginEngine
+from src.database.repository import OmniRepository
+from src.database.session import async_session_factory, init_db
 from src.profiles.manager import ProfileManager
-from benchmarks.harness import save_results
 
 
 def make_message(text: str, uid: str = "user_1") -> Message:

@@ -8,15 +8,16 @@ Output: benchmarks/results/db_lookup.json
 """
 
 import asyncio
-import time
-import sys
 import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from src.database.session import async_session_factory, init_db
-from src.database.repository import OmniRepository
-from src.core.loader import PluginEngine
 from benchmarks.harness import save_results
+from src.core.loader import PluginEngine
+from src.database.repository import OmniRepository
+from src.database.session import async_session_factory, init_db
 
 ITERATIONS = 100
 

@@ -1,5 +1,6 @@
 """Test stubs for PlatformAdapter ABC — structural correctness only."""
 import pytest
+
 from src.core.interfaces.platform_adapter import PlatformAdapter
 
 

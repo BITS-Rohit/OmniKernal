@@ -2,11 +2,11 @@
 Tests for Phase 5 — Profile Management.
 """
 
-import os
 import pytest
+
 from src.profiles.lock import ProfileLock
-from src.profiles.metadata import ProfileMetadata
 from src.profiles.manager import ProfileManager
+from src.profiles.metadata import ProfileMetadata
 
 
 class TestProfileLock:
@@ -99,7 +99,7 @@ class TestProfileMetadata:
         meta = ProfileMetadata(str(tmp_path))
         (tmp_path / "test_profile").mkdir()
 
-        data = meta.create_default("test_profile", "whatsapp")
+        meta.create_default("test_profile", "whatsapp")
         loaded = meta.load("test_profile")
         assert loaded["platform"] == "whatsapp"
 
@@ -128,7 +128,7 @@ class TestProfileManager:
         mgr = ProfileManager(str(tmp_path))
         mgr.create("alice")
 
-        meta = mgr.activate("alice")
+        mgr.activate("alice")
         assert mgr.lock.is_locked("alice") is True
 
         mgr.deactivate("alice")
@@ -140,7 +140,7 @@ class TestProfileManager:
         mgr.create("bob")
 
         # Activate first — no headless needed
-        meta_a = mgr.activate("alice")
+        mgr.activate("alice")
         assert mgr.should_force_headless() is False
 
         # Activate second — headless enforced (>= 2 active)

@@ -1,6 +1,8 @@
 """Test stubs for User contract — construction and immutability."""
-import pytest
 from dataclasses import FrozenInstanceError
+
+import pytest
+
 from src.core.contracts.user import User
 
 

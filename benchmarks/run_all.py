@@ -8,6 +8,7 @@ import asyncio
 import json
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
@@ -115,7 +116,7 @@ async def main():
         ("bench_fault_isolation", "Fault Isolation"),
     ]
 
-    for module_name, label in benchmarks:
+    for module_name, _label in benchmarks:
         print(f"\n{'-'*40}")
         module = __import__(f"benchmarks.{module_name}", fromlist=["main"])
         await module.main()

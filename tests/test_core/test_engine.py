@@ -13,16 +13,16 @@ DispatchResult namedtuple instead of a bare CommandResult. Tests that
 inject a mock dispatcher must now return DispatchResult instances.
 """
 
-import pytest
-import asyncio
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock
 
-from src.core.engine import OmniKernal
-from src.core.dispatcher import DispatchResult
+import pytest
+
+from src.core.contracts.command_result import CommandResult
 from src.core.contracts.message import Message
 from src.core.contracts.user import User
-from src.core.contracts.command_result import CommandResult
+from src.core.dispatcher import DispatchResult
+from src.core.engine import OmniKernal
 
 
 def _make_msg(text: str = "!echo hello integration", user_id: str = "user1") -> Message:
@@ -30,7 +30,7 @@ def _make_msg(text: str = "!echo hello integration", user_id: str = "user1") -> 
         id="msg1",
         raw_text=text,
         user=User(id=user_id, display_name="Test User", platform="mock"),
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         platform="mock"
     )
 

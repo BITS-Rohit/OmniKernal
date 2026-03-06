@@ -2,12 +2,11 @@
 Tests for AdapterValidator and AdapterLoader (Phase 4).
 """
 
-import os
 import pytest
-import tempfile
 import yaml
-from src.adapters.validator import AdapterValidator
+
 from src.adapters.loader import AdapterLoader
+from src.adapters.validator import AdapterValidator
 from src.core.interfaces.platform_adapter import PlatformAdapter
 
 
