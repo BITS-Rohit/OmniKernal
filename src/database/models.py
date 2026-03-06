@@ -7,7 +7,7 @@ and security watchdog (API health).
 
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import String, DateTime, Boolean, Integer, JSON, ForeignKey, Text
+from sqlalchemy import String, DateTime, Boolean, Integer, Float, JSON, ForeignKey, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
@@ -74,7 +74,7 @@ class ExecutionLog(Base):
     command_name: Mapped[str] = mapped_column(String(50))
     raw_input: Mapped[str] = mapped_column(Text)
     success: Mapped[bool] = mapped_column(Boolean)
-    response_time_ms: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
+    response_time_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # BUG 33 fix
     error_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 class ApiHealth(Base):

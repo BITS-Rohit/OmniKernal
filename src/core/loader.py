@@ -6,6 +6,10 @@ and registers findings into the OmniRepository.
 
 BUG 21 fix: Now uses PluginManifest.from_dict() to parse and validate
 manifests formally, instead of raw dict access.
+
+BUG 34 fix: Now enforces min_core_version — plugins that require a higher
+core version than the currently running OMNIKERNAL_VERSION are rejected
+at load time with a clear log message.
 """
 
 import os
@@ -17,6 +21,18 @@ from src.core.contracts.plugin_manifest import PluginManifest   # BUG 21
 
 if TYPE_CHECKING:
     from src.database.repository import OmniRepository
+
+# BUG 34 fix: single source of truth for the current Core version
+OMNIKERNAL_VERSION: str = "0.1.0"
+
+
+def _version_tuple(v: str) -> tuple[int, ...]:
+    """Parse a semver-like string into a comparable tuple, e.g. '1.2.3' → (1, 2, 3)."""
+    try:
+        return tuple(int(x) for x in v.split("."))
+    except (ValueError, AttributeError):
+        return (0,)
+
 
 class PluginEngine:
     """
@@ -63,6 +79,17 @@ class PluginEngine:
                 raw = json.load(f)
 
             manifest = PluginManifest.from_dict(raw)   # validates name/version
+
+            # BUG 34 fix: enforce min_core_version before registration
+            if manifest.min_core_version:
+                required = _version_tuple(manifest.min_core_version)
+                running  = _version_tuple(OMNIKERNAL_VERSION)
+                if required > running:
+                    self.logger.warning(
+                        f"Plugin '{manifest.name}' requires core v{manifest.min_core_version} "
+                        f"but running v{OMNIKERNAL_VERSION}. Skipping."
+                    )
+                    return
 
             # 2. Register Plugin in DB
             await self.repo.register_plugin(

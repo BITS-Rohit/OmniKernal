@@ -9,7 +9,7 @@ from typing import Optional, Sequence, Any
 from datetime import datetime, timezone
 from sqlalchemy import select, update, insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import Plugin, Tool, ExecutionLog, ApiHealth, DeadApi, ToolRequirement
+from .models import Plugin, Tool, RoutingRule, ExecutionLog, ApiHealth, DeadApi, ToolRequirement
 
 class OmniRepository:
     """
@@ -61,9 +61,23 @@ class OmniRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_tool_by_id(self, tool_id: int) -> Optional[Tool]:
+        """Looks up a tool by its integer primary key. BUG 30 support."""
+        return await self.session.get(Tool, tool_id)
+
     async def get_all_tools(self) -> Sequence[Tool]:
         """Returns all registered tools."""
         result = await self.session.execute(select(Tool))
+        return result.scalars().all()
+
+    async def get_all_routing_rules(self) -> Sequence[RoutingRule]:
+        """
+        Returns all routing rules ordered by priority (highest first).
+        BUG 30 fix: used by CommandRouter for regex-based dispatch.
+        """
+        result = await self.session.execute(
+            select(RoutingRule).order_by(RoutingRule.priority.desc())
+        )
         return result.scalars().all()
 
     async def set_plugin_inactive(self, name: str) -> None:

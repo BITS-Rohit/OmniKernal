@@ -19,6 +19,7 @@ from src.core.parser import CommandParser
 from src.core.permissions import PermissionValidator
 from src.core.contracts.command_result import CommandResult
 from src.core.contracts.command_context import CommandContext
+from src.security.encryption import EncryptionEngine             # BUG 35
 
 if TYPE_CHECKING:
     from src.database.repository import OmniRepository
@@ -92,7 +93,8 @@ class EventDispatcher:
                 user=user,
                 logger=self.logger,
                 _repository=self.repository,
-                _tool_id=route["id"]
+                _tool_id=route["id"],
+                _decrypter=EncryptionEngine.decrypt,  # BUG 35 fix
             )
             result = await handler_func(args, ctx)
             return result

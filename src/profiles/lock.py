@@ -3,10 +3,14 @@ ProfileLock — PID-Based Lock File Enforcement
 
 Prevents two processes from activating the same profile simultaneously.
 Stale locks (from crashed processes) are automatically detected and cleared.
+
+BUG 31 fix: Eliminated the TOCTOU race between the exists-check and atomic
+file creation. acquire() now uses a try-first-then-cleanup loop: it attempts
+os.O_EXCL creation immediately; only on FileExistsError does it inspect the
+existing PID and potentially clean up a stale lock, then retries once.
 """
 
 import os
-import json
 from src.core.logger import core_logger
 
 PROFILES_DIR = "profiles"
@@ -30,7 +34,6 @@ class ProfileLock:
     def _pid_is_alive(self, pid: int) -> bool:
         """Check if a process with the given PID is still running."""
         try:
-            # On Windows, os.kill with signal 0 checks existence
             os.kill(pid, 0)
             return True
         except (OSError, ProcessLookupError):
@@ -39,46 +42,58 @@ class ProfileLock:
     def acquire(self, profile_name: str) -> None:
         """
         Acquires the lock for a profile by writing the current PID.
-        Uses atomic file creation (O_CREAT | O_EXCL) to prevent race conditions.
+
+        BUG 31 fix: Uses a try-first-then-cleanup strategy to eliminate the
+        TOCTOU race between the exists check and atomic creation.
+
+        Strategy:
+          1. Attempt O_EXCL atomic create immediately (fastest, no race).
+          2. On FileExistsError, read the existing PID.
+          3. If PID is alive → raise RuntimeError (lock genuinely held).
+          4. If PID is dead → remove stale file and retry once (max 2 attempts).
+          5. If second attempt also fails → another live process got there first.
 
         Raises:
-            RuntimeError: If the lock is already held by a live process.
+            RuntimeError: If the lock is held by a live process.
         """
         lock_file = self._lock_path(profile_name)
         os.makedirs(os.path.dirname(lock_file), exist_ok=True)
 
-        # 1. Check for existing lock
-        if os.path.exists(lock_file):
+        for attempt in range(2):
             try:
-                with open(lock_file, "r") as f:
-                    content = f.read().strip()
+                # Atomic: fails immediately if the file already exists
+                fd = os.open(lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                with os.fdopen(fd, "w") as f:
+                    f.write(str(os.getpid()))
+                self.logger.info(f"Lock acquired for '{profile_name}' (PID {os.getpid()}).")
+                return
+
+            except FileExistsError:
+                if attempt == 1:
+                    # Second attempt failed — a live process just acquired the lock
+                    raise RuntimeError(
+                        f"Profile '{profile_name}' was locked by another process during acquisition."
+                    )
+
+                # First attempt: inspect the existing lock file
+                try:
+                    with open(lock_file, "r") as f:
+                        content = f.read().strip()
                     existing_pid = int(content) if content else None
-            except (ValueError, OSError):
-                existing_pid = None
+                except (OSError, ValueError):
+                    existing_pid = None
 
-            if existing_pid and self._pid_is_alive(existing_pid):
-                raise RuntimeError(
-                    f"Profile '{profile_name}' is already locked by PID {existing_pid}."
-                )
-            else:
-                self.logger.warning(
-                    f"Clearing stale lock for '{profile_name}'."
-                )
-                self.release(profile_name)
+                if existing_pid and self._pid_is_alive(existing_pid):
+                    raise RuntimeError(
+                        f"Profile '{profile_name}' is already locked by PID {existing_pid}."
+                    )
 
-        # 2. Atomic creation
-        try:
-            # os.O_EXCL ensures the call fails if the file already exists
-            fd = os.open(lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            with os.fdopen(fd, 'w') as f:
-                f.write(str(os.getpid()))
-        except FileExistsError:
-            # Rare race condition: someone else created it between our exists check and open
-            raise RuntimeError(
-                f"Profile '{profile_name}' was locked by another process during acquisition."
-            )
-
-        self.logger.info(f"Lock acquired for '{profile_name}' (PID {os.getpid()}).")
+                # Stale lock — remove it and loop back to retry O_EXCL
+                self.logger.warning(f"Clearing stale lock for '{profile_name}'.")
+                try:
+                    os.remove(lock_file)
+                except FileNotFoundError:
+                    pass  # another process already removed it — fine, O_EXCL will decide
 
     def release(self, profile_name: str) -> None:
         """Releases the lock for a profile."""

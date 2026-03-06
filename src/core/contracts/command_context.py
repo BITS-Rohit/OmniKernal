@@ -13,11 +13,16 @@ Phase 3: Full context passed into every handler execution.
 
 Invariant: Handlers access the DB ONLY through ctx.get_api_key().
 No raw DB session is ever exposed to handler scope.
+
+BUG 35 fix: The EncryptionEngine is now injected as a callable (_decrypter)
+at construction time instead of being imported lazily inside get_api_key().
+This eliminates the circular import risk, makes the dependency explicit to
+static analysers, and allows test code to pass a simple mock decrypter.
 """
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 if TYPE_CHECKING:
     from .user import User
@@ -32,14 +37,18 @@ class CommandContext:
     Safe, immutable capability surface provided to command handlers by the Core.
 
     Attributes:
-        user:   The User who triggered this command.
-        logger: Structured logger scoped to this execution (wired in Phase 1).
+        user:       The User who triggered this command.
+        logger:     Structured logger scoped to this execution (wired in Phase 1).
+        _decrypter: BUG 35 fix — callable (str) -> str provided by the Core.
+                    Defaults to EncryptionEngine.decrypt if not injected.
     """
 
     user: "User"
     logger: Any = field(default=None, repr=False)
     _repository: Optional["OmniRepository"] = field(default=None, repr=False)
     _tool_id: Optional[int] = field(default=None, repr=False)
+    # BUG 35 fix: decrypter injected by caller; avoids circular import via lazy hack
+    _decrypter: Optional[Callable[[str], str]] = field(default=None, repr=False)
 
     async def get_api_key(self, service: str) -> str:
         """
@@ -64,7 +73,13 @@ class CommandContext:
                 f"No API key found configured for tool '{service}' (tool_id={self._tool_id})"
             )
 
-        from src.security.encryption import EncryptionEngine
+        # BUG 35 fix: use injected decrypter if provided (no circular import)
+        if self._decrypter is not None:
+            return self._decrypter(encrypted_key)
+
+        # Fallback: late import kept as a last resort so callers that haven't
+        # been updated to inject _decrypter yet continue to work.
+        from src.security.encryption import EncryptionEngine  # noqa: PLC0415
         return EncryptionEngine.decrypt(encrypted_key)
 
     def __repr__(self) -> str:

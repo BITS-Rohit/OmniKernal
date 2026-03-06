@@ -7,8 +7,13 @@ the Dispatcher free of direct DB queries.
 
 BUG 19 fix: CommandRouter is now used by EventDispatcher instead
 of the dispatcher calling OmniRepository.get_tool_by_command directly.
+
+BUG 30 fix: get_route() now checks the routing_rules table first for
+regex-based overrides before falling back to exact command name lookup.
+This implements the DESIGN.md Phase 2 routing strategy.
 """
 
+import re
 from typing import Any, Optional
 from src.database.repository import OmniRepository
 
@@ -18,21 +23,52 @@ class CommandRouter:
     Registry for all available commands.
     DB-backed in Phase 2+.
 
-    Dispatcher uses this to resolve command_trigger -> handler_path.
+    Dispatcher uses this to resolve a command trigger → route dict.
+
+    Resolution order (BUG 30 fix):
+      1. Check routing_rules table — first regex pattern that matches wins.
+      2. Fall back to exact command name lookup in the tools table.
     """
 
     def __init__(self, repository: OmniRepository):
         self.repository = repository
 
-    async def get_route(self, command_name: str) -> Optional[dict]:
+    async def get_route(self, command_trigger: str) -> Optional[dict]:
         """
-        Looks up a route by command name from the database.
+        Looks up a route by command trigger.
+
+        BUG 30 fix: Checks routing_rules (regex overrides) first, then
+        falls back to the exact tool command_name lookup.
+
+        Args:
+            command_trigger: The raw command name without '!' (e.g. 'echo').
 
         Returns:
-            dict with keys: command_name, pattern, handler_path, plugin_name, id
-            or None if not found.
+            dict with keys: id, command_name, pattern, handler_path, plugin_name
+            or None if no route is found.
         """
-        tool = await self.repository.get_tool_by_command(command_name)
+        # 1. Check regex routing overrides (BUG 30)
+        rules = await self.repository.get_all_routing_rules()
+        for rule in rules:
+            try:
+                if re.fullmatch(rule.regex_pattern, command_trigger):
+                    # Resolve the tool this rule maps to
+                    tool = await self.repository.get_tool_by_id(rule.tool_id)
+                    if tool:
+                        return {
+                            "id": tool.id,
+                            "command_name": tool.command_name,
+                            "pattern": tool.pattern,
+                            "handler_path": tool.handler_path,
+                            "plugin_name": tool.plugin_name,
+                            "_via_routing_rule": rule.regex_pattern,  # debug aid
+                        }
+            except re.error:
+                # Malformed regex in DB — skip this rule gracefully
+                continue
+
+        # 2. Exact command name lookup (fallback)
+        tool = await self.repository.get_tool_by_command(command_trigger)
         if not tool:
             return None
 
@@ -41,10 +77,10 @@ class CommandRouter:
             "command_name": tool.command_name,
             "pattern": tool.pattern,
             "handler_path": tool.handler_path,
-            "plugin_name": tool.plugin_name
+            "plugin_name": tool.plugin_name,
         }
 
     async def list_commands(self) -> list[str]:
-        """Returns all registered commands from DB."""
+        """Returns all registered commands from the tools table."""
         tools = await self.repository.get_all_tools()
         return [t.command_name for t in tools]

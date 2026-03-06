@@ -34,6 +34,9 @@ async_session_factory = async_sessionmaker(
     expire_on_commit=False,
 )
 
+_db_initialized: bool = False
+
+
 async def init_db():
     """
     Initializes the database schema.
@@ -42,6 +45,28 @@ async def init_db():
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+async def ensure_db_initialized() -> None:
+    """
+    BUG 36 fix: Idempotent DB initialization guard.
+
+    Safe to call from any entry point (CLI scripts, test helpers, adapters)
+    that uses OmniRepository without going through OmniKernal.start().
+    On the first call it runs Base.metadata.create_all(); subsequent calls
+    are no-ops (guarded by module-level flag).
+
+    Usage::
+
+        from src.database.session import ensure_db_initialized
+        await ensure_db_initialized()
+        async with async_session_factory() as session:
+            repo = OmniRepository(session)
+    """
+    global _db_initialized
+    if not _db_initialized:
+        await init_db()
+        _db_initialized = True
 
 async def get_db():
     """Dependency for obtaining a database session."""
