@@ -57,6 +57,7 @@ Thumbs.db
 
 .jbeval/
 .qodo/
+.dev.key
 
 # Profile runtime data (Phase 5)
 # Keep profiles/.gitkeep but exclude all runtime subdirectories and their contents
