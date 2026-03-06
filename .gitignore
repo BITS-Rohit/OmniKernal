@@ -31,10 +31,11 @@ htmlcov/
 .coverage.*
 .pytest_cache/
 
-# Type checkers
+# Type checkers / Linters
 .mypy_cache/
 .pyre/
 .pytype/
+.ruff_cache/
 
 # IDEs
 .idea/
