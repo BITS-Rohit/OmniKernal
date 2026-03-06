@@ -20,12 +20,14 @@ BUG 58 fix: PluginEngine now accepts the running platform_name and skips
 prevents polluting the DB with tools that can never execute.
 """
 
-import os
 import json
+import os
+from typing import TYPE_CHECKING
+
 import yaml
-from typing import TYPE_CHECKING, Optional
+
+from src.core.contracts.plugin_manifest import PluginManifest  # BUG 21
 from src.core.logger import core_logger
-from src.core.contracts.plugin_manifest import PluginManifest   # BUG 21
 
 if TYPE_CHECKING:
     from src.database.repository import OmniRepository
@@ -58,7 +60,7 @@ class PluginEngine:
         self,
         repo: "OmniRepository",
         plugins_dir: str = "plugins",
-        platform_name: Optional[str] = None,
+        platform_name: str | None = None,
     ):
         self.repo = repo
         self.plugins_dir = plugins_dir
@@ -92,11 +94,11 @@ class PluginEngine:
             self.logger.debug(f"Skipping {folder_name}: No manifest.json found.")
             return
 
-        manifest: Optional[PluginManifest] = None
+        manifest: PluginManifest | None = None
 
         try:
             # 1. Load & Validate Manifest using formal contract (BUG 21 fix)
-            with open(manifest_path, "r", encoding="utf-8") as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 raw = json.load(f)
 
             manifest = PluginManifest.from_dict(raw)   # validates name/version
@@ -130,7 +132,7 @@ class PluginEngine:
 
             # 3. Load & Process commands.yaml
             if os.path.exists(commands_path):
-                with open(commands_path, "r", encoding="utf-8") as f:
+                with open(commands_path, encoding="utf-8") as f:
                     cmd_cfg = yaml.safe_load(f)
 
                 commands = cmd_cfg.get("commands", {})

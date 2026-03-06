@@ -19,7 +19,9 @@ Call invalidate_route_cache() after inserting a new routing rule.
 """
 
 import re
-from typing import Any, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
+
 from src.database.repository import OmniRepository
 
 
@@ -29,7 +31,7 @@ class RulesCache:
     Allows sharing a cache across multiple ephemeral CommandRouter instances.
     """
     def __init__(self):
-        self.rules: Optional[Sequence[Any]] = None
+        self.rules: Sequence[Any] | None = None
 
 
 class CommandRouter:
@@ -47,14 +49,14 @@ class CommandRouter:
     invalidate_route_cache() if rules change at runtime.
     """
 
-    def __init__(self, repository: OmniRepository, cache: Optional[RulesCache] = None):
+    def __init__(self, repository: OmniRepository, cache: RulesCache | None = None):
         self.repository = repository
         # BUG 68 fix: use shared cache if provided, else local one
         self._shared_cache = cache
-        self._local_cache: Optional[Sequence[Any]] = None
+        self._local_cache: Sequence[Any] | None = None
 
     @property
-    def _rules(self) -> Optional[Sequence[Any]]:
+    def _rules(self) -> Sequence[Any] | None:
         if self._shared_cache:
             return self._shared_cache.rules
         return self._local_cache
@@ -73,7 +75,7 @@ class CommandRouter:
         else:
             self._local_cache = None
 
-    async def get_route(self, command_trigger: str) -> Optional[dict]:
+    async def get_route(self, command_trigger: str) -> dict | None:
         """
         Looks up a route by command trigger.
 

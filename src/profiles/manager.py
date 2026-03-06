@@ -6,7 +6,7 @@ WhatsApp profiles. Enforces headless mode when ≥2 profiles are active.
 """
 
 import os
-from typing import Optional
+
 from src.core.logger import core_logger
 from src.profiles.lock import ProfileLock
 from src.profiles.metadata import ProfileMetadata
@@ -116,6 +116,6 @@ class ProfileManager:
         """Returns True if ≥2 profiles are currently active (locked)."""
         return self.lock.get_active_count() >= 2
 
-    def get_profile(self, name: str) -> Optional[dict]:
+    def get_profile(self, name: str) -> dict | None:
         """Returns metadata for a profile, or None if it doesn't exist."""
         return self.metadata.load(name)

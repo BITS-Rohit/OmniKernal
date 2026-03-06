@@ -14,7 +14,9 @@ independently, which is the recommended pattern for unit tests.
 """
 
 import os
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from .models import Base
 
 # Default to SQLite for Phase 2; override via DATABASE_URL env var for Postgres/MySQL

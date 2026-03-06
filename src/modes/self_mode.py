@@ -15,6 +15,7 @@ and propagate naturally. asyncio.CancelledError is handled explicitly.
 
 import asyncio
 from typing import TYPE_CHECKING
+
 from src.core.logger import core_logger
 
 if TYPE_CHECKING:

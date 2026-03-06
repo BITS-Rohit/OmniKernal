@@ -5,11 +5,14 @@ Isolates all SQLAlchemy queries. Ensures parameterized inputs and
 consistent error handling.
 """
 
-from typing import Optional, Sequence, Any
-from datetime import datetime, timezone
-from sqlalchemy import select, update, insert
+from collections.abc import Sequence
+from datetime import UTC, datetime
+
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import Plugin, Tool, RoutingRule, ExecutionLog, ApiHealth, DeadApi, ToolRequirement
+
+from .models import ApiHealth, DeadApi, ExecutionLog, Plugin, RoutingRule, Tool, ToolRequirement
+
 
 class OmniRepository:
     """
@@ -21,7 +24,7 @@ class OmniRepository:
 
     # --- Plugin & Tool Registry ---
 
-    async def register_plugin(self, name: str, version: str, author_name: Optional[str] = None, description: Optional[str] = None):
+    async def register_plugin(self, name: str, version: str, author_name: str | None = None, description: str | None = None):
         """
         Registers or updates a plugin entry.
 
@@ -47,7 +50,7 @@ class OmniRepository:
             self.session.add(plugin)
         await self.session.commit()
 
-    async def register_tool(self, command_name: str, pattern: str, handler_path: str, plugin_name: str, description: Optional[str] = None):
+    async def register_tool(self, command_name: str, pattern: str, handler_path: str, plugin_name: str, description: str | None = None):
         """Registers or updates a tool entry."""
         existing = await self.get_tool_by_command(command_name)
         if existing:
@@ -69,14 +72,14 @@ class OmniRepository:
 
         await self.session.commit()
 
-    async def get_tool_by_command(self, command_name: str) -> Optional[Tool]:
+    async def get_tool_by_command(self, command_name: str) -> Tool | None:
         """Looks up a tool by its !command trigger."""
         result = await self.session.execute(
             select(Tool).where(Tool.command_name == command_name)
         )
         return result.scalar_one_or_none()
 
-    async def get_tool_by_id(self, tool_id: int) -> Optional[Tool]:
+    async def get_tool_by_id(self, tool_id: int) -> Tool | None:
         """Looks up a tool by its integer primary key. BUG 30 support."""
         return await self.session.get(Tool, tool_id)
 
@@ -111,8 +114,8 @@ class OmniRepository:
         command_name: str,
         raw_input: str,
         success: bool,
-        response_time_ms: Optional[int] = None,
-        error_reason: Optional[str] = None
+        response_time_ms: int | None = None,
+        error_reason: str | None = None
     ):
         """Adds a record to the audit trail."""
         log = ExecutionLog(
@@ -140,7 +143,7 @@ class OmniRepository:
             self.session.add(health)
 
         health.consecutive_failures += 1
-        health.last_failure = datetime.now(timezone.utc)
+        health.last_failure = datetime.now(UTC)
 
         is_newly_dead = False
         if health.consecutive_failures >= health.error_threshold and not health.is_quarantined:
@@ -173,7 +176,7 @@ class OmniRepository:
             self.session.add(health)
 
         health.consecutive_failures = 0
-        health.last_success = datetime.now(timezone.utc)
+        health.last_success = datetime.now(UTC)
         health.is_quarantined = False   # watchdog recovery path: one success clears quarantine
 
         await self.session.commit()
@@ -198,19 +201,19 @@ class OmniRepository:
         if health:
             health.consecutive_failures = 0
             health.is_quarantined = False
-            health.last_success = datetime.now(timezone.utc)
+            health.last_success = datetime.now(UTC)
             await self.session.commit()
 
         # Also mark corresponding DeadApi row as reactivated
         # BUG 56: Removed redundant local imports
         await self.session.execute(
             update(DeadApi)
-            .where(DeadApi.api_url == url, DeadApi.reactivated == False)
+            .where(DeadApi.api_url == url, not DeadApi.reactivated)
             .values(reactivated=True)
         )
         await self.session.commit()
 
-    async def get_api_key(self, tool_id: int) -> Optional[str]:
+    async def get_api_key(self, tool_id: int) -> str | None:
         """Fetches the encrypted API key for a tool."""
         result = await self.session.execute(
             select(ToolRequirement).where(ToolRequirement.tool_id == tool_id)

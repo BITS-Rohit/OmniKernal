@@ -10,6 +10,7 @@ the frozen User dataclass.
 """
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from src.core.contracts.user import User
 

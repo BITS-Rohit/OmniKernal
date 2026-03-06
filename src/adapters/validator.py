@@ -5,10 +5,11 @@ Validates adapter pack descriptors (adapter.yaml) and ensures
 the entry class fully implements the PlatformAdapter ABC contract.
 """
 
+
 import yaml
-from typing import Optional
-from src.core.logger import core_logger
+
 from src.core.interfaces.platform_adapter import PlatformAdapter
+from src.core.logger import core_logger
 
 
 class AdapterValidator:
@@ -41,10 +42,10 @@ class AdapterValidator:
             ValueError: If required fields are missing or the file is malformed.
         """
         try:
-            with open(yaml_path, "r", encoding="utf-8") as f:
+            with open(yaml_path, encoding="utf-8") as f:
                 descriptor = yaml.safe_load(f)
         except Exception as e:
-            raise ValueError(f"Failed to read adapter descriptor: {e}")
+            raise ValueError(f"Failed to read adapter descriptor: {e}") from e
 
         if not isinstance(descriptor, dict):
             raise ValueError(f"Adapter descriptor is not a valid YAML mapping: {yaml_path}")

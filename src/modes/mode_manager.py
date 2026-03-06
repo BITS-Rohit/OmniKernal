@@ -6,10 +6,12 @@ Acts as the single point of control for switching how the Core drives messages.
 """
 
 import asyncio
-from typing import TYPE_CHECKING, Optional, Literal
+import contextlib
+from typing import TYPE_CHECKING, Literal
+
 from src.core.logger import core_logger
-from src.modes.self_mode import SelfMode
 from src.modes.coop_mode import CoopMode
+from src.modes.self_mode import SelfMode
 
 if TYPE_CHECKING:
     from src.core.engine import OmniKernal
@@ -30,13 +32,13 @@ class ModeManager:
     """
 
     def __init__(self):
-        self._active_mode_name: Optional[ModeName] = None
-        self._active_mode: Optional[SelfMode | CoopMode] = None
-        self._task: Optional[asyncio.Task] = None
+        self._active_mode_name: ModeName | None = None
+        self._active_mode: SelfMode | CoopMode | None = None
+        self._task: asyncio.Task | None = None
         self.logger = core_logger.bind(subsystem="mode_manager")
 
     @property
-    def active_mode(self) -> Optional[ModeName]:
+    def active_mode(self) -> ModeName | None:
         """Returns the name of the currently active mode."""
         return self._active_mode_name
 
@@ -85,16 +87,14 @@ class ModeManager:
         """Gracefully stops the active execution mode."""
         if self._task and not self._task.done():
             self._task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
 
         self._task = None
         self._active_mode = None
         self._active_mode_name = None
         self.logger.info("ModeManager: stopped.")
 
-    def get_mode_instance(self) -> Optional[SelfMode | CoopMode]:
+    def get_mode_instance(self) -> SelfMode | CoopMode | None:
         """Returns the active mode instance (for co-op approve/reject access)."""
         return self._active_mode

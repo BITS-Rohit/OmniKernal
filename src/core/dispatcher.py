@@ -23,19 +23,20 @@ the engine record the correct watchdog failure even when the route was matched
 via a regex rule (where the trigger doesn't equal the canonical command name).
 """
 
-import os
 import importlib
-from typing import TYPE_CHECKING, Any, NamedTuple, Optional
-from src.core.router import CommandRouter                         # BUG 19
+import os
+from typing import TYPE_CHECKING, Any, NamedTuple
+
+from src.core.contracts.command_context import CommandContext
+from src.core.contracts.command_result import CommandResult
 from src.core.parser import CommandParser
 from src.core.permissions import PermissionValidator
-from src.core.contracts.command_result import CommandResult
-from src.core.contracts.command_context import CommandContext
-from src.security.encryption import EncryptionEngine             # BUG 35
+from src.core.router import CommandRouter  # BUG 19
+from src.security.encryption import EncryptionEngine  # BUG 35
 
 if TYPE_CHECKING:
-    from src.database.repository import OmniRepository
     from src.core.contracts.user import User
+    from src.database.repository import OmniRepository
 
 
 # BUG 20: comma-separated list of platform user IDs that are admins,
@@ -50,9 +51,9 @@ _ADMIN_IDS: frozenset[str] = frozenset(
 # BUG 53 fix: structured return value carrying route metadata alongside the
 # CommandResult. Lets callers (engine) know which tool was actually executed.
 class DispatchResult(NamedTuple):
-    result: Optional[CommandResult]
-    tool_id: Optional[int]        # resolved tool PK (works for regex routes)
-    command_name: Optional[str]   # canonical command name (for audit logging)
+    result: CommandResult | None
+    tool_id: int | None        # resolved tool PK (works for regex routes)
+    command_name: str | None   # canonical command name (for audit logging)
 
 
 def _resolve_role(user: "User") -> str:
@@ -75,7 +76,7 @@ class EventDispatcher:
         self,
         repository: "OmniRepository",
         logger: Any = None,
-        rules_cache: Optional[Any] = None  # BUG 68 (RulesCache)
+        rules_cache: Any | None = None  # BUG 68 (RulesCache)
     ):
         self.repository = repository
         # BUG 19 fix: route resolution goes through CommandRouter
@@ -83,7 +84,7 @@ class EventDispatcher:
         self.router = CommandRouter(repository, cache=rules_cache)
         self.logger = logger
 
-    async def dispatch(self, sanitized_text: str, user: "User") -> Optional[DispatchResult]:
+    async def dispatch(self, sanitized_text: str, user: "User") -> DispatchResult | None:
         """
         Dispatches a sanitized command string.
 

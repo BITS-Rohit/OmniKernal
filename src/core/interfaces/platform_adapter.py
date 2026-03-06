@@ -36,7 +36,7 @@ class PlatformAdapter(ABC):
         ...
 
     @abstractmethod
-    async def fetch_new_messages(self) -> list["Message"]:
+    async def fetch_new_messages(self) -> list[Message]:
         """
         Return new unread messages since the last call.
 

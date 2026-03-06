@@ -51,7 +51,7 @@ class BaseCommand(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def run(self, args: dict[str, Any], ctx: "CommandContext") -> "CommandResult":
+    async def run(self, args: dict[str, Any], ctx: CommandContext) -> CommandResult:
         """
         Execute the command.
 

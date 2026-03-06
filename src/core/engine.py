@@ -16,24 +16,25 @@ resolve the tool by the raw user trigger, which missed regex routes).
 """
 
 import asyncio
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Optional
-from datetime import datetime, timezone
-from src.core.logger import core_logger
-from src.security.sanitizer import CommandSanitizer
-from src.security.watchdog import ApiWatchdog          # BUG 4: was missing
+
 from src.core.dispatcher import EventDispatcher
 from src.core.loader import PluginEngine
-from src.database.session import init_db
+from src.core.logger import core_logger
+from src.core.router import RulesCache  # BUG 68
 from src.database.repository import OmniRepository
-from src.profiles.manager import ProfileManager
+from src.database.session import init_db
 from src.modes.mode_manager import ModeManager
-from src.core.router import RulesCache                 # BUG 68
+from src.profiles.manager import ProfileManager
+from src.security.sanitizer import CommandSanitizer
+from src.security.watchdog import ApiWatchdog  # BUG 4: was missing
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import async_sessionmaker
-    from src.core.interfaces.platform_adapter import PlatformAdapter
+
     from src.core.contracts.message import Message
-    from src.core.contracts.user import User
+    from src.core.interfaces.platform_adapter import PlatformAdapter
 
 class OmniKernal:
     """
@@ -70,7 +71,7 @@ class OmniKernal:
         self.mode = mode
         self.profile_manager = ProfileManager(profiles_dir)
         self.mode_manager = ModeManager()
-        self.dispatcher: Optional[EventDispatcher] = None   # BUG 12: explicit type
+        self.dispatcher: EventDispatcher | None = None   # BUG 12: explicit type
         self.watchdog = ApiWatchdog(repository)             # BUG 4: wire watchdog
         self.headless: bool = False
         self.logger = core_logger.bind(profile=profile_name)
@@ -239,9 +240,9 @@ class OmniKernal:
             watchdog = self.watchdog
 
         # 2. Dispatch & Execute
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
         dispatch_result = await dispatcher.dispatch(clean_text, msg.user)
-        duration_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+        duration_ms = (datetime.now(UTC) - start_time).total_seconds() * 1000
 
         result = dispatch_result.result if dispatch_result else None
         resolved_tool_id = dispatch_result.tool_id if dispatch_result else None

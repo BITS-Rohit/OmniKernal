@@ -6,12 +6,12 @@ validates their descriptor and class, and returns a ready-to-use
 PlatformAdapter instance.
 """
 
-import os
 import importlib
-from typing import Optional
-from src.core.logger import core_logger
-from src.core.interfaces.platform_adapter import PlatformAdapter
+import os
+
 from src.adapters.validator import AdapterValidator
+from src.core.interfaces.platform_adapter import PlatformAdapter
+from src.core.logger import core_logger
 
 
 class AdapterLoader:
@@ -79,7 +79,7 @@ class AdapterLoader:
         except (ImportError, AttributeError) as e:
             raise ImportError(
                 f"Failed to import entry class '{entry_class_path}' from pack '{pack_name}': {e}"
-            )
+            ) from e
 
         # 4. Validate ABC compliance
         self.validator.validate_class(cls)

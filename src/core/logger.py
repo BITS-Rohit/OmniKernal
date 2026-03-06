@@ -12,6 +12,7 @@ Without this, any module that imports `from loguru import logger` directly
 """
 
 import sys
+
 from loguru import logger
 
 

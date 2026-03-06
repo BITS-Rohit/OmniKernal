@@ -5,11 +5,11 @@ Frozen dataclasses and structured objects passed between Core, adapters,
 and plugins. These are immutable data shapes — no logic lives here.
 """
 
-from .user import User
+from .command_context import CommandContext
+from .command_result import CommandResult
 from .message import Message
 from .plugin_manifest import PluginManifest
-from .command_result import CommandResult
-from .command_context import CommandContext
+from .user import User
 
 __all__ = [
     "User",

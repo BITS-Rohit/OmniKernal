@@ -13,7 +13,7 @@ They return a CommandResult and the Core handles delivery.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+
 
 @dataclass
 class CommandResult:
@@ -37,12 +37,12 @@ class CommandResult:
     """
 
     ok: bool
-    reply: Optional[str] = None
-    error_reason: Optional[str] = None
-    api_url: Optional[str] = None       # BUG 4: added for watchdog wiring
+    reply: str | None = None
+    error_reason: str | None = None
+    api_url: str | None = None       # BUG 4: added for watchdog wiring
 
     @classmethod
-    def success(cls, reply: Optional[str] = None) -> "CommandResult":
+    def success(cls, reply: str | None = None) -> CommandResult:
         """
         Build a successful result.
 
@@ -53,7 +53,7 @@ class CommandResult:
         return cls(ok=True, reply=reply)
 
     @classmethod
-    def error(cls, reason: str, api_url: Optional[str] = None) -> "CommandResult":
+    def error(cls, reason: str, api_url: str | None = None) -> CommandResult:
         """
         Build a failure result.
 

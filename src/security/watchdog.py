@@ -6,6 +6,7 @@ it quarantines the API to prevent cascading blocks and wastes.
 """
 
 from typing import TYPE_CHECKING
+
 from src.core.logger import core_logger
 
 if TYPE_CHECKING:
@@ -16,7 +17,7 @@ class ApiWatchdog:
     Monitor for external API health.
     Methods should be called before and after plugin API interactions.
     """
-    
+
     def __init__(self, repo: "OmniRepository"):
         self.repo = repo
         self.logger = core_logger.bind(subsystem="watchdog")

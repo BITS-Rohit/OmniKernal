@@ -10,7 +10,9 @@ os.O_EXCL creation immediately; only on FileExistsError does it inspect the
 existing PID and potentially clean up a stale lock, then retries once.
 """
 
+import contextlib
 import os
+
 from src.core.logger import core_logger
 
 PROFILES_DIR = "profiles"
@@ -73,11 +75,11 @@ class ProfileLock:
                     # Second attempt failed — a live process just acquired the lock
                     raise RuntimeError(
                         f"Profile '{profile_name}' was locked by another process during acquisition."
-                    )
+                    ) from None
 
                 # First attempt: inspect the existing lock file
                 try:
-                    with open(lock_file, "r") as f:
+                    with open(lock_file) as f:
                         content = f.read().strip()
                     existing_pid = int(content) if content else None
                 except (OSError, ValueError):
@@ -86,14 +88,12 @@ class ProfileLock:
                 if existing_pid and self._pid_is_alive(existing_pid):
                     raise RuntimeError(
                         f"Profile '{profile_name}' is already locked by PID {existing_pid}."
-                    )
+                    ) from None
 
                 # Stale lock — remove it and loop back to retry O_EXCL
                 self.logger.warning(f"Clearing stale lock for '{profile_name}'.")
-                try:
+                with contextlib.suppress(FileNotFoundError):
                     os.remove(lock_file)
-                except FileNotFoundError:
-                    pass  # another process already removed it — fine, O_EXCL will decide
 
     def release(self, profile_name: str) -> None:
         """Releases the lock for a profile, but only if owned by the current process.
@@ -107,7 +107,7 @@ class ProfileLock:
             return
 
         try:
-            with open(lock_file, "r") as f:
+            with open(lock_file) as f:
                 content = f.read().strip()
             file_pid = int(content) if content else None
         except (OSError, ValueError):
@@ -132,7 +132,7 @@ class ProfileLock:
         if not os.path.exists(lock_file):
             return False
 
-        with open(lock_file, "r") as f:
+        with open(lock_file) as f:
             try:
                 pid = int(f.read().strip())
             except ValueError:

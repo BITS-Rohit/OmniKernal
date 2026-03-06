@@ -9,13 +9,14 @@ cancelled on loop exit to prevent orphaned tasks surviving shutdown.
 """
 
 import asyncio
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
+
 from src.core.logger import core_logger
 
 if TYPE_CHECKING:
+    from src.core.contracts.message import Message
     from src.core.engine import OmniKernal
     from src.core.interfaces.platform_adapter import PlatformAdapter
-    from src.core.contracts.message import Message
 
 
 class CoopMode:
@@ -35,7 +36,7 @@ class CoopMode:
         self.logger = core_logger.bind(mode="coop")
 
         # Pending queue: msg_id -> Message
-        self._pending: dict[str, "Message"] = {}
+        self._pending: dict[str, Message] = {}
         # Approval signals: msg_id -> asyncio.Event
         self._approval_events: dict[str, asyncio.Event] = {}
         self._rejected: set[str] = set()

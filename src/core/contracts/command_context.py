@@ -21,12 +21,15 @@ static analysers, and allows test code to pass a simple mock decrypter.
 """
 
 from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .user import User
     from src.database.repository import OmniRepository
+
+    from .user import User
 
 
 # BUG 14: frozen=True prevents handlers from mutating ctx.user / ctx.logger
@@ -43,12 +46,12 @@ class CommandContext:
                     Defaults to EncryptionEngine.decrypt if not injected.
     """
 
-    user: "User"
+    user: User
     logger: Any = field(default=None, repr=False)
-    _repository: Optional["OmniRepository"] = field(default=None, repr=False)
-    _tool_id: Optional[int] = field(default=None, repr=False)
+    _repository: OmniRepository | None = field(default=None, repr=False)
+    _tool_id: int | None = field(default=None, repr=False)
     # BUG 35 fix: decrypter injected by caller; avoids circular import via lazy hack
-    _decrypter: Optional[Callable[[str], str]] = field(default=None, repr=False)
+    _decrypter: Callable[[str], str] | None = field(default=None, repr=False)
 
     async def get_api_key(self, service: str) -> str:
         """

@@ -13,10 +13,10 @@ The safe pattern is:
     metadata.save(name, data)       # re-encrypts cleanly
 """
 
-import os
 import json
-from datetime import datetime, timezone
-from typing import Optional
+import os
+from datetime import UTC, datetime
+
 from src.core.logger import core_logger
 from src.security.encryption import EncryptionEngine
 
@@ -85,7 +85,7 @@ class ProfileMetadata:
 
         self.logger.debug(f"Metadata saved for '{profile_name}'.")
 
-    def load(self, profile_name: str) -> Optional[dict]:
+    def load(self, profile_name: str) -> dict | None:
         """
         Loads and decrypts profile metadata.
 
@@ -107,7 +107,7 @@ class ProfileMetadata:
         if not os.path.exists(meta_path):
             return None
 
-        with open(meta_path, "r", encoding="utf-8") as f:
+        with open(meta_path, encoding="utf-8") as f:
             data = json.load(f)
 
         # Decrypt sensitive fields
@@ -132,7 +132,7 @@ class ProfileMetadata:
         data = {
             "name": profile_name,
             "platform": platform,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "headless": False,
             "session_data": "",
         }

@@ -15,6 +15,7 @@ immediately — use this in production to prevent key-loss incidents.
 
 import os
 from pathlib import Path
+
 from cryptography.fernet import Fernet
 from loguru import logger
 

@@ -12,8 +12,7 @@ files just to discover metadata.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -37,10 +36,10 @@ class PluginManifest:
     description: str
     platform: list[str]
     # BUG 21 fix: made Optional so existing manifests without this key still load
-    min_core_version: Optional[str] = None
+    min_core_version: str | None = None
 
     @classmethod
-    def from_dict(cls, data: dict) -> "PluginManifest":
+    def from_dict(cls, data: dict) -> PluginManifest:
         """
         Constructs a PluginManifest from a parsed manifest.json dictionary.
         Supports both 'platform' and the legacy 'supported_platforms' key.

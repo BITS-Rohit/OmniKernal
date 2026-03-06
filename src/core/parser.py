@@ -17,7 +17,6 @@ the same match as before since `!echo ` contains no metacharacters.
 """
 
 import re
-from typing import Any, Optional
 
 
 class CommandParser:
@@ -34,7 +33,7 @@ class CommandParser:
     """
 
     @classmethod
-    def match(cls, text: str, pattern: str) -> Optional[dict[str, str]]:
+    def match(cls, text: str, pattern: str) -> dict[str, str] | None:
         """
         Attempts to match text against a pattern.
         Returns a dict of extracted arguments on success, or None on failure.
