@@ -96,11 +96,35 @@ class ProfileLock:
                     pass  # another process already removed it — fine, O_EXCL will decide
 
     def release(self, profile_name: str) -> None:
-        """Releases the lock for a profile."""
+        """Releases the lock for a profile, but only if owned by the current process.
+
+        BUG 50 fix: Previously deleted unconditionally. Now checks that the PID
+        in the lock file matches os.getpid() before deleting, preventing a
+        process from releasing a lock held by a different live process.
+        """
         lock_file = self._lock_path(profile_name)
-        if os.path.exists(lock_file):
+        if not os.path.exists(lock_file):
+            return
+
+        try:
+            with open(lock_file, "r") as f:
+                content = f.read().strip()
+            file_pid = int(content) if content else None
+        except (OSError, ValueError):
+            file_pid = None
+
+        if file_pid is not None and file_pid != os.getpid():
+            self.logger.warning(
+                f"Skipping lock release for '{profile_name}': "
+                f"lock is held by PID {file_pid}, not current PID {os.getpid()}."
+            )
+            return
+
+        try:
             os.remove(lock_file)
             self.logger.info(f"Lock released for '{profile_name}'.")
+        except FileNotFoundError:
+            pass  # Already removed — fine
 
     def is_locked(self, profile_name: str) -> bool:
         """Returns True if the profile is locked by a live process."""

@@ -11,10 +11,15 @@ of the dispatcher calling OmniRepository.get_tool_by_command directly.
 BUG 30 fix: get_route() now checks the routing_rules table first for
 regex-based overrides before falling back to exact command name lookup.
 This implements the DESIGN.md Phase 2 routing strategy.
+
+BUG 45 fix: routing_rules are cached in memory after the first load.
+Rules rarely change at runtime; loading them from the DB on every
+message (default 1s poll) was a needless DB round-trip per message.
+Call invalidate_route_cache() after inserting a new routing rule.
 """
 
 import re
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 from src.database.repository import OmniRepository
 
 
@@ -28,10 +33,18 @@ class CommandRouter:
     Resolution order (BUG 30 fix):
       1. Check routing_rules table — first regex pattern that matches wins.
       2. Fall back to exact command name lookup in the tools table.
+
+    BUG 45 fix: routing_rules are loaded once and cached. Call
+    invalidate_route_cache() if rules change at runtime.
     """
 
     def __init__(self, repository: OmniRepository):
         self.repository = repository
+        self._rules_cache: Optional[Sequence[Any]] = None   # BUG 45
+
+    def invalidate_route_cache(self) -> None:
+        """Clears the cached routing rules so they are reloaded on next dispatch."""
+        self._rules_cache = None
 
     async def get_route(self, command_trigger: str) -> Optional[dict]:
         """
@@ -40,6 +53,8 @@ class CommandRouter:
         BUG 30 fix: Checks routing_rules (regex overrides) first, then
         falls back to the exact tool command_name lookup.
 
+        BUG 45 fix: routing_rules are cached after first load.
+
         Args:
             command_trigger: The raw command name without '!' (e.g. 'echo').
 
@@ -47,9 +62,11 @@ class CommandRouter:
             dict with keys: id, command_name, pattern, handler_path, plugin_name
             or None if no route is found.
         """
-        # 1. Check regex routing overrides (BUG 30)
-        rules = await self.repository.get_all_routing_rules()
-        for rule in rules:
+        # 1. Load rules (cached after first call) — BUG 45
+        if self._rules_cache is None:
+            self._rules_cache = await self.repository.get_all_routing_rules()
+
+        for rule in self._rules_cache:
             try:
                 if re.fullmatch(rule.regex_pattern, command_trigger):
                     # Resolve the tool this rule maps to

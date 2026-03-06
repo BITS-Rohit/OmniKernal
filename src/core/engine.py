@@ -72,6 +72,14 @@ class OmniKernal:
 
         try:
             await self.adapter.connect()
+
+            # BUG 46 fix: check is_running AFTER connect returns. If stop() was
+            # called while connect() was awaiting, it would have set is_running=False.
+            # Without this guard we'd override that and start polling anyway.
+            if not self.is_running and self._stop_event.is_set():
+                self.logger.warning("stop() was called during adapter.connect(). Aborting boot.")
+                return
+
             self.is_running = True
             self.logger.info("Adapter connected. Starting execution mode.")
 
@@ -126,9 +134,13 @@ class OmniKernal:
         # 2. Dispatch & Execute
         start_time = datetime.now(timezone.utc)
         result = await self.dispatcher.dispatch(clean_text, msg.user)
-        duration_ms = int((datetime.now(timezone.utc) - start_time).total_seconds() * 1000)
+        duration_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
         # 3. Log Execution to DB
+        # BUG 47 fix: log the command trigger from the text (the route lookup
+        # is inside dispatcher and not returned here; the raw trigger is correct
+        # for the audit log as the resolved command_name is the same for exact-match
+        # routes, and for regex routes it at least captures what the user sent).
         if result:
             await self.repository.log_execution(
                 user_id=msg.user.id,

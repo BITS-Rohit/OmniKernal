@@ -73,9 +73,16 @@ class ProfileManager:
         # Acquire PID lock
         self.lock.acquire(name)
 
-        # Load metadata
-        meta = self.metadata.load(name) or {}
-        
+        # Load metadata — BUG 49 fix: missing metadata.json is an error, not {}
+        meta = self.metadata.load(name)
+        if meta is None:
+            # Release the lock we just acquired before raising
+            self.lock.release(name)
+            raise RuntimeError(
+                f"Profile '{name}' directory exists but metadata.json is missing or unreadable. "
+                "The profile may be corrupted. Delete it and run again to recreate."
+            )
+
         # Enforce headless if needed, but don't overwrite user preference in JSON
         # unless specifically desired. For now, we resolve it for the caller.
         force_headless = self.should_force_headless()

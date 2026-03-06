@@ -122,6 +122,9 @@ class CoopMode:
                     messages = await adapter.fetch_new_messages()
 
                     for msg in messages:
+                        # BUG 48 fix: skip if already awaiting approval for this msg
+                        if msg.id in self._pending:
+                            continue
                         # BUG 22 fix: track task; remove from set when done
                         task = asyncio.create_task(
                             self._process_with_approval(msg, core),

@@ -89,8 +89,19 @@ class ProfileMetadata:
         """
         Loads and decrypts profile metadata.
 
+        BUG 51 fix: previously, a failed decryption silently set the field to
+        None. If the caller then did `save(load(name))`, the original ciphertext
+        would be overwritten with None, permanently destroying the secret.
+
+        Now we raise on decryption failure. The caller must decide how to handle
+        a key-mismatch scenario (e.g. prompt user or deactivate) rather than
+        silently losing data.
+
         Returns:
-            Decrypted metadata dict, or None if not found.
+            Decrypted metadata dict, or None if the file doesn't exist.
+
+        Raises:
+            RuntimeError: If a sensitive field cannot be decrypted (key mismatch).
         """
         meta_path = self._metadata_path(profile_name)
         if not os.path.exists(meta_path):
@@ -104,9 +115,15 @@ class ProfileMetadata:
             if field in data and data[field]:
                 try:
                     data[field] = EncryptionEngine.decrypt(data[field])
-                except Exception:
-                    self.logger.warning(f"Failed to decrypt '{field}' for profile '{profile_name}'.")
-                    data[field] = None
+                except Exception as e:
+                    self.logger.error(
+                        f"Cannot decrypt '{field}' for profile '{profile_name}'. "
+                        f"Key mismatch or corrupted data. Original ciphertext preserved."
+                    )
+                    raise RuntimeError(
+                        f"Profile '{profile_name}': failed to decrypt '{field}'. "
+                        "Ensure OMNIKERNAL_SECRET_KEY matches the key used when this profile was created."
+                    ) from e
 
         return data
 

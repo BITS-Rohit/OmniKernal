@@ -22,14 +22,29 @@ class OmniRepository:
     # --- Plugin & Tool Registry ---
 
     async def register_plugin(self, name: str, version: str, author_name: Optional[str] = None, description: Optional[str] = None):
-        """Registers or updates a plugin entry."""
-        plugin = Plugin(
-            name=name,
-            version=version,
-            author=author_name,
-            description=description
-        )
-        await self.session.merge(plugin)
+        """
+        Registers or updates a plugin entry.
+
+        BUG 52 fix: session.merge() with a new Plugin instance always resets
+        is_active to True (the model default), silently re-enabling manually
+        disabled plugins on every restart. We now load the existing record and
+        only update mutable metadata fields, preserving is_active.
+        """
+        existing = await self.session.get(Plugin, name)
+        if existing:
+            existing.version = version
+            existing.author = author_name
+            existing.description = description
+            # is_active is intentionally NOT touched — preserve disabled state
+        else:
+            plugin = Plugin(
+                name=name,
+                version=version,
+                author=author_name,
+                description=description,
+                is_active=True,
+            )
+            self.session.add(plugin)
         await self.session.commit()
 
     async def register_tool(self, command_name: str, pattern: str, handler_path: str, plugin_name: str, description: Optional[str] = None):
