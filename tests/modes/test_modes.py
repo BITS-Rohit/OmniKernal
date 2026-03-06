@@ -71,18 +71,38 @@ class TestCoopMode:
     @pytest.mark.asyncio
     async def test_approve_releases_to_pipeline(self):
         msg = make_mock_msg("m1", "!echo approved")
-        core, adapter = make_mock_core([msg])
+
+        # Use an asyncio.Event sentinel so we don't rely on timing
+        process_called = asyncio.Event()
+
+        async def fake_process(m):
+            process_called.set()
+
+        core = MagicMock()
+        core.is_running = True
+        core.process = AsyncMock(side_effect=fake_process)
+
+        call_count = 0
+        async def fake_fetch():
+            nonlocal call_count
+            call_count += 1
+            return [msg] if call_count == 1 else []
+
+        adapter = MagicMock()
+        adapter.fetch_new_messages = AsyncMock(side_effect=fake_fetch)
 
         mode = CoopMode(poll_interval=0.01)
-
-        # Run coop mode in background
         task = asyncio.create_task(mode.run(core, adapter))
-        await asyncio.sleep(0.05)  # let it poll
 
-        # Approve while pending
+        # Wait until the message is queued
+        await asyncio.sleep(0.05)
+        assert "m1" in mode._pending
+
+        # Approve and wait deterministically for process() to fire
         await mode.approve("m1")
-        await asyncio.sleep(0.05)  # let approval process
+        await asyncio.wait_for(process_called.wait(), timeout=2.0)
 
+        core.is_running = False
         task.cancel()
         try:
             await task

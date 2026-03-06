@@ -3,6 +3,9 @@ PluginEngine — Declarative Plugin Discovery & Loading
 
 Scans the plugins/ directory, validates manifest.json and commands.yaml,
 and registers findings into the OmniRepository.
+
+BUG 21 fix: Now uses PluginManifest.from_dict() to parse and validate
+manifests formally, instead of raw dict access.
 """
 
 import os
@@ -10,6 +13,7 @@ import json
 import yaml
 from typing import TYPE_CHECKING, Optional
 from src.core.logger import core_logger
+from src.core.contracts.plugin_manifest import PluginManifest   # BUG 21
 
 if TYPE_CHECKING:
     from src.database.repository import OmniRepository
@@ -51,29 +55,21 @@ class PluginEngine:
             self.logger.debug(f"Skipping {folder_name}: No manifest.json found.")
             return
 
-        name: Optional[str] = None  # track for degraded-status fallback
+        manifest: Optional[PluginManifest] = None
 
         try:
-            # 1. Load & Validate Manifest
+            # 1. Load & Validate Manifest using formal contract (BUG 21 fix)
             with open(manifest_path, "r", encoding="utf-8") as f:
-                manifest = json.load(f)
+                raw = json.load(f)
 
-            name = manifest.get("name")
-            version = manifest.get("version")
-            if not name or not version:
-                raise ValueError("Manifest missing 'name' or 'version'")
-
-            # BUG 6 fix: support both 'platform' (spec key) and the legacy
-            # 'supported_platforms' key that was used in early manifests.
-            # Normalise to 'platform' going forward.
-            platform = manifest.get("platform") or manifest.get("supported_platforms") or ["any"]
+            manifest = PluginManifest.from_dict(raw)   # validates name/version
 
             # 2. Register Plugin in DB
             await self.repo.register_plugin(
-                name=name,
-                version=version,
-                author_name=manifest.get("author"),
-                description=manifest.get("description")
+                name=manifest.name,
+                version=manifest.version,
+                author_name=manifest.author,
+                description=manifest.description
             )
 
             # 3. Load & Process commands.yaml
@@ -87,22 +83,24 @@ class PluginEngine:
                         command_name=cmd_name,
                         pattern=cmd_info.get("pattern"),
                         handler_path=cmd_info.get("handler"),
-                        plugin_name=name,
+                        plugin_name=manifest.name,
                         description=cmd_info.get("description")
                     )
 
-            self.logger.info(f"Successfully loaded plugin: {name} (v{version}) platforms={platform}")
+            self.logger.info(
+                f"Loaded plugin: {manifest}"  # uses PluginManifest.__repr__
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to load plugin '{folder_name}': {e}")
-            # BUG 13 fix: mark the plugin as inactive in DB if it was registered
-            # before the failure occurred, so dispatching returns a clear "degraded"
-            # signal instead of a silent "no route found".
-            if name:
+            # BUG 13: mark plugin inactive in DB if partially registered
+            if manifest is not None:
                 try:
-                    await self.repo.set_plugin_inactive(name)
+                    await self.repo.set_plugin_inactive(manifest.name)
                     self.logger.warning(
-                        f"Plugin '{name}' marked inactive in DB due to load failure."
+                        f"Plugin '{manifest.name}' marked inactive due to load failure."
                     )
                 except Exception as inner:
-                    self.logger.error(f"Could not mark plugin '{name}' inactive: {inner}")
+                    self.logger.error(
+                        f"Could not mark plugin '{manifest.name}' inactive: {inner}"
+                    )
