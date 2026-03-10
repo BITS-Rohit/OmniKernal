@@ -1,10 +1,8 @@
 {
-    "name": "sys",
-    "version": "1.0.0",
-    "author": "BITS-Rohit",
-    "description": "System diagnostic and testing commands.",
-    "platform": [
-        "any"
-    ],
-    "min_core_version": "0.1.0"
+  "name": "sys",
+  "version": "2.0.0",
+  "author": "BITS-Rohit",
+  "description": "🛡️ OmniSentinel — Core system introspection commands. Registry queries, health checks, and runtime diagnostics for OmniKernal operators.",
+  "platforms": ["any"],
+  "min_core_version": "0.1.0"
 }

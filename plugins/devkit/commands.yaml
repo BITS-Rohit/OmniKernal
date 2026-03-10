@@ -1,0 +1,55 @@
+commands:
+
+  # ── LAYER 1: Basic routing ─────────────────────────────────────────────────
+  devkit_ping:
+    description: "Basic end-to-end ping. Tests: routing, handler load, reply send."
+    pattern: "!devkit_ping"
+    handler: "handlers.devkit_ping.run"
+    requires_api: false
+    args: []
+
+  # ── LAYER 2: Argument parsing ──────────────────────────────────────────────
+  devkit_echo:
+    description: "Echo back a message. Tests: arg parsing, multi-word text, unicode, emoji."
+    pattern: "!devkit_echo <text>"
+    handler: "handlers.devkit_echo.run"
+    requires_api: false
+    args:
+      - name: text
+        type: str
+        required: true
+
+  # ── LAYER 3: Sanitizer visibility ─────────────────────────────────────────
+  devkit_sanitize:
+    description: "Show what the sanitizer does to raw input. Tests: injection stripping, metachar removal."
+    pattern: "!devkit_sanitize <payload>"
+    handler: "handlers.devkit_sanitize.run"
+    requires_api: false
+    args:
+      - name: payload
+        type: str
+        required: true
+
+  # ── LAYER 4: User context injection ───────────────────────────────────────
+  devkit_whoami:
+    description: "Show caller identity from ctx.user. Tests: User object injection, platform field."
+    pattern: "!devkit_whoami"
+    handler: "handlers.devkit_whoami.run"
+    requires_api: false
+    args: []
+
+  # ── LAYER 5: DB query ─────────────────────────────────────────────────────
+  devkit_status:
+    description: "Show system status. Tests: repo.get_all_plugins(), repo.get_all_tools() queries."
+    pattern: "!devkit_status"
+    handler: "handlers.devkit_status.run"
+    requires_api: false
+    args: []
+
+  # ── LAYER 6: Error-path ───────────────────────────────────────────────────
+  devkit_error:
+    description: "Deliberately returns a CommandResult.error(). Tests: error handling, audit log, no crash."
+    pattern: "!devkit_error"
+    handler: "handlers.devkit_error.run"
+    requires_api: false
+    args: []

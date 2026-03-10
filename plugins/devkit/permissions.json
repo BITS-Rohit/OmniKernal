@@ -1,0 +1,8 @@
+{
+    "devkit_ping":     { "allowed_roles": ["user", "admin"], "blocked_users": [], "rate_limit": "60/hour" },
+    "devkit_echo":     { "allowed_roles": ["user", "admin"], "blocked_users": [], "rate_limit": "60/hour" },
+    "devkit_sanitize": { "allowed_roles": ["user", "admin"], "blocked_users": [], "rate_limit": "60/hour" },
+    "devkit_whoami":   { "allowed_roles": ["user", "admin"], "blocked_users": [], "rate_limit": "60/hour" },
+    "devkit_status":   { "allowed_roles": ["user", "admin"], "blocked_users": [], "rate_limit": "30/hour" },
+    "devkit_error":    { "allowed_roles": ["user", "admin"], "blocked_users": [], "rate_limit": "10/hour" }
+}
