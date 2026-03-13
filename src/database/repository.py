@@ -99,6 +99,11 @@ class OmniRepository:
         result = await self.session.execute(select(Tool))
         return result.scalars().all()
 
+    async def get_all_plugins(self) -> Sequence[Plugin]:
+        """Returns all registered plugins (active and inactive)."""
+        result = await self.session.execute(select(Plugin))
+        return result.scalars().all()
+
     async def get_all_routing_rules(self) -> Sequence[RoutingRule]:
         """
         Returns all routing rules ordered by priority (highest first).

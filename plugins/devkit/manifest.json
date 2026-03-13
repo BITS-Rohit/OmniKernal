@@ -1,0 +1,8 @@
+{
+  "name": "devkit",
+  "version": "1.0.0",
+  "author": "BITS-Rohit",
+  "description": "⚡ OmniKernal DevKit — Pipeline edge-case stress tester. Validates routing, sanitization, argument parsing, context injection, DB queries, and error handling.",
+  "platforms": ["any"],
+  "min_core_version": "0.1.0"
+}
