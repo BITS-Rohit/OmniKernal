@@ -69,3 +69,5 @@ init_main.png
 pocos_chats_visibles.png
 send_message_error.png
 send_file_error.png
+baileys_session_*/
+node_modules/
