@@ -53,15 +53,18 @@ The interaction flow differs significantly based on the chosen adapter. While th
 ## 4. The Transport Research Matrix (The "Meat" of the Paper)
 The primary research value of OmniKernal lies in measuring the performance delta between the three implemented adapters.
 
-| Metric | UI-Based (Playwright) | API-Based (WAHA) | Socket-Based (Baileys) |
+| Research Parameter | UI-Based (Playwright) | API-Based (WAHA) | Socket-Based (Baileys) |
 |---|---|---|---|
 | **Mechanism** | DOM Manipulation / Scraped | HTTP REST / Proxy | WebSocket / Protobuf |
-| **Boot Time** | ~4.3s | ~4.1s | ~3.0s |
-| **RAM Usage** | ~532MB | ~817MB (Docker) | ~169MB |
-| **Mean Latency** | ~40,361ms | ~10.4ms | ~11.8ms |
-| **Jitter ($\sigma$)** | ~39.3ms | **~4.5ms (Highly Stable)** | ~11.4ms |
-| **Deployment Weight**| ~250MB (Chromium) | ~850MB (Docker Image) | **~20MB (Native JS)** |
-| **Reliability** | Low (DOM-sensitive) | High (Stateless REST) | Medium (Stateful Socket) |
+| **Boot Time** | ~4.3s | ~4.1s | **~3.0s** |
+| **RAM Usage** | ~532MB | ~817MB (Docker-heavy) | **~169MB** |
+| **Mean Latency ($L$)** | ~40,361ms | **~10.4ms** | ~11.8ms |
+| **Jitter ($\sigma$)** | ~39.3ms | **~4.5ms (Stable)** | ~11.4ms |
+| **Deployment Weight** | ~250MB (Chromium) | ~850MB (Container) | **~20MB (Native JS)** |
+| **Implementation Complexity**| 248 LoC | 400 LoC | 291 LoC |
+| **Protocol Efficiency** | Low (HTML/Scraped) | Medium (JSON/REST) | **High (Binary Protobuf)** |
+| **Reliability** | Low (DOM-fragile) | **High (Stateless)** | Medium (Stateful) |
+| **Detectability (Ban Risk)**| **Extremely Low (Human-like)** | Medium | High (If bot tokens flagged) |
 
 ### Key Hypothesis for Analysis:
 *   **The Latency-Complexity Trade-off:** Socket-based bridges (Baileys) offer near-instant response times critical for low-latency LLM stream-to-speech tasks, but increase maintenance complexity due to aggressive authentication token rotation.
