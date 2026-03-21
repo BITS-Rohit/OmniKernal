@@ -15,6 +15,7 @@ immediately — use this in production to prevent key-loss incidents.
 
 import os
 from pathlib import Path
+from typing import Optional
 
 from cryptography.fernet import Fernet
 from loguru import logger
@@ -46,7 +47,10 @@ def _load_or_create_dev_key() -> str:
 class EncryptionEngine:
     """Provides secure encryption and decryption."""
 
-    _fernet: "Fernet | None" = None
+    def __init__(self):
+        pass
+
+    _fernet: Optional[Fernet] = None
 
     @classmethod
     def _get_fernet(cls) -> "Fernet":
