@@ -45,9 +45,7 @@ class SelfMode:
             core: The OmniKernal engine instance.
             adapter: The connected PlatformAdapter.
         """
-        self.logger.info(
-            f"SelfMode started. Polling every {self.poll_interval}s."
-        )
+        self.logger.info(f"SelfMode started. Polling every {self.poll_interval}s.")
 
         while core.is_running:
             try:
@@ -71,8 +69,17 @@ class SelfMode:
                 # BUG 40 + BUG 162 fix: classify logic errors and system errors as fatal.
                 # Only Connection/Timeout are truly transient for polling.
                 is_likely_fatal = isinstance(
-                    e, (MemoryError, RuntimeError, PermissionError, OSError, 
-                        AttributeError, TypeError, NameError, ImportError)
+                    e,
+                    (
+                        MemoryError,
+                        RuntimeError,
+                        PermissionError,
+                        OSError,
+                        AttributeError,
+                        TypeError,
+                        NameError,
+                        ImportError,
+                    ),
                 ) and not isinstance(e, (ConnectionError, TimeoutError))
 
                 if is_likely_fatal:

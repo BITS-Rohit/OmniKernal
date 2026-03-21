@@ -29,7 +29,7 @@ classifiers = [
 
 dependencies = [
     # Database Layer
-    "sqlalchemy>=2.0.47",
+    "sqlalchemy>=2.0.48",
     "aiosqlite>=0.20.0",                   # Async SQLite driver
     # Configuration and serialization
     "pyyaml>=6.0.3",
@@ -44,6 +44,10 @@ dependencies = [
     # Cryptography
     "cryptography>=46.0.5",
     "aiohttp>=3.13.3",
+    "black>=26.3.1",
+    "mypy>=1.19.1",
+    "ruff>=0.15.7",
+    "deptry>=0.25.1",
 ]
 
 [project.optional-dependencies]
@@ -57,7 +61,7 @@ testing = [
 linting = [
     "ruff>=0.14.0",
     "mypy>=1.10.0",
-    "deptry>=0.23.0",
+    "deptry>=0.25.1",
     "pre-commit>=3.7.0",
 ]
 # Adapter integration testing — manual WhatsApp / Playwright smoke tests
@@ -109,7 +113,7 @@ testing = [
 linting = [
     "ruff>=0.14.0",
     "mypy>=1.10.0",
-    "deptry>=0.23.0",
+    "deptry>=0.25.1",
     "pre-commit>=3.7.0",
 ]
 # Adapter integration / smoke tests

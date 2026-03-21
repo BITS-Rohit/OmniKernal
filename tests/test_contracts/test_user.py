@@ -1,4 +1,5 @@
 """Test stubs for User contract — construction and immutability."""
+
 from dataclasses import FrozenInstanceError
 
 import pytest

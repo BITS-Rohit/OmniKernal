@@ -12,7 +12,7 @@ existing PID and potentially clean up a stale lock, then retries once.
 
 import contextlib
 import os
-import psutil # BUG 75
+import psutil  # BUG 75
 
 from src.core.logger import core_logger
 
@@ -79,7 +79,9 @@ class ProfileLock:
                     # BUG 75: Store pid:starttime
                     curr_proc = psutil.Process()
                     f.write(f"{curr_proc.pid}:{curr_proc.create_time()}")
-                self.logger.info(f"Lock acquired for '{profile_name}' (PID {os.getpid()}).")
+                self.logger.info(
+                    f"Lock acquired for '{profile_name}' (PID {os.getpid()})."
+                )
                 return
 
             except FileExistsError:
@@ -104,6 +106,7 @@ class ProfileLock:
                             # We can't await here as acquire() is sync for profile_manager use.
                             # But we only hit this on concurrent startup.
                             import time
+
                             time.sleep(0.05)
 
                     if ":" in content:

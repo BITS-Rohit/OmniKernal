@@ -51,8 +51,11 @@ class AdapterLoader:
         # BUG 117 fix: sanitize pack_name to prevent directory traversal
         # Only allow alphanumeric and underscore characters.
         import re
+
         if not re.fullmatch(r"[a-zA-Z0-9_]+", pack_name):
-            raise ValueError(f"Invalid pack name: '{pack_name}'. Only alphanumeric/underscore allowed.")
+            raise ValueError(
+                f"Invalid pack name: '{pack_name}'. Only alphanumeric/underscore allowed."
+            )
 
         pack_path = os.path.join(self.packs_dir, pack_name)
 
@@ -67,13 +70,17 @@ class AdapterLoader:
         descriptor = self.validator.validate_descriptor(yaml_path)
 
         # 2. Resolve entry_class from descriptor
-        entry_class_path = descriptor["entry_class"]  # e.g. "adapter.ConsoleMockAdapter"
+        entry_class_path = descriptor[
+            "entry_class"
+        ]  # e.g. "adapter.ConsoleMockAdapter"
         module_path, class_name = entry_class_path.rsplit(".", 1)
 
         # Build the full import path: adapter_packs.<pack_name>.<module_path>
         full_module_path = f"adapter_packs.{pack_name}.{module_path}"
 
-        self.logger.info(f"Loading adapter: {descriptor['name']} from {full_module_path}.{class_name}")
+        self.logger.info(
+            f"Loading adapter: {descriptor['name']} from {full_module_path}.{class_name}"
+        )
 
         # 3. Dynamic import
         try:
@@ -89,7 +96,9 @@ class AdapterLoader:
 
         # 5. Instantiate and return
         instance = cast(PlatformAdapter, cls(**kwargs))
-        self.logger.info(f"Adapter loaded: {instance.platform_name} (v{descriptor['version']})")
+        self.logger.info(
+            f"Adapter loaded: {instance.platform_name} (v{descriptor['version']})"
+        )
         return instance
 
     def list_packs(self) -> list[str]:
@@ -97,7 +106,8 @@ class AdapterLoader:
         if not os.path.isdir(self.packs_dir):
             return []
         return [
-            d for d in os.listdir(self.packs_dir)
+            d
+            for d in os.listdir(self.packs_dir)
             if os.path.isdir(os.path.join(self.packs_dir, d))
             and os.path.exists(os.path.join(self.packs_dir, d, "adapter.yaml"))
         ]

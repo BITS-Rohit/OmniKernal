@@ -20,9 +20,11 @@ def test_encryption_roundtrip():
     decrypted = EncryptionEngine.decrypt(ciphertext)
     assert decrypted == plaintext
 
+
 def test_empty_string_encryption():
     assert EncryptionEngine.encrypt("") == ""
     assert EncryptionEngine.decrypt("") == ""
+
 
 def test_encryption_generates_temp_key_if_missing(monkeypatch):
     monkeypatch.delenv("OMNIKERNAL_SECRET_KEY", raising=False)

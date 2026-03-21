@@ -36,5 +36,7 @@ class Message:
     platform: str
 
     def __repr__(self) -> str:
-        preview = self.raw_text[:40] + "..." if len(self.raw_text) > 40 else self.raw_text
+        preview = (
+            self.raw_text[:40] + "..." if len(self.raw_text) > 40 else self.raw_text
+        )
         return f"Message(id={self.id!r}, from={self.user.id!r}, text={preview!r})"

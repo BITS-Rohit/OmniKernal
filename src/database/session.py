@@ -71,6 +71,7 @@ async def ensure_db_initialized() -> None:
         await init_db()
         _db_initialized = True
 
+
 async def get_db() -> AsyncIterator[AsyncSession]:
     """Dependency for obtaining a database session."""
     async with async_session_factory() as session:

@@ -1,4 +1,5 @@
 """Test stubs for BaseCommand ABC — structural correctness only."""
+
 import pytest
 
 from src.core.interfaces.base_command import BaseCommand
@@ -12,6 +13,7 @@ def test_base_command_is_abstract():
 
 def test_base_command_missing_methods_raises():
     """A subclass missing abstract methods raises TypeError."""
+
     class IncompleteCommand(BaseCommand):
         pass
 
@@ -25,9 +27,13 @@ def test_base_command_full_concrete_instantiates():
 
     class ConcreteCommand(BaseCommand):
         @property
-        def command_name(self) -> str: return "echo"
+        def command_name(self) -> str:
+            return "echo"
+
         @property
-        def pattern(self) -> str: return "!echo <text>"
+        def pattern(self) -> str:
+            return "!echo <text>"
+
         async def run(self, args, ctx) -> CommandResult:
             return CommandResult.success(reply=args.get("text"))
 

@@ -47,7 +47,7 @@ def setup_logger(level: str = "INFO", profile_name: str = "default") -> Any:
         format=log_format,
         level=level,
         colorize=True,
-        enqueue=True  # Thread-safe / Async-safe
+        enqueue=True,  # Thread-safe / Async-safe
     )
 
     return logger.bind(profile=profile_name)

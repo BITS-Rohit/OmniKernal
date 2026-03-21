@@ -42,7 +42,8 @@ class ModeManager:
         """Returns the name of the currently active mode."""
         return self._active_mode_name
 
-    def _build_mode(self, mode_name: ModeName, poll_interval: float) -> SelfMode | CoopMode:
+    @staticmethod
+    def _build_mode(mode_name: ModeName, poll_interval: float) -> SelfMode | CoopMode:
         """Instantiates the correct mode object by name."""
         if mode_name == "self":
             return SelfMode(poll_interval=poll_interval)

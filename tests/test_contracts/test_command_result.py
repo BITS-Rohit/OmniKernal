@@ -1,4 +1,5 @@
 """Test stubs for CommandResult contract — factory methods."""
+
 from src.core.contracts.command_result import CommandResult
 
 

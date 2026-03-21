@@ -5,7 +5,6 @@ Validates adapter pack descriptors (adapter.yaml) and ensures
 the entry class fully implements the PlatformAdapter ABC contract.
 """
 
-
 import yaml
 import inspect  # BUG 76
 from typing import Any
@@ -50,7 +49,9 @@ class AdapterValidator:
             raise ValueError(f"Failed to read adapter descriptor: {e}") from e
 
         if not isinstance(descriptor, dict):
-            raise ValueError(f"Adapter descriptor is not a valid YAML mapping: {yaml_path}")
+            raise ValueError(
+                f"Adapter descriptor is not a valid YAML mapping: {yaml_path}"
+            )
 
         missing = self.REQUIRED_FIELDS - set(descriptor.keys())
         if missing:
@@ -72,9 +73,7 @@ class AdapterValidator:
             TypeError: If the class does not subclass PlatformAdapter or is missing methods.
         """
         if not issubclass(cls, PlatformAdapter):
-            raise TypeError(
-                f"{cls.__name__} must be a subclass of PlatformAdapter"
-            )
+            raise TypeError(f"{cls.__name__} must be a subclass of PlatformAdapter")
 
         # Check required async methods (BUG 76 fix: verify they are coroutines)
         for method_name in self.REQUIRED_METHODS:

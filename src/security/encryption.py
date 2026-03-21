@@ -59,11 +59,15 @@ class EncryptionEngine:
 
             if not key:
                 # Strict mode: raise immediately (use in production)
-                if os.getenv("OMNIKERNAL_STRICT_KEY", "").lower() in ("1", "true", "yes"):
+                if os.getenv("OMNIKERNAL_STRICT_KEY", "").lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                ):
                     raise RuntimeError(
                         "OMNIKERNAL_SECRET_KEY is not set. "
                         "Set the environment variable to a valid Fernet key. "
-                        "Generate one with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+                        'Generate one with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
                     )
 
                 # BUG 37 fix: persist dev key to .dev.key so restarts reuse the same key

@@ -27,19 +27,15 @@ def test_command_injection_prevention():
         ("!echo hello; rm -rf /", "!echo hello rm -rf /"),
         ("!echo hello && cat /etc/passwd", "!echo hello cat /etc/passwd"),
         ("!echo a | grep", "!echo a grep"),
-
         # Shell substitution
         ("!echo `ls`", "!echo ls"),
         ("!echo $(whoami)", "!echo whoami"),
-
         # Newline injection
         ("!echo hello\n!admin_cmd", "!echo hello!admin_cmd"),
         ("!cmd\r\n!next", "!cmd!next"),
-
         # Template injection
         ("!say {config.api_key}", "!say config.api_key"),
         ("!test <script>alert(1)</script>", "!test scriptalert1/script"),
-
         # Redirection
         ("!echo foo > /tmp/bad", "!echo foo /tmp/bad"),
     ]

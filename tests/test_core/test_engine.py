@@ -31,11 +31,13 @@ def _make_msg(text: str = "!echo hello integration", user_id: str = "user1") -> 
         raw_text=text,
         user=User(id=user_id, display_name="Test User", platform="mock"),
         timestamp=datetime.now(UTC),
-        platform="mock"
+        platform="mock",
     )
 
 
-def _dispatch_ok(reply: str | None = None, tool_id: int = 1, cmd: str = "echo") -> DispatchResult:
+def _dispatch_ok(
+    reply: str | None = None, tool_id: int = 1, cmd: str = "echo"
+) -> DispatchResult:
     """Helper: build a DispatchResult as dispatch() now returns."""
     return DispatchResult(
         result=CommandResult.success(reply=reply),
@@ -69,12 +71,16 @@ async def test_engine_process_sends_reply():
     # Inject a pre-built dispatcher so we don't need a DB
     # BUG 53 fix: dispatch() now returns DispatchResult, not bare CommandResult
     mock_dispatcher = AsyncMock()
-    mock_dispatcher.dispatch.return_value = _dispatch_ok(reply="Echo: hello integration")
+    mock_dispatcher.dispatch.return_value = _dispatch_ok(
+        reply="Echo: hello integration"
+    )
     engine.dispatcher = mock_dispatcher
 
     await engine.process(_make_msg("!echo hello integration"))
 
-    mock_adapter.send_message.assert_called_once_with("user1", "Echo: hello integration")
+    mock_adapter.send_message.assert_called_once_with(
+        "user1", "Echo: hello integration"
+    )
 
 
 @pytest.mark.asyncio

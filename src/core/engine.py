@@ -24,17 +24,18 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from src.core.dispatcher import EventDispatcher
 from src.core.loader import PluginEngine
 from src.core.logger import core_logger
-from src.core.router import RulesCache  # BUG 68
+from src.core.router import RulesCache
 from src.database.repository import OmniRepository
 from src.database.session import dispose_db, init_db
 from src.modes.mode_manager import ModeManager
 from src.profiles.manager import ProfileManager
 from src.security.sanitizer import CommandSanitizer
-from src.security.watchdog import ApiWatchdog  # BUG 4: was missing
+from src.security.watchdog import ApiWatchdog
 
 if TYPE_CHECKING:
     from src.core.contracts.message import Message
     from src.core.interfaces.platform_adapter import PlatformAdapter
+
 
 class OmniKernal:
     """
@@ -66,18 +67,18 @@ class OmniKernal:
     ) -> None:
         self.adapter = adapter
         self.repository = repository
-        self._session_factory = session_factory                     # BUG 62
+        self._session_factory = session_factory
         self.profile_name = profile_name
         self.mode = mode
         self.profile_manager = ProfileManager(profiles_dir)
         self.mode_manager = ModeManager()
-        self.dispatcher: EventDispatcher | None = None   # BUG 12: explicit type
-        self.watchdog = ApiWatchdog(repository)             # BUG 4: wire watchdog
+        self.dispatcher: EventDispatcher | None = None
+        self.watchdog = ApiWatchdog(repository)
         self.headless: bool = False
         self.logger = core_logger.bind(profile=profile_name)
         self.is_running = False
         self._stop_event = asyncio.Event()
-        self._rules_cache = RulesCache()                 # BUG 68: shared cache container
+        self._rules_cache = RulesCache()
 
     # ------------------------------------------------------------------
     # Internal: session-per-request helper (BUG 62)
@@ -97,7 +98,7 @@ class OmniKernal:
             f"Booting OmniKernal for platform: {self.adapter.platform_name} "
             f"[mode={self.mode}]"
         )
-        
+
         # BUG 225 fix: Check session safety for CoopMode
         if self.mode == "coop" and self._session_factory is None:
             self.logger.warning(
@@ -125,26 +126,25 @@ class OmniKernal:
         await loader.discover_and_load()
 
         self.dispatcher = EventDispatcher(
-            self.repository,
-            logger=self.logger,
-            rules_cache=self._rules_cache  # BUG 68
+            self.repository, logger=self.logger, rules_cache=self._rules_cache
         )
 
         try:
             await self.adapter.connect()
 
-            # BUG 46 fix: check is_running AFTER connect returns. If stop() was
-            # called while connect() was awaiting, it would have set is_running=False.
             # Without this guard we'd override that and start polling anyway.
             if not self.is_running and self._stop_event.is_set():
-                self.logger.warning("stop() was called during adapter.connect(). Aborting boot.")
+                self.logger.warning(
+                    "stop() was called during adapter.connect(). Aborting boot."
+                )
                 return
 
             self.is_running = True
             self.logger.info("Adapter connected. Starting execution mode.")
 
-            # Phase 6: delegate polling to ModeManager
-            mode_name: Literal["self", "coop"] = "coop" if self.mode == "coop" else "self"
+            mode_name: Literal["self", "coop"] = (
+                "coop" if self.mode == "coop" else "self"
+            )
             await self.mode_manager.start(mode_name, self, self.adapter)
             # Wait until engine is stopped
             await self._stop_event.wait()
@@ -163,7 +163,6 @@ class OmniKernal:
 
         if not was_running:
             self.logger.info("OmniKernal stop() called before full boot. Aborted.")
-            # BUG 171 fix: Even if booting failed/aborted, we MUST release the profile lock
             # if we acquired it, avoiding stale locks if the process doesn't exit immediately.
             try:
                 self.profile_manager.deactivate(self.profile_name)
@@ -171,23 +170,21 @@ class OmniKernal:
                 pass
             return
 
-        # Stop execution mode (Phase 6)
+        # Stop execution mode
         await self.mode_manager.stop()
 
         try:
-            # BUG 81 fix: wrap adapter disconnect in try block so profile
             # deactivation (releasing the lock) always happens.
             await self.adapter.disconnect()
         except Exception as e:
             self.logger.warning(f"Adapter disconnect failure: {e}")
 
-        # Profile Deactivation (Phase 5) — release PID lock
+        # Profile Deactivation
         try:
             self.profile_manager.deactivate(self.profile_name)
         except Exception as e:
             self.logger.warning(f"Profile deactivation warning: {e}")
 
-        # BUG 123 fix: Cleanly dispose the DB engine session pool on shutdown
         await dispose_db()
 
         self.logger.info("Shutdown complete.")
@@ -205,7 +202,6 @@ class OmniKernal:
         sharing the same AsyncSession.
         """
 
-        # BUG 12: guard against dispatcher not yet initialised (race in early stop())
         if self.dispatcher is None:
             self.logger.warning("process() called before dispatcher was initialised.")
             return
@@ -218,7 +214,7 @@ class OmniKernal:
         if not clean_text or not clean_text.startswith("!"):
             return
 
-        # 2. Get a per-request session/repo (BUG 62 fix)
+        # 2. Get a per-request session/repo
         if self._session_factory is not None:
             async with self._session_factory() as session:
                 await self._process_with_session(clean_text, msg, session)
@@ -242,24 +238,19 @@ class OmniKernal:
         """
 
         if repo is None:
-            # BUG 62: session is guaranteed non-None here by the caller
             assert session is not None
             repo = self._make_repo(session)
 
-        # Use a fresh dispatcher when we have a fresh repo (BUG 62 session path).
         # Reuse self.dispatcher when the legacy no-session path is taken — this
         # preserves test injection of mock dispatchers.
         if session is not None:
             # BUG 68: pass the shared cache to the per-request dispatcher
             dispatcher = EventDispatcher(
-                repo,
-                logger=self.logger,
-                rules_cache=self._rules_cache
+                repo, logger=self.logger, rules_cache=self._rules_cache
             )
-            # BUG 66 fix: record failures using a watchdog bound to the fresh repo
             watchdog = ApiWatchdog(repo)
         else:
-            dispatcher = self.dispatcher  # type: ignore[assignment]  # already guarded above
+            dispatcher = self.dispatcher  # type: ignore[assignment]
             watchdog = self.watchdog
 
         # 2. Dispatch & Execute
@@ -270,9 +261,11 @@ class OmniKernal:
         result = dispatch_result.result if dispatch_result else None
         resolved_tool_id = dispatch_result.tool_id if dispatch_result else None
 
-        # 3. Log Execution to DB (BUG 47/53: use resolved command_name if available)
+        # 3. Log Execution to DB
         if result:
-            logged_cmd = (dispatch_result.command_name if dispatch_result else None) or clean_text.split(" ")[0][1:]
+            logged_cmd = (
+                dispatch_result.command_name if dispatch_result else None
+            ) or clean_text.split(" ")[0][1:]
             await repo.log_execution(
                 user_id=msg.user.id,
                 platform=msg.platform,
@@ -280,7 +273,7 @@ class OmniKernal:
                 raw_input=msg.raw_text,
                 success=result.ok,
                 response_time_ms=duration_ms,
-                error_reason=result.error_reason
+                error_reason=result.error_reason,
             )
 
         # 4. Handle Reply
@@ -288,8 +281,7 @@ class OmniKernal:
             self.logger.info(f"Command succeeded. Sending reply to {msg.user.id}")
             await self.adapter.send_message(msg.user.id, result.reply)
 
-        # BUG 140 fix: Changed from 'elif' to 'if not result.ok' to ensure 
-        # API watchdog failures are recorded even when the handler provides 
+        # API watchdog failures are recorded even when the handler provides
         # a failure-explanation reply to the user.
         if result and not result.ok:
             self.logger.error(f"Command failed: {result.error_reason}")

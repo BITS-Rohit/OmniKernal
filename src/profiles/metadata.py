@@ -76,7 +76,9 @@ class ProfileMetadata:
 
         for field in SENSITIVE_FIELDS:
             if field in encrypted_data and encrypted_data[field]:
-                encrypted_data[field] = EncryptionEngine.encrypt(str(encrypted_data[field]))
+                encrypted_data[field] = EncryptionEngine.encrypt(
+                    str(encrypted_data[field])
+                )
 
         meta_path = self._metadata_path(profile_name)
         os.makedirs(os.path.dirname(meta_path), exist_ok=True)

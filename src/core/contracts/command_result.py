@@ -39,7 +39,7 @@ class CommandResult:
     ok: bool
     reply: str | None = None
     error_reason: str | None = None
-    api_url: str | None = None       # BUG 4: added for watchdog wiring
+    api_url: str | None = None  # BUG 4: added for watchdog wiring
 
     @classmethod
     def success(cls, reply: str | None = None) -> CommandResult:

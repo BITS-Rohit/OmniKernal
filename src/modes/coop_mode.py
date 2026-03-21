@@ -138,9 +138,10 @@ class CoopMode:
                         # Create and track the task
                         task = asyncio.create_task(
                             self._process_with_approval(msg, core),
-                            name=f"coop_approval_{msg.id}"
+                            name=f"coop_approval_{msg.id}",
                         )
                         self._active_tasks.add(task)
+
                         # Remove from BOTH sets when task finishes
                         def _cleanup(t: asyncio.Task[None], m_id: str = msg.id) -> None:
                             self._active_tasks.discard(t)
@@ -171,9 +172,7 @@ class CoopMode:
 
         self.logger.info("CoopMode stopped.")
 
-    async def _process_with_approval(
-        self, msg: "Message", core: "OmniKernal"
-    ) -> None:
+    async def _process_with_approval(self, msg: "Message", core: "OmniKernal") -> None:
         """Internal: holds for approval then routes through Core."""
         try:
             approved = await self._hold_for_approval(msg)
@@ -183,5 +182,7 @@ class CoopMode:
             else:
                 self.logger.info(f"Skipped rejected message: {msg.id}")
         except asyncio.CancelledError:
-            self.logger.info(f"Approval task for '{msg.id}' was cancelled during shutdown.")
+            self.logger.info(
+                f"Approval task for '{msg.id}' was cancelled during shutdown."
+            )
             raise

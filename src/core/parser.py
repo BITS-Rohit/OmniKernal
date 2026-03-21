@@ -89,7 +89,7 @@ class CommandParser:
                     name = f"_{name}"
                 elif not name:
                     name = "arg"
-                
+
                 quantifier = ".+" if counter == num_args else ".+?"
                 regex_parts.append(f"(?P<{name}>{quantifier})")
             else:

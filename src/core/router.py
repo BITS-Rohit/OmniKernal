@@ -30,6 +30,7 @@ class RulesCache:
     Mutable container for cached routing rules (BUG 68).
     Allows sharing a cache across multiple ephemeral CommandRouter instances.
     """
+
     def __init__(self) -> None:
         self.rules: Sequence[Any] | None = None
         # BUG 170 fix: store regex cache in shared container so it persists across messages
@@ -51,7 +52,9 @@ class CommandRouter:
     invalidate_route_cache() if rules change at runtime.
     """
 
-    def __init__(self, repository: OmniRepository, cache: RulesCache | None = None) -> None:
+    def __init__(
+        self, repository: OmniRepository, cache: RulesCache | None = None
+    ) -> None:
         self.repository = repository
         # BUG 68 fix: use shared cache if provided, else local one
         self._shared_cache = cache
@@ -76,7 +79,7 @@ class CommandRouter:
         """Clears the cached routing rules."""
         if self._shared_cache:
             self._shared_cache.rules = None
-            self._shared_cache.regex_cache.clear() # BUG 170
+            self._shared_cache.regex_cache.clear()  # BUG 170
         else:
             self._local_cache = None
             self._local_regex_cache.clear()
@@ -85,7 +88,11 @@ class CommandRouter:
         """
         BUG 120 + BUG 170 fix: Get pre-compiled regex from the correct cache.
         """
-        cache_dict = self._shared_cache.regex_cache if self._shared_cache else self._local_regex_cache
+        cache_dict = (
+            self._shared_cache.regex_cache
+            if self._shared_cache
+            else self._local_regex_cache
+        )
         if pattern not in cache_dict:
             cache_dict[pattern] = re.compile(pattern)
         return cache_dict[pattern]
@@ -115,7 +122,7 @@ class CommandRouter:
             try:
                 # BUG 120 fix: use pre-compiled regex from cache
                 pattern_obj = self._get_compiled_regex(rule.regex_pattern)
-                
+
                 if pattern_obj.fullmatch(command_trigger):
                     # Resolve the tool this rule maps to (BUG 70: pre-fetched)
                     tool = rule.tool
@@ -146,7 +153,7 @@ class CommandRouter:
             "pattern": tool.pattern,
             "handler_path": tool.handler_path,
             "plugin_name": tool.plugin_name,
-            "required_role": tool.required_role, # BUG 71
+            "required_role": tool.required_role,  # BUG 71
         }
 
     async def list_commands(self) -> list[str]:

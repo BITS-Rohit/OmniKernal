@@ -48,6 +48,7 @@ class TestAdapterValidator:
     def test_valid_class_passes(self):
         """ConsoleMockAdapter should pass validation."""
         from adapter_packs.console_mock.adapter import ConsoleMockAdapter
+
         self.validator.validate_class(ConsoleMockAdapter)  # Should not raise
 
     def test_non_subclass_rejected(self):
@@ -66,7 +67,9 @@ class TestAdapterLoader:
         adapter = loader.load("console_mock")
 
         assert isinstance(adapter, PlatformAdapter)
-        assert adapter.platform_name == "console"   # BUG 16 fix: aligned with adapter.yaml
+        assert (
+            adapter.platform_name == "console"
+        )  # BUG 16 fix: aligned with adapter.yaml
 
     def test_load_nonexistent_pack_raises(self):
         loader = AdapterLoader()

@@ -12,6 +12,7 @@ from src.core.logger import core_logger
 if TYPE_CHECKING:
     from src.database.repository import OmniRepository
 
+
 class ApiWatchdog:
     """
     Monitor for external API health.
@@ -26,12 +27,17 @@ class ApiWatchdog:
         """Records a failure and quarantines if threshold reached. BUG 183 sanitized."""
         # Sanitize error message to prevent log injection (B183)
         from src.security.sanitizer import CommandSanitizer
+
         safe_msg = CommandSanitizer.sanitize(error_msg or "unknown error")
 
         self.logger.warning(f"API Failure recorded for {api_url}: {safe_msg}")
-        is_dead = await self.repo.increment_error(api_url, tool_id=tool_id, error_msg=safe_msg)
+        is_dead = await self.repo.increment_error(
+            api_url, tool_id=tool_id, error_msg=safe_msg
+        )
         if is_dead:
-            self.logger.error(f"API {api_url} is now QUARANTINED due to consecutive failures.")
+            self.logger.error(
+                f"API {api_url} is now QUARANTINED due to consecutive failures."
+            )
 
     async def record_success(self, api_url: str) -> None:
         """Records a success, resetting any degraded state."""

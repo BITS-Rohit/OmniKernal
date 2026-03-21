@@ -13,10 +13,13 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
     async with session_factory() as session:
         yield session
     await engine.dispose()
+
 
 @pytest.mark.asyncio
 async def test_repository_plugin_and_tool_registration(db_session):
@@ -30,7 +33,7 @@ async def test_repository_plugin_and_tool_registration(db_session):
         command_name="echo",
         pattern="!echo <text>",
         handler_path="plugins.echo.handlers.echo.run",
-        plugin_name="echo_plugin"
+        plugin_name="echo_plugin",
     )
 
     # 3. Verify
@@ -38,6 +41,7 @@ async def test_repository_plugin_and_tool_registration(db_session):
     assert tool is not None
     assert tool.pattern == "!echo <text>"
     assert tool.plugin_name == "echo_plugin"
+
 
 @pytest.mark.asyncio
 async def test_repository_execution_logging(db_session):
@@ -49,12 +53,13 @@ async def test_repository_execution_logging(db_session):
         command_name="echo",
         raw_input="!echo hello",
         success=True,
-        response_time_ms=150
+        response_time_ms=150,
     )
 
     # Verify via direct session query or if repo had a 'get_logs'
     # For now, just ensure it doesn't crash and commits.
     assert True
+
 
 @pytest.mark.asyncio
 async def test_repository_api_health_watchdog(db_session):

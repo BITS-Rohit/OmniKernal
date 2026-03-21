@@ -1,4 +1,3 @@
-
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -27,9 +26,11 @@ async def app_repo():
 
     await engine.dispose()
 
+
 @pytest.fixture
 def watchdog(app_repo):
     return ApiWatchdog(app_repo)
+
 
 @pytest.mark.asyncio
 async def test_watchdog_quarantine_flow(watchdog, app_repo):
@@ -52,7 +53,10 @@ async def test_watchdog_quarantine_flow(watchdog, app_repo):
     from sqlalchemy import select
 
     from src.database.models import DeadApi
-    result = await app_repo.session.execute(select(DeadApi).where(DeadApi.api_url == url))
+
+    result = await app_repo.session.execute(
+        select(DeadApi).where(DeadApi.api_url == url)
+    )
     dead_log = result.scalar_one()
     assert dead_log is not None
     assert dead_log.kill_reason == "Connection Refused"

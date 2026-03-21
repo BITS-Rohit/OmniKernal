@@ -12,7 +12,15 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload  # BUG 70
 
-from .models import ApiHealth, DeadApi, ExecutionLog, Plugin, RoutingRule, Tool, ToolRequirement
+from .models import (
+    ApiHealth,
+    DeadApi,
+    ExecutionLog,
+    Plugin,
+    RoutingRule,
+    Tool,
+    ToolRequirement,
+)
 
 
 class OmniRepository:
@@ -25,7 +33,13 @@ class OmniRepository:
 
     # --- Plugin & Tool Registry ---
 
-    async def register_plugin(self, name: str, version: str, author_name: str | None = None, description: str | None = None) -> None:
+    async def register_plugin(
+        self,
+        name: str,
+        version: str,
+        author_name: str | None = None,
+        description: str | None = None,
+    ) -> None:
         """
         Registers or updates a plugin entry.
 
@@ -58,7 +72,7 @@ class OmniRepository:
         handler_path: str,
         plugin_name: str,
         description: str | None = None,
-        required_role: str = "user"  # BUG 71
+        required_role: str = "user",  # BUG 71
     ) -> None:
         """Registers or updates a tool entry."""
         existing = await self.get_tool_by_command(command_name)
@@ -67,9 +81,9 @@ class OmniRepository:
             existing.pattern = pattern
             existing.handler_path = handler_path
             existing.description = description
-            existing.plugin_name = plugin_name   # was missing
-            existing.required_role = required_role # BUG 71
-            await self.session.flush()           # make intent explicit
+            existing.plugin_name = plugin_name  # was missing
+            existing.required_role = required_role  # BUG 71
+            await self.session.flush()  # make intent explicit
         else:
             tool = Tool(
                 command_name=command_name,
@@ -77,7 +91,7 @@ class OmniRepository:
                 handler_path=handler_path,
                 plugin_name=plugin_name,
                 description=description,
-                required_role=required_role # BUG 71
+                required_role=required_role,  # BUG 71
             )
             self.session.add(tool)
 
@@ -120,6 +134,7 @@ class OmniRepository:
     async def set_plugin_inactive(self, name: str) -> None:
         """Marks a plugin as inactive. BUG 13."""
         from sqlalchemy import update
+
         await self.session.execute(
             update(Plugin).where(Plugin.name == name).values(is_active=False)
         )
@@ -128,6 +143,7 @@ class OmniRepository:
     async def deactivate_missing_plugins(self, active_names: list[str]) -> None:
         """Marks plugins NOT in the list as inactive. BUG 240."""
         from sqlalchemy import update
+
         await self.session.execute(
             update(Plugin)
             .where(Plugin.name.notin_(active_names))
@@ -145,11 +161,12 @@ class OmniRepository:
         raw_input: str,
         success: bool,
         response_time_ms: float | None = None,
-        error_reason: str | None = None
+        error_reason: str | None = None,
     ) -> None:
         """Adds a record to the audit trail. BUG 183 sanitized."""
         # Sanitize error reason specifically for audit logs to prevent injection (B183)
         from src.security.sanitizer import CommandSanitizer
+
         safe_reason = CommandSanitizer.sanitize(error_reason) if error_reason else None
 
         log = ExecutionLog(
@@ -159,14 +176,16 @@ class OmniRepository:
             raw_input=raw_input,
             success=success,
             response_time_ms=response_time_ms,
-            error_reason=safe_reason
+            error_reason=safe_reason,
         )
         self.session.add(log)
         await self.session.commit()
 
     # --- API Health Watchdog ---
 
-    async def increment_error(self, url: str, tool_id: int | None, error_msg: str) -> bool:
+    async def increment_error(
+        self, url: str, tool_id: int | None, error_msg: str
+    ) -> bool:
         """
         Increments failure count. Quarantines and logs to DeadApi if threshold reached.
         Returns True if the API is now quarantined as a result of this error.
@@ -174,23 +193,37 @@ class OmniRepository:
         # BUG 220 + BUG 274 fix: use atomic SQL update and fetch fresh data.
         # execute(update) does not refresh loaded objects; we must SELECT again.
         from sqlalchemy import select
+
         await self.session.execute(
             update(ApiHealth)
             .where(ApiHealth.url == url)
-            .values(consecutive_failures=ApiHealth.consecutive_failures + 1, last_failure=datetime.now(UTC))
+            .values(
+                consecutive_failures=ApiHealth.consecutive_failures + 1,
+                last_failure=datetime.now(UTC),
+            )
         )
-        
+
         # Fresh fetch to avoid identity-map stale counter values
-        result = await self.session.execute(select(ApiHealth).where(ApiHealth.url == url))
+        result = await self.session.execute(
+            select(ApiHealth).where(ApiHealth.url == url)
+        )
         health = result.scalar_one_or_none()
-        
+
         if not health:
-            health = ApiHealth(url=url, consecutive_failures=1, last_failure=datetime.now(UTC), error_threshold=3)
+            health = ApiHealth(
+                url=url,
+                consecutive_failures=1,
+                last_failure=datetime.now(UTC),
+                error_threshold=3,
+            )
             self.session.add(health)
             await self.session.flush()
 
         is_newly_dead = False
-        if health.consecutive_failures >= health.error_threshold and not health.is_quarantined:
+        if (
+            health.consecutive_failures >= health.error_threshold
+            and not health.is_quarantined
+        ):
             health.is_quarantined = True
             is_newly_dead = True
 
@@ -198,7 +231,7 @@ class OmniRepository:
                 api_url=url,
                 tool_id=tool_id,
                 error_count=health.consecutive_failures,
-                kill_reason=error_msg
+                kill_reason=error_msg,
             )
             self.session.add(dead_api)
 
@@ -216,12 +249,16 @@ class OmniRepository:
         """
         health = await self.session.get(ApiHealth, url)
         if not health:
-            health = ApiHealth(url=url, consecutive_failures=0, error_threshold=3, is_quarantined=False)
+            health = ApiHealth(
+                url=url, consecutive_failures=0, error_threshold=3, is_quarantined=False
+            )
             self.session.add(health)
 
         health.consecutive_failures = 0
         health.last_success = datetime.now(UTC)
-        health.is_quarantined = False   # watchdog recovery path: one success clears quarantine
+        health.is_quarantined = (
+            False  # watchdog recovery path: one success clears quarantine
+        )
 
         await self.session.commit()
 
@@ -257,21 +294,24 @@ class OmniRepository:
         )
         await self.session.commit()
 
-    async def register_tool_requirement(self, tool_id: int, api_key: str, service: str = "default") -> None:
+    async def register_tool_requirement(
+        self, tool_id: int, api_key: str, service: str = "default"
+    ) -> None:
         """Saves or updates an encrypted API key for a tool. BUG 279 (UPSERT)."""
         service = service or "default"
         # Since this is a specialized repo method, we handle the select/merge
         result = await self.session.execute(
             select(ToolRequirement).where(
-                ToolRequirement.tool_id == tool_id, 
-                ToolRequirement.service == service
+                ToolRequirement.tool_id == tool_id, ToolRequirement.service == service
             )
         )
         req = result.scalar_one_or_none()
         if req:
             req.api_key_value = api_key
         else:
-            req = ToolRequirement(tool_id=tool_id, service=service, api_key_value=api_key)
+            req = ToolRequirement(
+                tool_id=tool_id, service=service, api_key_value=api_key
+            )
             self.session.add(req)
         await self.session.commit()
 
@@ -279,8 +319,8 @@ class OmniRepository:
         """Fetches the encrypted API key for a tool (optional service name). BUG 181."""
         result = await self.session.execute(
             select(ToolRequirement).where(
-                ToolRequirement.tool_id == tool_id, 
-                ToolRequirement.service == (service or "default")
+                ToolRequirement.tool_id == tool_id,
+                ToolRequirement.service == (service or "default"),
             )
         )
         req = result.scalar_one_or_none()

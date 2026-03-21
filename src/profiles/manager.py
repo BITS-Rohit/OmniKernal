@@ -93,7 +93,9 @@ class ProfileManager:
                 f"Multiple profiles active. Resolve status for '{name}': force_headless=True"
             )
 
-        self.logger.info(f"Profile activated: {name} (headless={meta.get('headless', False)})")
+        self.logger.info(
+            f"Profile activated: {name} (headless={meta.get('headless', False)})"
+        )
         return meta
 
     def deactivate(self, name: str) -> None:
@@ -108,9 +110,10 @@ class ProfileManager:
         if not os.path.isdir(self.profiles_dir):
             return []
         return [
-            d for d in os.listdir(self.profiles_dir)
+            d
+            for d in os.listdir(self.profiles_dir)
             if os.path.isdir(os.path.join(self.profiles_dir, d))
-            and not d.startswith(".") # BUG 161 (skips .git, .tmp)
+            and not d.startswith(".")  # BUG 161 (skips .git, .tmp)
         ]
 
     def should_force_headless(self) -> bool:

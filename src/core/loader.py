@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 
 import yaml
 
-from src.core.contracts.plugin_manifest import PluginManifest  # BUG 21
+from src.core.contracts.plugin_manifest import PluginManifest
 from src.core.logger import core_logger
 
 if TYPE_CHECKING:
@@ -42,10 +42,10 @@ def _version_tuple(v: str) -> tuple[int, ...]:
     BUG 119 fix: Pads with zeros to ensure '1.2' is (1, 2, 0) for stable comparison.
     """
     try:
-        # BUG 119 + BUG 182 fix: robust semver parsing.
         # Split by '.' and then only take the digit parts of each segment
         # (e.g. '1.0.0-alpha' -> '1', '0', '0')
         import re
+
         parts = []
         for segment in v.split("."):
             match = re.search(r"\d+", segment)
@@ -59,7 +59,7 @@ def _version_tuple(v: str) -> tuple[int, ...]:
             parts.append(0)
         return tuple(parts[:3])
     except (ValueError, AttributeError):
-        return (0, 0, 0)
+        return 0, 0, 0
 
 
 class PluginEngine:
@@ -82,7 +82,7 @@ class PluginEngine:
     ):
         self.repo = repo
         self.plugins_dir = plugins_dir
-        self.platform_name = platform_name   # BUG 58
+        self.platform_name = platform_name
         self.logger = core_logger.bind(subsystem="plugin_engine")
 
     async def discover_and_load(self) -> None:
@@ -106,7 +106,7 @@ class PluginEngine:
             if name:
                 found_names.append(name)
 
-        # BUG 240 fix: cleanup any plugins in DB that are NO LONGER on disk.
+        # cleanup any plugins in DB that are NO LONGER on disk.
         if found_names:
             await self.repo.deactivate_missing_plugins(found_names)
 
@@ -122,11 +122,11 @@ class PluginEngine:
         manifest: PluginManifest | None = None
 
         try:
-            # 1. Load & Validate Manifest using formal contract (BUG 21 fix)
+            # 1. Load & Validate Manifest using formal contract
             with open(manifest_path, encoding="utf-8") as f:
                 raw = json.load(f)
 
-            manifest = PluginManifest.from_dict(raw)   # validates name/version
+            manifest = PluginManifest.from_dict(raw)  # validates name/version
 
             # BUG 118 fix: enforce folder name matches manifest name
             # This prevents import failures if a user renames a plugin folder on disk.
@@ -140,7 +140,7 @@ class PluginEngine:
             # BUG 34 fix: enforce min_core_version before registration
             if manifest.min_core_version:
                 required = _version_tuple(manifest.min_core_version)
-                running  = _version_tuple(OMNIKERNAL_VERSION)
+                running = _version_tuple(OMNIKERNAL_VERSION)
                 if required > running:
                     self.logger.warning(
                         f"Plugin '{manifest.name}' requires core v{manifest.min_core_version} "
@@ -149,7 +149,9 @@ class PluginEngine:
                     return
 
             # BUG 58 fix: skip plugins incompatible with the active platform
-            if self.platform_name and not manifest.supports_platform(self.platform_name):
+            if self.platform_name and not manifest.supports_platform(
+                self.platform_name
+            ):
                 self.logger.info(
                     f"Plugin '{manifest.name}' does not support platform "
                     f"'{self.platform_name}' (supports {manifest.platform}). Skipping."
@@ -161,7 +163,7 @@ class PluginEngine:
                 name=manifest.name,
                 version=manifest.version,
                 author_name=manifest.author,
-                description=manifest.description
+                description=manifest.description,
             )
 
             # 3. Load & Process commands.yaml
@@ -172,20 +174,30 @@ class PluginEngine:
                 # BUG 141 fix: safe-guard against empty or malformed YAML files
                 # BUG 141 + BUG 180 fix: ensure both cmd_cfg and .get('commands') are dictionaries.
                 if not isinstance(cmd_cfg, dict):
-                    self.logger.warning(f"Skipping commands for '{manifest.name}': commands.yaml is empty or malformed.")
+                    self.logger.warning(
+                        f"Skipping commands for '{manifest.name}': commands.yaml is empty or malformed."
+                    )
                     commands = {}
                 else:
                     commands_raw = cmd_cfg.get("commands", {})
                     if not isinstance(commands_raw, dict):
-                        self.logger.warning(f"Skipping commands for '{manifest.name}': 'commands' key in commands.yaml is not a dictionary.")
+                        self.logger.warning(
+                            f"Skipping commands for '{manifest.name}': 'commands' key in commands.yaml is not a dictionary."
+                        )
                         commands = {}
                     else:
                         commands = commands_raw
 
                 for cmd_name, cmd_info in commands.items():
                     # BUG 73 fix: validate schema before registration
-                    if not isinstance(cmd_info, dict) or not cmd_info.get("pattern") or not cmd_info.get("handler"):
-                        self.logger.error(f"Skipping command '{cmd_name}' in plugin '{manifest.name}': missing 'pattern' or 'handler', or not a dict.")
+                    if (
+                        not isinstance(cmd_info, dict)
+                        or not cmd_info.get("pattern")
+                        or not cmd_info.get("handler")
+                    ):
+                        self.logger.error(
+                            f"Skipping command '{cmd_name}' in plugin '{manifest.name}': missing 'pattern' or 'handler', or not a dict."
+                        )
                         continue
 
                     # BUG 57 fix: warn if an existing tool with this name belongs
@@ -199,12 +211,12 @@ class PluginEngine:
                         )
 
                     await self.repo.register_tool(
-                        command_name=cmd_name.lower(), # BUG 271: normalize to lowercase
+                        command_name=cmd_name.lower(),  # BUG 271: normalize to lowercase
                         pattern=cmd_info.get("pattern"),
                         handler_path=cmd_info.get("handler"),
                         plugin_name=manifest.name,
                         description=cmd_info.get("description"),
-                        required_role=cmd_info.get("role", "user") # BUG 71
+                        required_role=cmd_info.get("role", "user"),  # BUG 71
                     )
 
             self.logger.info(
@@ -217,7 +229,9 @@ class PluginEngine:
             # BUG 13: mark plugin inactive in DB if partially registered
             if manifest is not None:
                 try:
-                    await self.repo.deactivate_missing_plugins([]) # Or use set_plugin_inactive
+                    await self.repo.deactivate_missing_plugins(
+                        []
+                    )  # Or use set_plugin_inactive
                     # Wait, I renamed set_plugin_inactive. I should put it back for single-plugin use.
                     await self.repo.set_plugin_inactive(manifest.name)
                     self.logger.warning(

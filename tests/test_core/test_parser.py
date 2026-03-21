@@ -6,6 +6,7 @@ def test_parser_single_arg():
     extracted = CommandParser.match("!echo hello world", pattern)
     assert extracted == {"text": "hello world"}
 
+
 def test_parser_multiple_args():
     pattern = "!kick <user> <reason>"
     extracted = CommandParser.match("!kick @rohit spamming the chat", pattern)
@@ -17,9 +18,11 @@ def test_parser_multiple_args():
     assert "user" in extracted
     assert "reason" in extracted
 
+
 def test_parser_no_match():
     assert CommandParser.match("hello", "!echo <text>") is None
     assert CommandParser.match("!help", "!echo <text>") is None
+
 
 def test_parser_empty():
     assert CommandParser.match("", "") is None

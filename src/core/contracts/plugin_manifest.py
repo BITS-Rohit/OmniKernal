@@ -62,7 +62,9 @@ class PluginManifest:
             raise ValueError("Plugin manifest missing required field: 'version'")
 
         # Normalise platform key (BUG 148 fix: robust list coercion)
-        platform_raw = data.get("platform") or data.get("supported_platforms") or ["any"]
+        platform_raw = (
+            data.get("platform") or data.get("supported_platforms") or ["any"]
+        )
         if isinstance(platform_raw, str):
             platform = [platform_raw]
         elif isinstance(platform_raw, list):

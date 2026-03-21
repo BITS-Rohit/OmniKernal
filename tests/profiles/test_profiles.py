@@ -87,6 +87,7 @@ class TestProfileMetadata:
 
         # Verify the raw file has encrypted session_data
         import json
+
         raw = json.loads((profile_dir / "metadata.json").read_text())
         assert raw["session_data"] != "super_secret_token_12345"  # Encrypted!
 
