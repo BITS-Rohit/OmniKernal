@@ -175,5 +175,5 @@ addopts      = "-v --cov=src --cov-report=term-missing"
 [tool.deptry]
 package_module_name_map = { "pyyaml" = "yaml" }
 per_rule_ignores = { "DEP002" = ["aiosqlite", "playwright", "whatsplay", "aiomysql", "asyncpg"] }
-# Also ignore dev and docs in PEP 621
-pep621_dev_dependency_groups = ["testing", "linting", "adapter-testing", "dev", "docs"]
+# Also ignore dev and DOCS in PEP 621
+pep621_dev_dependency_groups = ["testing", "linting", "adapter-testing"]

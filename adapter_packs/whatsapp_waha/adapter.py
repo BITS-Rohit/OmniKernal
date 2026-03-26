@@ -10,7 +10,7 @@ Architecture vs. Playwright adapter:
 
 Key design decisions:
   - Polling via GET /api/messages with ?limit + timestamp tracking.
-    WAHA docs recommend webhooks for production, but polling fits our
+    WAHA DOCS recommend webhooks for production, but polling fits our
     existing PlatformAdapter ABC (fetch_new_messages) without changes.
   - chatId format: WhatsApp uses "<phone_number>@c.us" for individuals
     and "<group_id>@g.us" for groups.
@@ -32,6 +32,7 @@ Setup requirements:
 import asyncio
 import os
 from datetime import datetime, timezone
+from typing import Optional
 
 import aiohttp
 
@@ -66,7 +67,7 @@ class WhatsAppWahaAdapter(PlatformAdapter):
         self,
         api_url: str = _DEFAULT_API_URL,
         session_name: str = _DEFAULT_SESSION,
-        api_key: str | None = None,
+        api_key: Optional[str] = None,
     ) -> None:
         self._platform_name = "whatsapp"
         self._api_url       = api_url.rstrip("/")
@@ -74,7 +75,7 @@ class WhatsAppWahaAdapter(PlatformAdapter):
         self._api_key       = api_key or os.getenv("WAHA_API_KEY", "")
 
         # HTTP client (created lazily in connect())
-        self._http: aiohttp.ClientSession | None = None
+        self._http:  Optional[aiohttp.ClientSession] = None
 
         # Timestamp of last seen message — used to filter already-processed
         # messages on the next poll. WAHA returns timestamps as Unix ints.
