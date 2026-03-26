@@ -82,3 +82,7 @@ ignore
 
 benchmarks/
 DOCS/
+adapter_packs/
+tests/test_baileys.py
+tests/test_playwright.py
+tests/test_waha.py

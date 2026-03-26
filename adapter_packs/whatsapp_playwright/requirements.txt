@@ -1,2 +1,0 @@
-# WhatsApp Playwright Adapter - SDK Dependencies
-playwright>=1.58.0
