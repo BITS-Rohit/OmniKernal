@@ -24,8 +24,8 @@ via a regex rule (where the trigger doesn't equal the canonical command name).
 """
 
 import importlib
-import os
 import inspect  # BUG 122
+import os
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from omnikernal.core.contracts.command_context import CommandContext

@@ -63,7 +63,7 @@ class OmniKernal:
         profile_name: str = "main",
         profiles_dir: str = "profiles",
         mode: str = "self",
-        session_factory: Optional[async_sessionmaker[AsyncSession]] = None,
+        session_factory: async_sessionmaker[AsyncSession] | None = None,
     ) -> None:
         self.adapter = adapter
         self.repository = repository
@@ -226,7 +226,7 @@ class OmniKernal:
         self,
         clean_text: str,
         msg: "Message",
-        session: Optional[AsyncSession] = None,
+        session: AsyncSession | None = None,
         repo: Optional["OmniRepository"] = None,
     ) -> None:
         """Core pipeline using either a fresh session or an existing repo.

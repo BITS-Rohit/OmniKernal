@@ -12,7 +12,7 @@ the frozen User dataclass.
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from omnikernal.core.contracts.user import User
+    pass
 
 
 class PermissionValidator:

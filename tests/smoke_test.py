@@ -13,7 +13,10 @@ import asyncio
 from omnikernal.adapters.loader import AdapterLoader
 from omnikernal.core.engine import OmniKernal
 from omnikernal.database.repository import OmniRepository
-from omnikernal.database.session import async_session_factory, ensure_db_initialized  # BUG 43
+from omnikernal.database.session import (
+    async_session_factory,
+    ensure_db_initialized,
+)  # BUG 43
 
 
 async def run_smoke_test():
@@ -46,9 +49,12 @@ async def run_smoke_test():
         await engine_task
 
         if adapter.sent_messages:
-            print("\n[PASS] SMOKE TEST PASSED: Adapter Pack discovery + Engine pipeline working!")
+            print(
+                "\n[PASS] SMOKE TEST PASSED: Adapter Pack discovery + Engine pipeline working!"
+            )
         else:
             print("\n[FAIL] SMOKE TEST FAILED: No reply generated.")
+
 
 if __name__ == "__main__":
     asyncio.run(run_smoke_test())

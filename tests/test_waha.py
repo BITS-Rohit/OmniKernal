@@ -26,12 +26,12 @@ import sys
 
 sys.path.insert(0, os.path.abspath("."))
 
-from omnikernal.core.engine import OmniKernal
-from omnikernal.database.session import async_session_factory, init_db
-from omnikernal.database.repository import OmniRepository
 from adapter_packs.whatsapp_waha.adapter import WhatsAppWahaAdapter
+from omnikernal.core.engine import OmniKernal
+from omnikernal.database.repository import OmniRepository
+from omnikernal.database.session import async_session_factory, init_db
 
-WAHA_URL     = os.getenv("WAHA_URL", "http://localhost:3000")
+WAHA_URL = os.getenv("WAHA_URL", "http://localhost:3000")
 SESSION_NAME = os.getenv("WAHA_SESSION", "default")
 WAHA_API_KEY = os.getenv("WAHA_API_KEY", "omnikernal_secret")
 

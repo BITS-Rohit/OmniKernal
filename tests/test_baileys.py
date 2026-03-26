@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath("."))
 
-from omnikernal.core.engine import OmniKernal
-from omnikernal.database.session import async_session_factory, init_db
-from omnikernal.database.repository import OmniRepository
 from adapter_packs.whatsapp_baileys.adapter import WhatsAppBaileysAdapter
+from omnikernal.core.engine import OmniKernal
+from omnikernal.database.repository import OmniRepository
+from omnikernal.database.session import async_session_factory, init_db
+
 
 async def main() -> None:
     print("🚀 Booting OmniKernal with Baileys Adapter (Socket Bridge)...")
@@ -40,6 +41,7 @@ async def main() -> None:
             if core.is_running:
                 await core.stop()
             print("\n✅ OmniKernal stopped cleanly.")
+
 
 if __name__ == "__main__":
     try:

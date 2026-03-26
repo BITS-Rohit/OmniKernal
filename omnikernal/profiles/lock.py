@@ -12,6 +12,7 @@ existing PID and potentially clean up a stale lock, then retries once.
 
 import contextlib
 import os
+
 import psutil  # BUG 75
 
 from omnikernal.core.logger import core_logger

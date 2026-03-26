@@ -5,9 +5,10 @@ Validates adapter pack descriptors (adapter.yaml) and ensures
 the entry class fully implements the PlatformAdapter ABC contract.
 """
 
-import yaml
 import inspect  # BUG 76
 from typing import Any
+
+import yaml
 
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 from omnikernal.core.logger import core_logger
