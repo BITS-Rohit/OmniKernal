@@ -9,13 +9,13 @@ import asyncio
 import contextlib
 from typing import TYPE_CHECKING, Literal
 
-from src.core.logger import core_logger
-from src.modes.coop_mode import CoopMode
-from src.modes.self_mode import SelfMode
+from omnikernal.core.logger import core_logger
+from omnikernal.modes.coop_mode import CoopMode
+from omnikernal.modes.self_mode import SelfMode
 
 if TYPE_CHECKING:
-    from src.core.engine import OmniKernal
-    from src.core.interfaces.platform_adapter import PlatformAdapter
+    from omnikernal.core.engine import OmniKernal
+    from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 ModeName = Literal["self", "coop"]
 

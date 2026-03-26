@@ -28,16 +28,16 @@ import os
 import inspect  # BUG 122
 from typing import TYPE_CHECKING, Any, NamedTuple
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
-from src.core.parser import CommandParser
-from src.core.permissions import PermissionValidator
-from src.core.router import CommandRouter  # BUG 19
-from src.security.encryption import EncryptionEngine  # BUG 35
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
+from omnikernal.core.parser import CommandParser
+from omnikernal.core.permissions import PermissionValidator
+from omnikernal.core.router import CommandRouter  # BUG 19
+from omnikernal.security.encryption import EncryptionEngine  # BUG 35
 
 if TYPE_CHECKING:
-    from src.core.contracts.user import User
-    from src.database.repository import OmniRepository
+    from omnikernal.core.contracts.user import User
+    from omnikernal.database.repository import OmniRepository
 
 
 # BUG 53 fix: structured return value carrying route metadata alongside the
@@ -152,7 +152,7 @@ class EventDispatcher:
             # handlers calling ctx.user.is_admin() see 'user'.
             context_user = user
             if effective_role != user.role:
-                from src.core.contracts.user import User
+                from omnikernal.core.contracts.user import User
 
                 context_user = User(
                     id=user.id,

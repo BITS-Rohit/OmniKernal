@@ -21,20 +21,20 @@ from typing import TYPE_CHECKING, Literal, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from src.core.dispatcher import EventDispatcher
-from src.core.loader import PluginEngine
-from src.core.logger import core_logger
-from src.core.router import RulesCache
-from src.database.repository import OmniRepository
-from src.database.session import dispose_db, init_db
-from src.modes.mode_manager import ModeManager
-from src.profiles.manager import ProfileManager
-from src.security.sanitizer import CommandSanitizer
-from src.security.watchdog import ApiWatchdog
+from omnikernal.core.dispatcher import EventDispatcher
+from omnikernal.core.loader import PluginEngine
+from omnikernal.core.logger import core_logger
+from omnikernal.core.router import RulesCache
+from omnikernal.database.repository import OmniRepository
+from omnikernal.database.session import dispose_db, init_db
+from omnikernal.modes.mode_manager import ModeManager
+from omnikernal.profiles.manager import ProfileManager
+from omnikernal.security.sanitizer import CommandSanitizer
+from omnikernal.security.watchdog import ApiWatchdog
 
 if TYPE_CHECKING:
-    from src.core.contracts.message import Message
-    from src.core.interfaces.platform_adapter import PlatformAdapter
+    from omnikernal.core.contracts.message import Message
+    from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class OmniKernal:

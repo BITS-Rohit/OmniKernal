@@ -21,9 +21,9 @@ import sys
 
 sys.path.insert(0, os.path.abspath("."))
 
-from src.core.engine import OmniKernal
-from src.database.session import async_session_factory, init_db
-from src.database.repository import OmniRepository
+from omnikernal.core.engine import OmniKernal
+from omnikernal.database.session import async_session_factory, init_db
+from omnikernal.database.repository import OmniRepository
 from adapter_packs.whatsapp_playwright.adapter import WhatsAppPlaywrightAdapter
 
 PROFILE_NAME = "whatsapp_test"

@@ -2,8 +2,8 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from src.database.models import Base
-from src.database.repository import OmniRepository
+from omnikernal.database.models import Base
+from omnikernal.database.repository import OmniRepository
 
 
 @pytest_asyncio.fixture

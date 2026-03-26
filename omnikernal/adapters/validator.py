@@ -9,8 +9,8 @@ import yaml
 import inspect  # BUG 76
 from typing import Any
 
-from src.core.interfaces.platform_adapter import PlatformAdapter
-from src.core.logger import core_logger
+from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.core.logger import core_logger
 
 
 class AdapterValidator:

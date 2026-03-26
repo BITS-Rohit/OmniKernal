@@ -7,10 +7,10 @@ it quarantines the API to prevent cascading blocks and wastes.
 
 from typing import TYPE_CHECKING
 
-from src.core.logger import core_logger
+from omnikernal.core.logger import core_logger
 
 if TYPE_CHECKING:
-    from src.database.repository import OmniRepository
+    from omnikernal.database.repository import OmniRepository
 
 
 class ApiWatchdog:
@@ -26,7 +26,7 @@ class ApiWatchdog:
     async def record_failure(self, api_url: str, tool_id: int, error_msg: str) -> None:
         """Records a failure and quarantines if threshold reached. BUG 183 sanitized."""
         # Sanitize error message to prevent log injection (B183)
-        from src.security.sanitizer import CommandSanitizer
+        from omnikernal.security.sanitizer import CommandSanitizer
 
         safe_msg = CommandSanitizer.sanitize(error_msg or "unknown error")
 

@@ -4,9 +4,9 @@ Tests for Phase 5 — Profile Management.
 
 import pytest
 
-from src.profiles.lock import ProfileLock
-from src.profiles.manager import ProfileManager
-from src.profiles.metadata import ProfileMetadata
+from omnikernal.profiles.lock import ProfileLock
+from omnikernal.profiles.manager import ProfileManager
+from omnikernal.profiles.metadata import ProfileMetadata
 
 
 class TestProfileLock:

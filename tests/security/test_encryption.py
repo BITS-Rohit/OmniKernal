@@ -2,7 +2,7 @@ import os
 
 from cryptography.fernet import Fernet
 
-from src.security.encryption import EncryptionEngine
+from omnikernal.security.encryption import EncryptionEngine
 
 
 def test_encryption_roundtrip():

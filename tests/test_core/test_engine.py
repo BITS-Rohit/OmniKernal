@@ -18,11 +18,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from src.core.contracts.command_result import CommandResult
-from src.core.contracts.message import Message
-from src.core.contracts.user import User
-from src.core.dispatcher import DispatchResult
-from src.core.engine import OmniKernal
+from omnikernal.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.message import Message
+from omnikernal.core.contracts.user import User
+from omnikernal.core.dispatcher import DispatchResult
+from omnikernal.core.engine import OmniKernal
 
 
 def _make_msg(text: str = "!echo hello integration", user_id: str = "user1") -> Message:

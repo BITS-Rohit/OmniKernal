@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.core.interfaces.base_plugin import BasePlugin
+from omnikernal.core.interfaces.base_plugin import BasePlugin
 
 
 def test_base_plugin_is_abstract():

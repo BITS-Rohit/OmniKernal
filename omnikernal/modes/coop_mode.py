@@ -11,12 +11,12 @@ cancelled on loop exit to prevent orphaned tasks surviving shutdown.
 import asyncio
 from typing import TYPE_CHECKING
 
-from src.core.logger import core_logger
+from omnikernal.core.logger import core_logger
 
 if TYPE_CHECKING:
-    from src.core.contracts.message import Message
-    from src.core.engine import OmniKernal
-    from src.core.interfaces.platform_adapter import PlatformAdapter
+    from omnikernal.core.contracts.message import Message
+    from omnikernal.core.engine import OmniKernal
+    from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class CoopMode:

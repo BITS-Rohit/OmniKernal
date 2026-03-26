@@ -26,11 +26,11 @@ from typing import TYPE_CHECKING
 
 import yaml
 
-from src.core.contracts.plugin_manifest import PluginManifest
-from src.core.logger import core_logger
+from omnikernal.core.contracts.plugin_manifest import PluginManifest
+from omnikernal.core.logger import core_logger
 
 if TYPE_CHECKING:
-    from src.database.repository import OmniRepository
+    from omnikernal.database.repository import OmniRepository
 
 # BUG 34 fix: single source of truth for the current Core version
 OMNIKERNAL_VERSION: str = "0.1.0"

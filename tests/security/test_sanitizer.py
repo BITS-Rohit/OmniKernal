@@ -5,7 +5,7 @@ Merged unique cases from the now-deleted tests/test_security/test_sanitizer.py
 into this canonical location.
 """
 
-from src.security.sanitizer import CommandSanitizer
+from omnikernal.security.sanitizer import CommandSanitizer
 
 
 def test_command_sanitization_basics():

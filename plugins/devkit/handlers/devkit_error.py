@@ -11,8 +11,8 @@ This is the "intentional failure" test. If you receive a reply to this
 command, the entire error-handling pipeline is confirmed working.
 """
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 async def run(args: dict[str, str], ctx: CommandContext) -> CommandResult:

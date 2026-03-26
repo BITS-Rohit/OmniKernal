@@ -9,11 +9,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.core.contracts.message import Message
-from src.core.contracts.user import User
-from src.modes.coop_mode import CoopMode
-from src.modes.mode_manager import ModeManager
-from src.modes.self_mode import SelfMode
+from omnikernal.core.contracts.message import Message
+from omnikernal.core.contracts.user import User
+from omnikernal.modes.coop_mode import CoopMode
+from omnikernal.modes.mode_manager import ModeManager
+from omnikernal.modes.self_mode import SelfMode
 
 
 def make_mock_msg(msg_id: str = "m1", text: str = "!echo hi") -> Message:

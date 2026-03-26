@@ -10,8 +10,8 @@ The CommandContext carries a reference to the per-request repository
 (ctx._repository). This is the only sanctioned DB access point in handlers.
 """
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 async def run(args: dict[str, str], ctx: CommandContext) -> CommandResult:

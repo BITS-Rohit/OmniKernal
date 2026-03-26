@@ -4,7 +4,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from src.core.contracts.user import User
+from omnikernal.core.contracts.user import User
 
 
 def test_user_construction():

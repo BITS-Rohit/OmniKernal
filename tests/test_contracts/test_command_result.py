@@ -1,6 +1,6 @@
 """Test stubs for CommandResult contract — factory methods."""
 
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 def test_success_with_reply():

@@ -10,8 +10,8 @@ and be caught by the dispatcher, returning a visible error instead
 of a clean status reply.
 """
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 async def run(args: dict[str, str], ctx: CommandContext) -> CommandResult:

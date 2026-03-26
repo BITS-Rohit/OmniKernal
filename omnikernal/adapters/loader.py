@@ -10,9 +10,9 @@ import importlib
 import os
 from typing import cast
 
-from src.adapters.validator import AdapterValidator
-from src.core.interfaces.platform_adapter import PlatformAdapter
-from src.core.logger import core_logger
+from omnikernal.adapters.validator import AdapterValidator
+from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.core.logger import core_logger
 
 
 class AdapterLoader:

@@ -31,9 +31,9 @@ from whatsplay import Client
 from whatsplay.auth.local_profile_auth import LocalProfileAuth
 from whatsplay.object.message import Message as WhatsplayMessage
 
-from src.core.contracts.message import Message
-from src.core.contracts.user import User
-from src.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.core.contracts.message import Message
+from omnikernal.core.contracts.user import User
+from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 # Directory (relative to CWD) where persistent browser profiles are stored.

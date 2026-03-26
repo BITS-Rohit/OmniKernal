@@ -61,7 +61,7 @@ async def ensure_db_initialized() -> None:
 
     Usage::
 
-        from src.database.session import ensure_db_initialized
+        from omnikernal.database.session import ensure_db_initialized
         await ensure_db_initialized()
         async with async_session_factory() as session:
             repo = OmniRepository(session)

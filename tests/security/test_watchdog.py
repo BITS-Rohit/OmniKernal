@@ -1,9 +1,9 @@
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from src.database.models import Base
-from src.database.repository import OmniRepository
-from src.security.watchdog import ApiWatchdog
+from omnikernal.database.models import Base
+from omnikernal.database.repository import OmniRepository
+from omnikernal.security.watchdog import ApiWatchdog
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ async def test_watchdog_quarantine_flow(watchdog, app_repo):
     # Ensure it logged to DeadApi
     from sqlalchemy import select
 
-    from src.database.models import DeadApi
+    from omnikernal.database.models import DeadApi
 
     result = await app_repo.session.execute(
         select(DeadApi).where(DeadApi.api_url == url)

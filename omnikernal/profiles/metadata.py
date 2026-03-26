@@ -18,8 +18,8 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
-from src.core.logger import core_logger
-from src.security.encryption import EncryptionEngine
+from omnikernal.core.logger import core_logger
+from omnikernal.security.encryption import EncryptionEngine
 
 PROFILES_DIR = "profiles"
 

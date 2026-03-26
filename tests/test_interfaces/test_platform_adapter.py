@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 def test_platform_adapter_is_abstract():

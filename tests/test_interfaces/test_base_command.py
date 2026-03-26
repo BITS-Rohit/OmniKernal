@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.core.interfaces.base_command import BaseCommand
+from omnikernal.core.interfaces.base_command import BaseCommand
 
 
 def test_base_command_is_abstract():
@@ -23,7 +23,7 @@ def test_base_command_missing_methods_raises():
 
 def test_base_command_full_concrete_instantiates():
     """A fully implemented subclass instantiates correctly."""
-    from src.core.contracts import CommandResult
+    from omnikernal.core.contracts import CommandResult
 
     class ConcreteCommand(BaseCommand):
         @property

@@ -31,7 +31,7 @@ class User:
     def is_admin(self) -> bool:
         """Return True if this user has admin role (or higher)."""
         # BUG 155 fix: use the validator to handle role hierarchy
-        from src.core.permissions import PermissionValidator
+        from omnikernal.core.permissions import PermissionValidator
 
         return PermissionValidator.check_role(self.role, "admin")
 

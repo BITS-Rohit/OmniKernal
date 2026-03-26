@@ -14,7 +14,7 @@ import contextlib
 import os
 import psutil  # BUG 75
 
-from src.core.logger import core_logger
+from omnikernal.core.logger import core_logger
 
 PROFILES_DIR = "profiles"
 

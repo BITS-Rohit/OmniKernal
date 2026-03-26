@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 
 import aiohttp
 
-from src.core.contracts.message import Message
-from src.core.contracts.user import User
-from src.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.core.contracts.message import Message
+from omnikernal.core.contracts.user import User
+from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class WhatsAppBaileysAdapter(PlatformAdapter):

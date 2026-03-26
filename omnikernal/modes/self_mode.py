@@ -16,11 +16,11 @@ and propagate naturally. asyncio.CancelledError is handled explicitly.
 import asyncio
 from typing import TYPE_CHECKING
 
-from src.core.logger import core_logger
+from omnikernal.core.logger import core_logger
 
 if TYPE_CHECKING:
-    from src.core.engine import OmniKernal
-    from src.core.interfaces.platform_adapter import PlatformAdapter
+    from omnikernal.core.engine import OmniKernal
+    from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class SelfMode:

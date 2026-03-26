@@ -1,5 +1,5 @@
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 async def run(args: dict, ctx: CommandContext) -> CommandResult:

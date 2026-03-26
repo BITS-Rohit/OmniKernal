@@ -22,7 +22,7 @@ import re
 from collections.abc import Sequence
 from typing import Any
 
-from src.database.repository import OmniRepository
+from omnikernal.database.repository import OmniRepository
 
 
 class RulesCache:

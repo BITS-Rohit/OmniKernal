@@ -165,7 +165,7 @@ class OmniRepository:
     ) -> None:
         """Adds a record to the audit trail. BUG 183 sanitized."""
         # Sanitize error reason specifically for audit logs to prevent injection (B183)
-        from src.security.sanitizer import CommandSanitizer
+        from omnikernal.security.sanitizer import CommandSanitizer
 
         safe_reason = CommandSanitizer.sanitize(error_reason) if error_reason else None
 

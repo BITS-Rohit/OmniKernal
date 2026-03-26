@@ -5,9 +5,9 @@ Tests for AdapterValidator and AdapterLoader (Phase 4).
 import pytest
 import yaml
 
-from src.adapters.loader import AdapterLoader
-from src.adapters.validator import AdapterValidator
-from src.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.adapters.loader import AdapterLoader
+from omnikernal.adapters.validator import AdapterValidator
+from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class TestAdapterValidator:

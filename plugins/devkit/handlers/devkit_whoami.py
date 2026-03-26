@@ -10,8 +10,8 @@ If user.id shows "Tweakio" (or your contact name) and platform shows
 "whatsapp", the full adapter → Core → ctx injection chain is verified.
 """
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 async def run(args: dict[str, str], ctx: CommandContext) -> CommandResult:

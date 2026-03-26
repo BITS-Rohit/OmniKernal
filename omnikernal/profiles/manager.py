@@ -8,9 +8,9 @@ WhatsApp profiles. Enforces headless mode when ≥2 profiles are active.
 import os
 from typing import Any
 
-from src.core.logger import core_logger
-from src.profiles.lock import ProfileLock
-from src.profiles.metadata import ProfileMetadata
+from omnikernal.core.logger import core_logger
+from omnikernal.profiles.lock import ProfileLock
+from omnikernal.profiles.metadata import ProfileMetadata
 
 PROFILES_DIR = "profiles"
 

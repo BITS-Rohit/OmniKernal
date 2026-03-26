@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from src.database.repository import OmniRepository
+    from omnikernal.database.repository import OmniRepository
 
     from .user import User
 
@@ -96,7 +96,7 @@ class CommandContext:
         if self._decrypter is not None:
             return self._decrypter(encrypted_key)
 
-        from src.security.encryption import EncryptionEngine  # noqa: PLC0415
+        from omnikernal.security.encryption import EncryptionEngine  # noqa: PLC0415
 
         return EncryptionEngine.decrypt(encrypted_key)
 

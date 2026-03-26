@@ -17,9 +17,9 @@ by the Core. So this handler shows the post-sanitized text, revealing
 exactly what the sanitizer allowed through vs. stripped.
 """
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
-from src.security.sanitizer import CommandSanitizer
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
+from omnikernal.security.sanitizer import CommandSanitizer
 
 # Shell injection tokens that should never survive sanitization
 _DANGEROUS_TOKENS = [";", "&&", "||", "|", "`", "$(", "${", "\\n", "\\r"]

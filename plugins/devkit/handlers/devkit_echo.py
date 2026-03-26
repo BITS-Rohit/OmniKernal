@@ -11,8 +11,8 @@ Edge cases this tests:
 Expected reply: echoes back exactly what it parsed.
 """
 
-from src.core.contracts.command_context import CommandContext
-from src.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.command_context import CommandContext
+from omnikernal.core.contracts.command_result import CommandResult
 
 
 async def run(args: dict[str, str], ctx: CommandContext) -> CommandResult:

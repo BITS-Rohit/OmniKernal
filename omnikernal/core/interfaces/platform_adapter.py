@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.core.contracts.message import Message
+    from omnikernal.core.contracts.message import Message
 
 
 class PlatformAdapter(ABC):
