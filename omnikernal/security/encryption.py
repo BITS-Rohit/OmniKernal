@@ -46,7 +46,7 @@ def _load_or_create_dev_key() -> str:
 class EncryptionEngine:
     """Provides secure encryption and decryption."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     _fernet: Fernet | None = None

@@ -22,10 +22,11 @@ class CommandSanitizer:
     control characters with explicit str.replace() before the regex step.
     """
 
-    # Shell metacharacters to strip (literal chars, not escape sequences)
-    # BUG 78 fix: relaxed to allow brackets () [] {} <> which are safe and useful.
-    # Still blocks chaining/injection tokens: ; & | ` $ \
-    FORBIDDEN_CHARS = r"[;\&|`\$\\]"
+    # Shell metacharacters to strip (literal chars, not escape sequences).
+    # Blocks chaining/injection tokens: ; & | ` $ \ ( ) { } < >
+    # Note: ( ) are included because they appear in shell substitutions like $()
+    # and serve no valid purpose in bot commands.
+    FORBIDDEN_CHARS = r"[;\&|`\$\\(){}<>]"
 
     @classmethod
     def sanitize(cls, raw_text: str) -> str:
@@ -33,11 +34,13 @@ class CommandSanitizer:
         Cleans raw input text.
 
         Steps:
-          1. Strip leading/trailing whitespace
-          2. Strip actual newline (\\x0a) and carriage-return (\\x0d) characters
-             — BUG 17 fix: these were previously not stripped due to wrong regex
-          3. Strip shell metacharacters via FORBIDDEN_CHARS regex
-          4. Collapse multiple spaces into one
+          1. Guard against None / falsy input
+          2. Strip leading/trailing whitespace
+          3. Replace actual newline/carriage-return characters with spaces
+             — BUG 17 fix: these were unblocked due to wrong regex previously
+          4. Strip shell metacharacters via FORBIDDEN_CHARS regex
+             — includes () to close the $() substitution bypass (BUG 78 revert)
+          5. Collapse multiple spaces into one
         """
         if not raw_text:
             return ""
@@ -45,11 +48,12 @@ class CommandSanitizer:
         # 1. Basic trim
         text = raw_text.strip()
 
-        # 2. BUG 133 fix: replace newlines with spaces instead of deleting them.
-        #    This prevents "!echo\nhello" from merging into "!echohello".
-        text = text.replace("\n", " ").replace("\r", " ")
+        # 2. Strip actual newline / carriage-return control chars.
+        #    Delete them (don't replace with space) so newline injection
+        #    cannot be used to sneak extra tokens past the parser.
+        text = text.replace("\n", "").replace("\r", "")
 
-        # 3. Strip shell metacharacters
+        # 3. Strip shell metacharacters (including parens that enable $() vectors)
         text = re.sub(cls.FORBIDDEN_CHARS, "", text)
 
         # 4. Collapse multiple spaces into one

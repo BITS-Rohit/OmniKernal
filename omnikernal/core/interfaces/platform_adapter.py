@@ -1,10 +1,10 @@
 """
 PlatformAdapter — Abstract Base Class (Hook Contract)
 
-The Core calls ONLY these 4 methods. The user implements them.
+The Core calls ONLY these 4 methods. Adapter implementations subclass this.
 The Core never imports any platform SDK (playwright, baileys, etc.) directly.
 
-Invariant: SDK-specific code lives ONLY in adapter_packs/<name>/.
+Adapters are registered with AdapterLoader and instantiated on demand.
 """
 
 from __future__ import annotations

@@ -1,113 +1,84 @@
 """
-AdapterLoader — Dynamic Adapter Pack Discovery & Loading
+AdapterLoader — Adapter Registry & Loader
 
-Discovers adapter packs from the adapter_packs/ directory,
-validates their descriptor and class, and returns a ready-to-use
-PlatformAdapter instance.
+Provides a simple registry for PlatformAdapter implementations.
+Adapters are registered directly by class reference (no external
+YAML descriptors or directory scanning needed).
+
+Usage:
+    loader = AdapterLoader()
+    loader.register("console", ConsoleMockAdapter)
+    adapter = loader.load("console")
 """
 
-import importlib
-import os
-from typing import cast
 
-from omnikernal.adapters.validator import AdapterValidator
+from typing import Any
+
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 from omnikernal.core.logger import core_logger
 
 
 class AdapterLoader:
     """
-    Discovers and loads adapter packs from the adapter_packs/ directory.
+    Registry-based adapter loader.
+
+    Adapters are registered by a string name pointing to a PlatformAdapter subclass.
+    Calling load() validates the class and returns a ready-to-use instance.
 
     Usage:
         loader = AdapterLoader()
-        adapter = loader.load("console_mock")
-        # adapter is now a PlatformAdapter instance ready for Core
+        loader.register("console", ConsoleMockAdapter)
+        adapter = loader.load("console")
     """
 
-    def __init__(self, packs_dir: str = "adapter_packs"):
-        self.packs_dir = packs_dir
-        self.validator = AdapterValidator()
+    def __init__(self) -> None:
+        self._registry: dict[str, type[PlatformAdapter]] = {}
         self.logger = core_logger.bind(subsystem="adapter_loader")
 
-    def load(self, pack_name: str, **kwargs) -> PlatformAdapter:
+    def register(self, name: str, cls: type[PlatformAdapter]) -> None:
         """
-        Loads an adapter pack by name.
-
-        Steps:
-          1. Reads adapter_packs/<pack_name>/adapter.yaml
-          2. Validates the descriptor schema
-          3. Dynamically imports the entry_class
-          4. Validates ABC compliance
-          5. Returns an instance with optional kwargs
+        Registers an adapter class under the given name.
 
         Args:
-            pack_name: Name of the adapter pack folder.
-            **kwargs: Arguments to pass to the adapter class constructor.
+            name: Logical name for the adapter (e.g. "console", "whatsapp").
+            cls:  A PlatformAdapter subclass to register.
+
+        Raises:
+            TypeError: If cls is not a subclass of PlatformAdapter.
+        """
+        if not (isinstance(cls, type) and issubclass(cls, PlatformAdapter)):
+            raise TypeError(
+                f"Cannot register '{name}': {cls!r} is not a PlatformAdapter subclass."
+            )
+        self._registry[name] = cls
+        self.logger.debug(f"Adapter registered: '{name}' -> {cls.__name__}")
+
+    def load(self, name: str, **kwargs: Any) -> PlatformAdapter:
+        """
+        Instantiates and returns a registered adapter by name.
+
+        Args:
+            name:    The registered adapter name.
+            **kwargs: Passed to the adapter class constructor.
 
         Returns:
-            A PlatformAdapter instance ready for Core.
-        """
-        # BUG 117 fix: sanitize pack_name to prevent directory traversal
-        # Only allow alphanumeric and underscore characters.
-        import re
+            A PlatformAdapter instance.
 
-        if not re.fullmatch(r"[a-zA-Z0-9_]+", pack_name):
-            raise ValueError(
-                f"Invalid pack name: '{pack_name}'. Only alphanumeric/underscore allowed."
+        Raises:
+            KeyError: If no adapter is registered under the given name.
+        """
+        if name not in self._registry:
+            available = list(self._registry.keys())
+            raise KeyError(
+                f"No adapter registered under '{name}'. Available: {available}"
             )
 
-        pack_path = os.path.join(self.packs_dir, pack_name)
-
-        if not os.path.isdir(pack_path):
-            raise FileNotFoundError(f"Adapter pack not found: {pack_path}")
-
-        yaml_path = os.path.join(pack_path, "adapter.yaml")
-        if not os.path.exists(yaml_path):
-            raise FileNotFoundError(f"Missing adapter.yaml in: {pack_path}")
-
-        # 1. Validate descriptor
-        descriptor = self.validator.validate_descriptor(yaml_path)
-
-        # 2. Resolve entry_class from descriptor
-        entry_class_path = descriptor[
-            "entry_class"
-        ]  # e.g. "adapter.ConsoleMockAdapter"
-        module_path, class_name = entry_class_path.rsplit(".", 1)
-
-        # Build the full import path: adapter_packs.<pack_name>.<module_path>
-        full_module_path = f"adapter_packs.{pack_name}.{module_path}"
-
-        self.logger.info(
-            f"Loading adapter: {descriptor['name']} from {full_module_path}.{class_name}"
-        )
-
-        # 3. Dynamic import
-        try:
-            module = importlib.import_module(full_module_path)
-            cls = getattr(module, class_name)
-        except (ImportError, AttributeError) as e:
-            raise ImportError(
-                f"Failed to import entry class '{entry_class_path}' from pack '{pack_name}': {e}"
-            ) from e
-
-        # 4. Validate ABC compliance
-        self.validator.validate_class(cls)
-
-        # 5. Instantiate and return
-        instance = cast(PlatformAdapter, cls(**kwargs))
-        self.logger.info(
-            f"Adapter loaded: {instance.platform_name} (v{descriptor['version']})"
-        )
+        cls = self._registry[name]
+        self.logger.info(f"Loading adapter: '{name}' ({cls.__name__})")
+        instance: PlatformAdapter = cls(**kwargs)
+        self.logger.info(f"Adapter loaded: {instance.platform_name}")
         return instance
 
-    def list_packs(self) -> list[str]:
-        """Lists all available adapter pack names."""
-        if not os.path.isdir(self.packs_dir):
-            return []
-        return [
-            d
-            for d in os.listdir(self.packs_dir)
-            if os.path.isdir(os.path.join(self.packs_dir, d))
-            and os.path.exists(os.path.join(self.packs_dir, d, "adapter.yaml"))
-        ]
+    def list_adapters(self) -> list[str]:
+        """Returns the names of all registered adapters."""
+        return list(self._registry.keys())

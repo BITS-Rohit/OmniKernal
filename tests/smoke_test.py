@@ -1,8 +1,8 @@
 """
-OmniKernal — Smoke Test (Phase 4: Adapter Pack Discovery)
+OmniKernal — Smoke Test
 
-Demonstrates the full Core Engine loop using AdapterLoader:
-1. Discovers the console_mock adapter pack from adapter_packs/
+Demonstrates the full Core Engine loop using a directly-registered adapter:
+1. Registers ConsoleMockAdapter with AdapterLoader
 2. Boots the engine with the loaded adapter
 3. Injects a simulated message
 4. Runs the pipeline: Sanitize -> Parse -> Route -> Execute -> Reply
@@ -10,30 +10,32 @@ Demonstrates the full Core Engine loop using AdapterLoader:
 
 import asyncio
 
+from omnikernal.adapters.console_mock import ConsoleMockAdapter
 from omnikernal.adapters.loader import AdapterLoader
 from omnikernal.core.engine import OmniKernal
 from omnikernal.database.repository import OmniRepository
 from omnikernal.database.session import (
     async_session_factory,
     ensure_db_initialized,
-)  # BUG 43
+)
 
 
 async def run_smoke_test():
-    # 1. Initialize DB and Repository (BUG 43: use idempotent helper)
+    # 1. Initialize DB and Repository
     print("[Core] Initializing Database...")
     await ensure_db_initialized()
 
     async with async_session_factory() as session:
         repo = OmniRepository(session)
 
-        # 2. Discover and load adapter from adapter_packs/
-        print("[Core] Loading adapter pack: console_mock...")
+        # 2. Register and load adapter
+        print("[Core] Loading adapter: console...")
         loader = AdapterLoader()
-        adapter = loader.load("console_mock")
+        loader.register("console", ConsoleMockAdapter)
+        adapter = loader.load("console")
 
         # 3. Inject a test message
-        adapter.inject_message("!echo Declarative Phase 4 is Working!")
+        adapter.inject_message("!echo Smoke Test is Working!")
 
         # 4. Boot the engine
         engine = OmniKernal(adapter, repo)
@@ -49,9 +51,7 @@ async def run_smoke_test():
         await engine_task
 
         if adapter.sent_messages:
-            print(
-                "\n[PASS] SMOKE TEST PASSED: Adapter Pack discovery + Engine pipeline working!"
-            )
+            print("\n[PASS] SMOKE TEST PASSED: Adapter + Engine pipeline working!")
         else:
             print("\n[FAIL] SMOKE TEST FAILED: No reply generated.")
 

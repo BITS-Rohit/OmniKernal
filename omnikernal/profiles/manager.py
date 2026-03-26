@@ -33,7 +33,7 @@ class ProfileManager:
         self.metadata = ProfileMetadata(profiles_dir)
         self.logger = core_logger.bind(subsystem="profile_manager")
 
-    def create(self, name: str, platform: str = "whatsapp") -> dict[str, Any]:
+    def create(self, name: str, platform: str = "default") -> dict[str, Any]:
         """
         Creates a new profile directory and initializes metadata.
 

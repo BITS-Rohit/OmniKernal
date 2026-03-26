@@ -1,17 +1,18 @@
 """
-Tests for AdapterValidator and AdapterLoader (Phase 4).
+Tests for AdapterValidator and AdapterLoader.
 """
 
 import pytest
 import yaml
 
+from omnikernal.adapters.console_mock import ConsoleMockAdapter
 from omnikernal.adapters.loader import AdapterLoader
 from omnikernal.adapters.validator import AdapterValidator
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 class TestAdapterValidator:
-    """Tests for descriptor and class validation."""
+    """Tests for class validation (ABC compliance checker)."""
 
     def setup_method(self):
         self.validator = AdapterValidator()
@@ -46,9 +47,7 @@ class TestAdapterValidator:
             self.validator.validate_descriptor(str(yaml_file))
 
     def test_valid_class_passes(self):
-        """ConsoleMockAdapter should pass validation."""
-        from adapter_packs.console_mock.adapter import ConsoleMockAdapter
-
+        """ConsoleMockAdapter should pass class validation."""
         self.validator.validate_class(ConsoleMockAdapter)  # Should not raise
 
     def test_non_subclass_rejected(self):
@@ -60,24 +59,38 @@ class TestAdapterValidator:
 
 
 class TestAdapterLoader:
-    """Tests for dynamic adapter pack loading."""
+    """Tests for registry-based adapter loading."""
 
-    def test_load_console_mock(self):
+    def test_register_and_load(self):
         loader = AdapterLoader()
-        adapter = loader.load("console_mock")
+        loader.register("console", ConsoleMockAdapter)
+        adapter = loader.load("console")
 
         assert isinstance(adapter, PlatformAdapter)
-        assert (
-            adapter.platform_name == "console"
-        )  # BUG 16 fix: aligned with adapter.yaml
+        assert adapter.platform_name == "console"
 
-    def test_load_nonexistent_pack_raises(self):
+    def test_load_unregistered_raises(self):
         loader = AdapterLoader()
-        with pytest.raises(FileNotFoundError):
-            loader.load("nonexistent_pack")
+        with pytest.raises(KeyError, match="No adapter registered"):
+            loader.load("nonexistent_adapter")
 
-    def test_list_packs(self):
+    def test_register_non_adapter_raises(self):
         loader = AdapterLoader()
-        packs = loader.list_packs()
-        assert "console_mock" in packs
-        assert "whatsapp_playwright" in packs
+
+        class NotAnAdapter:
+            pass
+
+        with pytest.raises(TypeError, match="not a PlatformAdapter subclass"):
+            loader.register("bad", NotAnAdapter)
+
+    def test_list_adapters(self):
+        loader = AdapterLoader()
+        loader.register("console", ConsoleMockAdapter)
+        adapters = loader.list_adapters()
+        assert "console" in adapters
+
+    def test_multiple_registrations(self):
+        loader = AdapterLoader()
+        loader.register("console", ConsoleMockAdapter)
+        loader.register("console2", ConsoleMockAdapter)
+        assert set(loader.list_adapters()) == {"console", "console2"}
