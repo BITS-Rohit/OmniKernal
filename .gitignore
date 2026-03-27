@@ -78,9 +78,7 @@ search_exception_error_*.png
 search_input_*.png
 before_search.png
 init_main.png
-ignore
 
-benchmarks/
 DOCS/
 adapter_packs/
 ignore/
