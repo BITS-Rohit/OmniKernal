@@ -10,7 +10,6 @@ Demonstrates the full Core Engine loop using a directly-registered adapter:
 
 import asyncio
 
-from omnikernal.adapters.console_mock import ConsoleMockAdapter
 from omnikernal.adapters.loader import AdapterLoader
 from omnikernal.core.engine import OmniKernal
 from omnikernal.database.repository import OmniRepository
@@ -31,7 +30,9 @@ async def run_smoke_test():
         # 2. Register and load adapter
         print("[Core] Loading adapter: console...")
         loader = AdapterLoader()
-        loader.register("console", ConsoleMockAdapter)
+
+        # TODO  ConsoleAdapter already has now Decorator to register it, need Fixation if error comes
+        loader.register_adapter("console")
         adapter = loader.load("console")
 
         # 3. Inject a test message

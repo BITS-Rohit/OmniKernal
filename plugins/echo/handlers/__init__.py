@@ -1,1 +1,0 @@
-# Echo plugin handlers package.

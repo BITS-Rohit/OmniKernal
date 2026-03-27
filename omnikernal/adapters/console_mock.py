@@ -8,16 +8,17 @@ No SDK, no browser, no network — purely synthetic.
 
 from datetime import UTC, datetime
 
+from omnikernal.adapters.loader import AdapterLoader
 from omnikernal.core.contracts.message import Message
 from omnikernal.core.contracts.user import User
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
-
+@AdapterLoader.register_adapter("console")
 class ConsoleMockAdapter(PlatformAdapter):
     """
     Mock adapter for testing the Core lifecycle without any platform SDK.
 
-    Pre-load messages into the queue via `inject_message()`,
+    Preload messages into the queue via `inject_message()`,
     then let the Core poll them through `fetch_new_messages()`.
     Sent replies are stored in `sent_messages` for assertion.
     """

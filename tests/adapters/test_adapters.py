@@ -63,7 +63,7 @@ class TestAdapterLoader:
 
     def test_register_and_load(self):
         loader = AdapterLoader()
-        loader.register("console", ConsoleMockAdapter)
+        loader.register_adapter("console", ConsoleMockAdapter)
         adapter = loader.load("console")
 
         assert isinstance(adapter, PlatformAdapter)
@@ -81,16 +81,16 @@ class TestAdapterLoader:
             pass
 
         with pytest.raises(TypeError, match="not a PlatformAdapter subclass"):
-            loader.register("bad", NotAnAdapter)
+            loader.register_adapter("bad", NotAnAdapter)
 
     def test_list_adapters(self):
         loader = AdapterLoader()
-        loader.register("console", ConsoleMockAdapter)
+        loader.register_adapter("console", ConsoleMockAdapter)
         adapters = loader.list_adapters()
         assert "console" in adapters
 
     def test_multiple_registrations(self):
         loader = AdapterLoader()
-        loader.register("console", ConsoleMockAdapter)
-        loader.register("console2", ConsoleMockAdapter)
+        loader.register_adapter("console", ConsoleMockAdapter)
+        loader.register_adapter("console2", ConsoleMockAdapter)
         assert set(loader.list_adapters()) == {"console", "console2"}

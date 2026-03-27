@@ -19,7 +19,7 @@ class User:
     Attributes:
         id:           Platform-specific unique identifier (e.g. phone number, user ID).
         display_name: Human-readable name as seen on the platform.
-        platform:     Platform this user belongs to (e.g. 'whatsapp', 'telegram').
+        platform:     Platform this user belongs to (e.g. 'WhatsApp', 'telegram').
         role:         Permission role. Default 'user'. Elevated to 'admin' via config.
     """
 

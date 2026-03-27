@@ -10,7 +10,7 @@ Adapters are registered with AdapterLoader and instantiated on demand.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from omnikernal.core.contracts.message import Message
@@ -24,6 +24,9 @@ class PlatformAdapter(ABC):
     pipes replies through send_message(), and shuts down with disconnect().
     The Core never sees the underlying SDK — only this interface.
     """
+
+    def __init__(self, **kwargs: Any) -> None:
+        ...
 
     @abstractmethod
     async def connect(self) -> None:

@@ -117,7 +117,6 @@ class ApiHealth(Base):
 
     __tablename__ = "api_health"
 
-    # BUG 127 fix: use Text for URLs to prevent length limitations
     url: Mapped[str] = mapped_column(Text, primary_key=True)
     consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
     last_success: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -134,10 +133,10 @@ class DeadApi(Base):
     __tablename__ = "dead_apis"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    api_url: Mapped[str] = mapped_column(Text, index=True)  # BUG 127
+    api_url: Mapped[str] = mapped_column(Text, index=True)
     tool_id: Mapped[int | None] = mapped_column(
         ForeignKey("tools.id", ondelete="SET NULL"), nullable=True
-    )  # BUG 125
+    )
     error_count: Mapped[int] = mapped_column(Integer)
     killed_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(UTC)
@@ -159,8 +158,7 @@ class ToolRequirement(Base):
     )
     service: Mapped[str] = mapped_column(
         String(50), default="default", index=True
-    )  # BUG 181
+    )
     api_key_value: Mapped[str] = mapped_column(Text)  # Stored ENCRYPTED
 
-    # BUG 181: allow one key per service per tool
     __table_args__ = (UniqueConstraint("tool_id", "service", name="uq_tool_service"),)
