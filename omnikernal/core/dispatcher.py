@@ -24,7 +24,8 @@ via a regex rule (where the trigger doesn't equal the canonical command name).
 """
 
 import importlib
-import inspect  # BUG 122
+import inspect
+from omnikernal.core.contracts.user import ROLE
 import os
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -32,15 +33,15 @@ from omnikernal.core.contracts.command_context import CommandContext
 from omnikernal.core.contracts.command_result import CommandResult
 from omnikernal.core.parser import CommandParser
 from omnikernal.core.permissions import PermissionValidator
-from omnikernal.core.router import CommandRouter  # BUG 19
-from omnikernal.security.encryption import EncryptionEngine  # BUG 35
+from omnikernal.core.router import CommandRouter
+from omnikernal.security.encryption import EncryptionEngine
 
 if TYPE_CHECKING:
     from omnikernal.core.contracts.user import User
     from omnikernal.database.repository import OmniRepository
 
 
-# BUG 53 fix: structured return value carrying route metadata alongside the
+# structured return value carrying route metadata alongside the
 # CommandResult. Lets callers (engine) know which tool was actually executed.
 class DispatchResult(NamedTuple):
     result: CommandResult | None
@@ -63,8 +64,8 @@ def _resolve_role(user: "User") -> str:
         if uid.strip()
     }
     if user.id in admins:
-        if not PermissionValidator.check_role(user.role, "admin"):
-            return "admin"
+        if not PermissionValidator.check_role(user.role, ROLE.ADMIN):
+            return ROLE.ADMIN
     return user.role
 
 
@@ -108,8 +109,8 @@ class EventDispatcher:
         if not route:
             return None
 
-        effective_role = _resolve_role(user)
-        required_role = route.get("required_role", "user")
+        effective_role : ROLE = ROLE(_resolve_role(user))
+        required_role = route.get("required_role", ROLE.ADMIN)
         if not PermissionValidator.check_role(
             effective_role, required_role=required_role
         ):

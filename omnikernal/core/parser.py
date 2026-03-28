@@ -4,11 +4,11 @@ CommandParser — Pattern Matching & Argument Extraction
 Extends the Core's ability to understand "!command <arg>" patterns.
 Uses regex generated from the declarative patterns in commands.yaml.
 
-BUG 7 fix: previously all placeholders used greedy `.+`, which caused the first
+previously all placeholders used greedy `.+`, which caused the first
 argument to consume the entire remaining string in multi-arg patterns.
 Now all non-final args use non-greedy `.+?` and the final arg uses greedy `.+`.
 
-BUG 41 fix: Previously, literal parts of patterns (everything outside <...>
+Previously, literal parts of patterns (everything outside <...>
 placeholders) were left as raw regex. Patterns with metacharacters like `.`,
 `(`, `)`, `+` etc. would produce incorrect regexes. Now each literal segment
 between/around placeholders is passed through re.escape() before the final
@@ -27,12 +27,12 @@ class CommandParser:
       "!echo <text>"          → matches "!echo hello world", args={"text": "hello world"}
       "!kick <user> <reason>" → matches "!kick @rohit spam", args={"user": "@rohit", "reason": "spam"}
 
-    Metacharacter safety (BUG 41):
+    Metacharacter safety :
       "!find . <path>"  → the literal "." is escaped, won't match any character
       "!add (n) <val>"  → literal parens are escaped, treated literally
     """
 
-    # BUG 72: Cache for compiled regex objects to avoid re-compilation on every message
+    # Cache for compiled regex objects to avoid re-compilation on every message
     _compiled_cache: dict[str, re.Pattern[str]] = {}
 
     @classmethod
@@ -51,7 +51,7 @@ class CommandParser:
         if not text or not pattern:
             return None
 
-        # BUG 72 fix: Return from cache if we've seen this pattern before
+        # Return from cache if we've seen this pattern before
         if pattern in cls._compiled_cache:
             match = cls._compiled_cache[pattern].match(text)
             return match.groupdict() if match else None
@@ -82,7 +82,7 @@ class CommandParser:
             if part.startswith("<") and part.endswith(">"):
                 # Placeholder → named capture group
                 counter += 1
-                # BUG 130 + BUG 160 fix: sanitize group name. Must be alphanumeric/underscore
+                # sanitize group name. Must be alphanumeric/underscore
                 # and cannot start with a digit.
                 name = re.sub(r"\W", "_", part[1:-1])
                 if name and name[0].isdigit():
@@ -93,7 +93,7 @@ class CommandParser:
                 quantifier = ".+" if counter == num_args else ".+?"
                 regex_parts.append(f"(?P<{name}>{quantifier})")
             else:
-                # Literal segment → escape metacharacters (BUG 41 fix)
+                # Literal segment → escape metacharacters
                 regex_parts.append(re.escape(part))
 
         regex_string = f"^{''.join(regex_parts)}$"

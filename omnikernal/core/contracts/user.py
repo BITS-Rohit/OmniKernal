@@ -9,6 +9,7 @@ through the Core pipeline. Immutable — never modified in flight.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass(frozen=True)
@@ -26,14 +27,23 @@ class User:
     id: str
     display_name: str
     platform: str
-    role: str = "user"  # "user" | "admin"
+    role: ROLE = ROLE.USER
 
+    @property
     def is_admin(self) -> bool:
         """Return True if this user has admin role (or higher)."""
-        # BUG 155 fix: use the validator to handle role hierarchy
         from omnikernal.core.permissions import PermissionValidator
-
-        return PermissionValidator.check_role(self.role, "admin")
+        return PermissionValidator.check_role(self.role, ROLE.ADMIN)
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.display_name!r}, platform={self.platform!r}, role={self.role!r})"
+
+
+class ROLE(str, Enum):
+    """
+    ROLE enum representing the permission role.
+    """
+    USER = "user"
+    ADMIN = "admin"
+    ANY = "any"
+    MODERATOR = "moderator"

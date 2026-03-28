@@ -26,7 +26,7 @@ class PluginManifest:
         version:          Semantic version string (e.g. '1.0.0').
         author:           Plugin author name or handle.
         description:      Human-readable description.
-        platform:         List of supported platforms (e.g. ['whatsapp', 'any']).
+        platform:         List of supported platforms (e.g. ['WhatsApp', 'any']).
         min_core_version: Minimum OmniKernal version required (e.g. '0.1.0').
                           Optional — older manifests may omit this field.
     """
@@ -36,7 +36,6 @@ class PluginManifest:
     author: str
     description: str
     platform: list[str]
-    # BUG 21 fix: made Optional so existing manifests without this key still load
     min_core_version: str | None = None
 
     @classmethod
@@ -61,7 +60,7 @@ class PluginManifest:
         if not version:
             raise ValueError("Plugin manifest missing required field: 'version'")
 
-        # Normalise platform key (BUG 148 fix: robust list coercion)
+        # Normalise platform key
         platform_raw = (
             data.get("platform") or data.get("supported_platforms") or ["any"]
         )

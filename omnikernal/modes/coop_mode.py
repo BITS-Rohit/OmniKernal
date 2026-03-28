@@ -27,7 +27,7 @@ class CoopMode:
     Approval: approve(msg_id) releases message to core.process().
     Rejection: reject(msg_id) discards message with a log entry.
 
-    BUG 22 fix: all background approval tasks are tracked and cancelled
+    BUG 22 fix: all background approval tasks are tracked and canceled
     when the polling loop exits, ensuring deterministic shutdown.
     """
 
@@ -40,9 +40,9 @@ class CoopMode:
         # Approval signals: msg_id -> asyncio.Event
         self._approval_events: dict[str, asyncio.Event] = {}
         self._rejected: set[str] = set()
-        # BUG 22 fix: track all background tasks so we can cancel on shutdown
+        #track all background tasks so we can cancel on shutdown
         self._active_tasks: set[asyncio.Task[None]] = set()
-        # BUG 64 fix: track IDs mid-processing to prevent duplicate task spawn
+        #track IDs mid-processing to prevent duplicate task spawn
         self._processing_ids: set[str] = set()
 
     @property
@@ -101,7 +101,7 @@ class CoopMode:
             approved = msg_id not in self._rejected
             return approved
         finally:
-            # BUG 69 fix: cleanup in finally ensures dictionaries don't leak on cancellation
+            # cleanup in finally ensures dictionaries don't leak on cancellation
             self._pending.pop(msg_id, None)
             self._approval_events.pop(msg_id, None)
             self._rejected.discard(msg_id)
@@ -125,11 +125,11 @@ class CoopMode:
                     messages = await adapter.fetch_new_messages()
 
                     for msg in messages:
-                        # BUG 83 fix: break immediately if engine is stopping
+                        #  break immediately if engine is stopping
                         if not core.is_running:
                             break
 
-                        # BUG 48 + BUG 64 fix: skip if already awaiting approval or spawning
+                        #  skip if already awaiting approval or spawning
                         if msg.id in self._pending or msg.id in self._processing_ids:
                             continue
 
@@ -158,7 +158,7 @@ class CoopMode:
                     self.logger.warning(f"CoopMode error: {e}. Retrying in 2s.")
                     await asyncio.sleep(2)
         finally:
-            # BUG 22 fix: cancel all pending approval tasks on exit
+            #cancel all pending approval tasks on exit
             if self._active_tasks:
                 self.logger.info(
                     f"CoopMode cleanup: cancelling {len(self._active_tasks)} "

@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from omnikernal.database.repository import OmniRepository
 
     from .user import User
+from omnikernal.security.encryption import EncryptionEngine
 
 
 # after construction. get_api_key() only reads fields — no conflict with frozen.
@@ -50,11 +51,8 @@ class CommandContext:
         """
         Retrieve and decrypt an API key for the given service.
 
-        The `service` argument was previously accepted but silently
-        ignored. It is now used as a human-readable label in error messages and
-        debug logging, improving traceability. All API keys are stored per-tool
-        (one key per tool_id) — if a future multi-key schema is added, this arg
-        will become the lookup key. For now, it is a required label that must
+        All API keys are stored per-tool
+        (one key per tool_id) - it is a required label that must
         match the service name declared in commands.yaml.
 
         Args:
@@ -75,20 +73,15 @@ class CommandContext:
                 "Repository or tool_id not configured in CommandContext."
             )
 
-        encrypted_key = await self._repository.get_api_key(
-            self._tool_id, service=service
-        )
+        encrypted_key = await self._repository.get_api_key(self._tool_id, service=service)
         if not encrypted_key:
             raise ValueError(
                 f"No API key configured for service '{service}' (tool_id={self._tool_id}). "
                 "Register it via OmniRepository.register_tool_requirement()."
             )
 
-        # BUG 35 fix: use injected decrypter if provided (no circular import)
         if self._decrypter is not None:
             return self._decrypter(encrypted_key)
-
-        from omnikernal.security.encryption import EncryptionEngine  # noqa: PLC0415
 
         return EncryptionEngine.decrypt(encrypted_key)
 

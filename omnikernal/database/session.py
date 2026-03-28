@@ -4,7 +4,7 @@ Database Session Management — SQLAlchemy Async Engine
 Handles initialization of the SQLite/Postgres engine and provides
 the async session factory.
 
-BUG 9 note: The engine and session_factory are created as module-level globals,
+The engine and session_factory are created as module-level globals,
 which means any import of this module triggers DB engine creation. For test
 isolation, set the DATABASE_URL environment variable to an in-memory URL BEFORE
 importing this module:
@@ -20,13 +20,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from .models import Base
 
-# Default to SQLite for Phase 2; override via DATABASE_URL env var for Postgres/MySQL
 DEFAULT_DB_URL = "sqlite+aiosqlite:///omnikernal.db"
 DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DB_URL)
 
-# BUG 9 fix: removed echo=True — it was logging every SQL statement to stdout,
-# which pollutes test output and is not appropriate outside of debugging sessions.
-# Set SQLALCHEMY_ECHO=1 env var if you need SQL tracing temporarily.
+
 _echo = os.getenv("SQLALCHEMY_ECHO", "").lower() in ("1", "true", "yes")
 
 engine = create_async_engine(DATABASE_URL, echo=_echo)
@@ -52,7 +49,7 @@ async def init_db() -> None:
 
 async def ensure_db_initialized() -> None:
     """
-    BUG 36 fix: Idempotent DB initialization guard.
+    Idempotent DB initialization guard.
 
     Safe to call from any entry point (CLI scripts, test helpers, adapters)
     that uses OmniRepository without going through OmniKernal.start().
@@ -80,7 +77,7 @@ async def get_db() -> AsyncIterator[AsyncSession]:
 
 async def dispose_db() -> None:
     """
-    BUG 116 fix: Cleanly disposes the database engine.
+    Cleanly disposes the database engine.
     Should be called during service shutdown to close pools.
     """
     await engine.dispose()

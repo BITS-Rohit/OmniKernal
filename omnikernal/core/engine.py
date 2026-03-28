@@ -99,7 +99,7 @@ class OmniKernal:
             f"[mode={self.mode}]"
         )
 
-        # BUG 225 fix: Check session safety for CoopMode
+        # Check session safety for CoopMode
         if self.mode == "coop" and self._session_factory is None:
             self.logger.warning(
                 "CoopMode active without session_factory. "

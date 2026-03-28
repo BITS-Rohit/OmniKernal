@@ -7,10 +7,10 @@ consistent error handling.
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
-
+from typing import cast, Any
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload  # BUG 70
+from sqlalchemy.orm import joinedload
 
 from .models import (
     ApiHealth,
@@ -72,18 +72,18 @@ class OmniRepository:
         handler_path: str,
         plugin_name: str,
         description: str | None = None,
-        required_role: str = "user",  # BUG 71
+        required_role: str = "user",
     ) -> None:
         """Registers or updates a tool entry."""
         existing = await self.get_tool_by_command(command_name)
         if existing:
-            # BUG 3 fix: also update plugin_name to avoid stale association
+            # also update plugin_name to avoid stale association
             existing.pattern = pattern
             existing.handler_path = handler_path
             existing.description = description
-            existing.plugin_name = plugin_name  # was missing
-            existing.required_role = required_role  # BUG 71
-            await self.session.flush()  # make intent explicit
+            existing.plugin_name = plugin_name
+            existing.required_role = required_role
+            await self.session.flush()
         else:
             tool = Tool(
                 command_name=command_name,
@@ -91,7 +91,7 @@ class OmniRepository:
                 handler_path=handler_path,
                 plugin_name=plugin_name,
                 description=description,
-                required_role=required_role,  # BUG 71
+                required_role=required_role,
             )
             self.session.add(tool)
 
@@ -105,7 +105,7 @@ class OmniRepository:
         return result.scalar_one_or_none()
 
     async def get_tool_by_id(self, tool_id: int) -> Tool | None:
-        """Looks up a tool by its integer primary key. BUG 30 support."""
+        """Looks up a tool by its integer primary key."""
         return await self.session.get(Tool, tool_id)
 
     async def get_all_tools(self) -> Sequence[Tool]:
@@ -121,8 +121,8 @@ class OmniRepository:
     async def get_all_routing_rules(self) -> Sequence[RoutingRule]:
         """
         Returns all routing rules ordered by priority (highest first).
-        BUG 30 fix: used by CommandRouter for regex-based dispatch.
-        BUG 70 fix: uses joinedload to fetch Tool metadata in one query.
+        used by CommandRouter for regex-based dispatch.
+        uses joined load to fetch Tool metadata in one query.
         """
         result = await self.session.execute(
             select(RoutingRule)
@@ -132,7 +132,7 @@ class OmniRepository:
         return result.scalars().all()
 
     async def set_plugin_inactive(self, name: str) -> None:
-        """Marks a plugin as inactive. BUG 13."""
+        """Marks a plugin as inactive."""
         from sqlalchemy import update
 
         await self.session.execute(
@@ -141,7 +141,7 @@ class OmniRepository:
         await self.session.commit()
 
     async def deactivate_missing_plugins(self, active_names: list[str]) -> None:
-        """Marks plugins NOT in the list as inactive. BUG 240."""
+        """Marks plugins NOT in the list as inactive."""
         from sqlalchemy import update
 
         await self.session.execute(
@@ -163,8 +163,8 @@ class OmniRepository:
         response_time_ms: float | None = None,
         error_reason: str | None = None,
     ) -> None:
-        """Adds a record to the audit trail. BUG 183 sanitized."""
-        # Sanitize error reason specifically for audit logs to prevent injection (B183)
+        """Adds a record to the audit trail.sanitized."""
+        # Sanitize error reason specifically for audit logs to prevent injection
         from omnikernal.security.sanitizer import CommandSanitizer
 
         safe_reason = CommandSanitizer.sanitize(error_reason) if error_reason else None
@@ -190,7 +190,7 @@ class OmniRepository:
         Increments failure count. Quarantines and logs to DeadApi if threshold reached.
         Returns True if the API is now quarantined as a result of this error.
         """
-        # BUG 220 + BUG 274 fix: use atomic SQL update and fetch fresh data.
+        #  use atomic SQL update and fetch fresh data.
         # execute(update) does not refresh loaded objects; we must SELECT again.
         from sqlalchemy import select
 
@@ -230,7 +230,7 @@ class OmniRepository:
             dead_api = DeadApi(
                 api_url=url,
                 tool_id=tool_id,
-                error_count=health.consecutive_failures,
+                error_count=cast(int, cast(Any, health.consecutive_failures)),
                 kill_reason=error_msg,
             )
             self.session.add(dead_api)
@@ -286,10 +286,10 @@ class OmniRepository:
             await self.session.commit()
 
         # Also mark corresponding DeadApi row as reactivated
-        # BUG 56: Removed redundant local imports
+        # Removed redundant local imports
         await self.session.execute(
             update(DeadApi)
-            .where(DeadApi.api_url == url, DeadApi.reactivated == False)  # noqa: E712
+            .where(DeadApi.api_url == url, DeadApi.reactivated == False)
             .values(reactivated=True)
         )
         await self.session.commit()
@@ -316,7 +316,7 @@ class OmniRepository:
         await self.session.commit()
 
     async def get_api_key(self, tool_id: int, service: str = "default") -> str | None:
-        """Fetches the encrypted API key for a tool (optional service name). BUG 181."""
+        """Fetches the encrypted API key for a tool (optional service name)."""
         result = await self.session.execute(
             select(ToolRequirement).where(
                 ToolRequirement.tool_id == tool_id,

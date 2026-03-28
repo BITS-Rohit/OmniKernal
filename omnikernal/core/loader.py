@@ -4,18 +4,18 @@ PluginEngine — Declarative Plugin Discovery & Loading
 Scans the plugins/ directory, validates manifest.json and commands.yaml,
 and registers findings into the OmniRepository.
 
-BUG 21 fix: Now uses PluginManifest.from_dict() to parse and validate
+Now uses PluginManifest.from_dict() to parse and validate
 manifests formally, instead of raw dict access.
 
-BUG 34 fix: Now enforces min_core_version — plugins that require a higher
+Now enforces min_core_version — plugins that require a higher
 core version than the currently running OMNIKERNAL_VERSION are rejected
 at load time with a clear log message.
 
-BUG 57 fix: Warns when a command_name from one plugin would overwrite a
+Warns when a command_name from one plugin would overwrite a
 command_name already registered by a different plugin, so admins know which
 plugin "won" the collision.
 
-BUG 58 fix: PluginEngine now accepts the running platform_name and skips
+PluginEngine now accepts the running platform_name and skips
 (or marks inactive) plugins that don't support the current platform. This
 prevents polluting the DB with tools that can never execute.
 """
@@ -32,7 +32,7 @@ from omnikernal.core.logger import core_logger
 if TYPE_CHECKING:
     from omnikernal.database.repository import OmniRepository
 
-# BUG 34 fix: single source of truth for the current Core version
+# single source of truth for the current Core version
 OMNIKERNAL_VERSION: str = "0.1.0"
 
 

@@ -25,7 +25,7 @@ class ApiWatchdog:
 
     async def record_failure(self, api_url: str, tool_id: int, error_msg: str) -> None:
         """Records a failure and quarantines if threshold reached. BUG 183 sanitized."""
-        # Sanitize error message to prevent log injection (B183)
+        # Sanitize error message to prevent log injection
         from omnikernal.security.sanitizer import CommandSanitizer
 
         safe_msg = CommandSanitizer.sanitize(error_msg or "unknown error")

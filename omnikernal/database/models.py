@@ -61,7 +61,7 @@ class Tool(Base):
     plugin_name: Mapped[str] = mapped_column(
         ForeignKey("plugins.name", ondelete="CASCADE")
     )
-    required_role: Mapped[str] = mapped_column(String(20), default="user")  # BUG 71
+    required_role: Mapped[str] = mapped_column(String(20), default="user")
 
     # Metadata
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -85,7 +85,7 @@ class RoutingRule(Base):
     priority: Mapped[int] = mapped_column(Integer, default=0)
 
     # Relationships
-    tool: Mapped["Tool"] = relationship()  # BUG 70
+    tool: Mapped["Tool"] = relationship()
 
 
 class ExecutionLog(Base):
@@ -106,7 +106,7 @@ class ExecutionLog(Base):
     success: Mapped[bool] = mapped_column(Boolean)
     response_time_ms: Mapped[float | None] = mapped_column(
         Float, nullable=True
-    )  # BUG 33 fix
+    )
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 

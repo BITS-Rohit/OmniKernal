@@ -19,7 +19,7 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 from loguru import logger
 
-# Dev key is stored in the project root relative to this file (BUG 230)
+# Dev key is stored in the project root relative to this file
 _DEV_KEY_FILE = Path(__file__).resolve().parent.parent.parent / ".dev.key"
 
 
@@ -28,7 +28,7 @@ def _load_or_create_dev_key() -> str:
     BUG 37 fix: Loads an existing dev key file or creates and persists a new one.
     This ensures a consistent key across process restarts in development.
     """
-    # BUG 231 fix: if file is empty or malformed, recreate it to prevent crash.
+    # if file is empty or malformed, recreate it to prevent crash.
     if _DEV_KEY_FILE.exists():
         try:
             val = _DEV_KEY_FILE.read_text().strip()
