@@ -6,7 +6,7 @@ and routes them through the Core pipeline without any human intervention.
 
 This is the default execution mode for OmniKernal.
 
-BUG 40 fix: The exception handler in the polling loop now distinguishes
+The exception handler in the polling loop now distinguishes
 between recoverable errors (network glitches, transient failures) and
 critical errors that should stop the engine. BaseException subclasses
 that are not Exception (e.g. SystemExit, KeyboardInterrupt) are not caught
@@ -52,7 +52,7 @@ class SelfMode:
                 messages = await adapter.fetch_new_messages()
 
                 for msg in messages:
-                    # BUG 83 fix: break immediately if engine is stopping
+                    # break immediately if engine is stopping
                     if not core.is_running:
                         break
                     await core.process(msg)
@@ -63,10 +63,10 @@ class SelfMode:
                 self.logger.info("SelfMode loop cancelled.")
                 break
             except Exception as e:
-                # BUG 40 fix: Only retry on genuinely transient errors.
+                # Only retry on genuinely transient errors.
                 # Classify the exception before deciding to swallow it.
                 error_type = type(e).__name__
-                # BUG 40 + BUG 162 fix: classify logic errors and system errors as fatal.
+                # classify logic errors and system errors as fatal.
                 # Only Connection/Timeout are truly transient for polling.
                 is_likely_fatal = isinstance(
                     e,

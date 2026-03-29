@@ -270,7 +270,7 @@ class OmniRepository:
         if success:
             await self.reset_api_health(url)
         else:
-            # BUG 54 fix: use None instead of 0 for tool_id to avoid FK issues
+            # use None instead of 0 for tool_id to avoid FK issues
             await self.increment_error(url, tool_id=None, error_msg="health update")
 
     async def reactivate_api(self, url: str) -> None:

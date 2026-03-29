@@ -1,5 +1,5 @@
 """
-ApiWatchdog ΓÇö Reliability & Fail-Fast Mechanism
+ApiWatchdog , Reliability & Fail-Fast Mechanism
 
 Tracks external API call success rates. If an API fails repeatedly,
 it quarantines the API to prevent cascading blocks and wastes.

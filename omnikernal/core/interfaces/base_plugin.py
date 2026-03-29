@@ -19,7 +19,7 @@ class BasePlugin(ABC):
 
     Every plugin folder that wishes to be recognised by the Core
     must provide a class satisfying this interface — though in practice
-    Phase 3 uses manifest.json + commands.yaml for discovery (YAML-first).
+    uses manifest.json + commands.yaml for discovery (YAML-first).
     This ABC provides a programmatic identity surface for tooling and tests.
     """
 

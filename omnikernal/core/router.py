@@ -10,7 +10,7 @@ of the dispatcher calling OmniRepository.get_tool_by_command directly.
 
 get_route() now checks the routing_rules table first for
 regex-based overrides before falling back to exact command name lookup.
-This implements the DESIGN.md Phase 2 routing strategy.
+This implements routing strategy.
 
 routing_rules are cached in memory after the first load.
 Rules rarely change at runtime; loading them from the DB on every

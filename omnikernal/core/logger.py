@@ -2,9 +2,9 @@
 Core Logger — Structured Contextual Logging
 
 Wraps loguru to provide consistent, profile-aware logging across the core
-and plugins. Supports both console and (in Phase 2) database logging.
+and plugins. Supports both console and database logging.
 
-BUG 38 fix: Added `logger.configure(extra={"profile": "system", "subsystem": "-"})`
+Added `logger.configure(extra={"profile": "system", "subsystem": "-"})`
 to set safe defaults for ALL extra keys referenced in the format string.
 Without this, any module that imports `from loguru import logger` directly
 (e.g. encryption.py) and emits a log line would cause a KeyError on
@@ -20,9 +20,9 @@ from loguru import logger
 def setup_logger(level: str = "INFO", profile_name: str = "default") -> Any:
     """
     Configures loguru for OmniKernal.
-    In Phase 1, we focus on console output with a clean format.
+    we focus on console output with a clean format.
 
-    BUG 38 fix: Calls logger.configure(extra=...) to set safe fallback
+    Calls logger.configure(extra=...) to set safe fallback
     values before adding any handlers, so every log record has the keys
     that the format string references even if they weren't explicitly bound.
     """

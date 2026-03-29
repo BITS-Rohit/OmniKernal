@@ -2,7 +2,7 @@
 BaseCommand — Abstract Base Class
 
 Defines the handler contract every command must implement.
-Handlers are lazy-imported by the PluginExecutor (Phase 3) —
+Handlers are lazy-imported by the PluginExecutor
 they are never imported on boot.
 
 Standard handler signature (enforced at execution time):
@@ -26,7 +26,7 @@ class BaseCommand(ABC):
     Each command in a plugin's commands.yaml maps to a handler module
     that exposes a `run` coroutine. This ABC formalises that contract
     for class-based handlers and tooling. Function-based handlers
-    (async def run) are also valid — see commands.yaml spec in DESIGN.md.
+    (async def run) are also valid.
     """
 
     @property

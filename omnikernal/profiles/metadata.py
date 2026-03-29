@@ -2,9 +2,9 @@
 ProfileMetadata — Encrypted metadata.json Read/Write
 
 Stores profile configuration and session data. Sensitive fields
-are encrypted at rest using the EncryptionEngine from Phase 2.5.
+are encrypted at rest using the EncryptionEngine.
 
-BUG 11 note: save() always expects PLAINTEXT values for SENSITIVE_FIELDS.
+save() always expects PLAINTEXT values for SENSITIVE_FIELDS.
 Never pass a dict obtained from load() back into save() without going through
 the full decrypt → modify → save cycle, or session_data will be double-encrypted.
 The safe pattern is:
@@ -38,7 +38,7 @@ class ProfileMetadata:
         headless: bool      — Whether this profile runs headless
         session_data: str   — Encrypted session/auth data (encrypted at rest)
 
-    BUG 11: save() encrypts sensitive fields unconditionally if they are non-empty.
+    save() encrypts sensitive fields unconditionally if they are non-empty.
     Callers MUST ensure they only pass plaintext values for SENSITIVE_FIELDS.
     Passing an already-encrypted value results in double-encryption (silent corruption).
     """
@@ -65,7 +65,7 @@ class ProfileMetadata:
             data: Metadata dict to persist. Values for SENSITIVE_FIELDS must be
                   plaintext strings — they will be encrypted by this method.
 
-        BUG 11 warning: do NOT pass a dict that was previously returned by load()
+        do NOT pass a dict that was previously returned by load()
         without first decrypting-then-plaintext-setting the sensitive fields.
         load() decrypts automatically, so the round-trip is safe as long as you
         don't re-load without modifying (which would pass plaintext to save() again,
@@ -94,10 +94,10 @@ class ProfileMetadata:
 
         Args:
             profile_name: Profile directory name.
-            decrypt:      BUG 80 fix: set to False to skip decryption;
+            decrypt:      set to False to skip decryption;
                           useful for lists/checks when secret key is unknown.
 
-        BUG 51 fix: previously, a failed decryption silently set the field to
+        previously, a failed decryption silently set the field to
         None. If the caller then did `save(load(name))`, the original ciphertext
         would be overwritten with None, permanently destroying the secret.
 

@@ -4,7 +4,7 @@ ProfileLock — PID-Based Lock File Enforcement
 Prevents two processes from activating the same profile simultaneously.
 Stale locks (from crashed processes) are automatically detected and cleared.
 
-BUG 31 fix: Eliminated the TOCTOU race between the exists-check and atomic
+Eliminated the TOCTOU race between the exists-check and atomic
 file creation. acquire() now uses a try-first-then-cleanup loop: it attempts
 os.O_EXCL creation immediately; only on FileExistsError does it inspect the
 existing PID and potentially clean up a stale lock, then retries once.
@@ -13,7 +13,7 @@ existing PID and potentially clean up a stale lock, then retries once.
 import contextlib
 import os
 
-import psutil  # BUG 75
+import psutil  
 
 from omnikernal.core.logger import core_logger
 
@@ -38,7 +38,7 @@ class ProfileLock:
     def _pid_is_alive(self, pid: int, start_time: float | None = None) -> bool:
         """
         Check if a process with the given PID is still running.
-        BUG 75 fix: If start_time is provided, also verify that the process
+        If start_time is provided, also verify that the process
         was created at that exact time to prevent recycling races.
         """
         try:
@@ -56,7 +56,7 @@ class ProfileLock:
         """
         Acquires the lock for a profile by writing the current PID.
 
-        BUG 31 fix: Uses a try-first-then-cleanup strategy to eliminate the
+        Uses a try-first-then-cleanup strategy to eliminate the
         TOCTOU race between the exists check and atomic creation.
 
         Strategy:
@@ -77,7 +77,7 @@ class ProfileLock:
                 # Atomic: fails immediately if the file already exists
                 fd = os.open(lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
                 with os.fdopen(fd, "w") as f:
-                    # BUG 75: Store pid:starttime
+                    # Store pid:starttime
                     curr_proc = psutil.Process()
                     f.write(f"{curr_proc.pid}:{curr_proc.create_time()}")
                 self.logger.info(
@@ -94,7 +94,7 @@ class ProfileLock:
 
                 # First attempt: inspect the existing lock file
                 try:
-                    # BUG 210 fix: if file is empty, someone might be currently writing to it.
+                    # if file is empty, someone might be currently writing to it.
                     # Wait briefly and retry reading before assuming it's truly stale.
                     content = ""
                     for sub_attempt in range(3):
@@ -134,7 +134,7 @@ class ProfileLock:
     def release(self, profile_name: str) -> None:
         """Releases the lock for a profile, but only if owned by the current process.
 
-        BUG 50 fix: Previously deleted unconditionally. Now checks that the PID
+        Previously deleted unconditionally. Now checks that the PID
         in the lock file matches os.getpid() before deleting, preventing a
         process from releasing a lock held by a different live process.
         """
@@ -145,7 +145,7 @@ class ProfileLock:
         try:
             with open(lock_file) as f:
                 content = f.read().strip()
-            # BUG 131 fix: handle colon-separated PID:TIME format consistently
+            # handle colon-separated PID:TIME format consistently
             if ":" in content:
                 file_pid = int(content.split(":", 1)[0])
             else:
@@ -153,7 +153,7 @@ class ProfileLock:
         except (OSError, ValueError):
             file_pid = None
 
-        # BUG 163 fix: also verify creation time if available to prevent Windows PID reciclery race.
+        # also verify creation time if available to prevent Windows PID reciclery race.
         current_proc = psutil.Process()
         if file_pid is not None and file_pid != current_proc.pid:
             self.logger.warning(
@@ -176,7 +176,7 @@ class ProfileLock:
         if not os.path.exists(lock_file):
             return False
 
-        # BUG 194 fix: Handle FileNotFoundError race condition (TOCTOU)
+        # Handle FileNotFoundError race condition (TOCTOU)
         try:
             with open(lock_file) as f:
                 content = f.read().strip()
@@ -200,7 +200,7 @@ class ProfileLock:
             return True
 
         # Stale lock — clean it up
-        # BUG 61 fix: needs to bypass the ownership check if we're cleaning up
+        # needs to bypass the ownership check if we're cleaning up
         # after a dead process that wasn't us.
         try:
             os.remove(lock_file)

@@ -1,5 +1,5 @@
 """
-Database Models ΓÇö SQLAlchemy Declarative Schema
+Database Models, SQLAlchemy Declarative Schema
 
 Defines the tables for the Microkernel registry, execution logging,
 and security watchdog (API health).

@@ -5,7 +5,7 @@ Validates adapter pack descriptors (adapter.yaml) and ensures
 the entry class fully implements the PlatformAdapter ABC contract.
 """
 
-import inspect  # BUG 76
+import inspect  
 from typing import Any
 
 import yaml
@@ -76,7 +76,7 @@ class AdapterValidator:
         if not issubclass(cls, PlatformAdapter):
             raise TypeError(f"{cls.__name__} must be a subclass of PlatformAdapter")
 
-        # Check required async methods (BUG 76 fix: verify they are coroutines)
+        # Check required async methods (verify they are coroutines)
         for method_name in self.REQUIRED_METHODS:
             method = getattr(cls, method_name, None)
             if method is None:

@@ -40,6 +40,13 @@ class PermissionValidator:
         Hierarchical RBAC check .
         Checks if the user's role level is >= the required role level.
 
+        # Fail-closed on unrecognized roles.
+        # If 'required_role' is misspelled, default to level 100 (admin).
+        # This prevents typo-ing 'admin' and accidentally opening it to 'user'.
+        # Fail-closed on unrecognized roles.
+        # Maps common synonyms to internal levels to prevent accidental lockout.
+        # normalize to lowercase for robust dictionary lookup
+
         Args:
             effective_role: The resolved role string (e.g. ROLE.ADMIN, ROLE.MODERATOR, ROLE.USER).
             required_role:  Minimum role required (default 'user').
@@ -47,12 +54,6 @@ class PermissionValidator:
         Returns:
             True if user role meets or exceeds required level.
         """
-        # Fail-closed on unrecognized roles.
-        # If 'required_role' is misspelled, default to level 100 (admin).
-        # This prevents typo-ing 'admin' and accidentally opening it to 'user'.
-        # Fail-closed on unrecognized roles.
-        # Maps common synonyms to internal levels to prevent accidental lockout.
-        # normalize to lowercase for robust dictionary lookup
 
         mapped_req = LEVEL_SYNONYMS.get(required_role.lower(), required_role.lower())
         user_role = effective_role

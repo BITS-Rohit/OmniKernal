@@ -2,7 +2,7 @@
 PluginManifest — Frozen Dataclass Contract
 
 Represents the parsed contents of a plugin's manifest.json file.
-Built by the PluginLoader (Phase 3) when scanning the plugins/ directory.
+Built by the PluginLoader when scanning the plugins/ directory.
 Used by the Core to register plugins in the DB and to validate
 compatibility before loading.
 

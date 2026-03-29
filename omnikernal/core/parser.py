@@ -42,10 +42,10 @@ class CommandParser:
         Returns a dict of extracted arguments on success, or None on failure.
 
         Conversion logic:
-          1. Check cache for pre-compiled regex (BUG 72 fix).
+          1. Check cache for pre-compiled regex.
           2. Split pattern on <arg_name> tokens, collecting literal segments.
-          3. re.escape() each literal segment (BUG 41 fix).
-          4. All placeholders except the last → "(?P<arg_name>.+?)" (BUG 7 fix).
+          3. re.escape() each literal segment 
+          4. All placeholders except the last → "(?P<arg_name>.+?)".
           5. Compile and cache.
         """
         if not text or not pattern:

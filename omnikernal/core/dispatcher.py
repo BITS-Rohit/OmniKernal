@@ -4,20 +4,20 @@ EventDispatcher — Command Routing & Execution Pipeline
 Coordinates the "Process" pipeline:
     sanitized text → route lookup → permission check → parse → execute
 
-BUG 19 fix: Uses CommandRouter for route resolution instead of calling
+Uses CommandRouter for route resolution instead of calling
 OmniRepository directly — respects the architectural layering.
 
-BUG 20 fix: Re-checks user role against OMNIKERNAL_ADMINS env var before
+Re-checks user role against OMNIKERNAL_ADMINS env var before
 permission validation so admin features are actually reachable.
 
-BUG 39 fix: Permission check now uses effective_role (after OMNIKERNAL_ADMINS
+Permission check now uses effective_role (after OMNIKERNAL_ADMINS
 elevation) instead of user.role (original frozen field).
 
-BUG 42 fix: Handler import path is prefixed with the plugin root module
+Handler import path is prefixed with the plugin root module
 (plugins.<plugin_name>.) so importlib resolves handlers correctly for
 all plugins, not just echo which happened to be a top-level package.
 
-BUG 53 fix: dispatch() now returns a DispatchResult namedtuple that carries
+dispatch() now returns a DispatchResult namedtuple that carries
 both the CommandResult AND the resolved tool_id and command_name. This lets
 the engine record the correct watchdog failure even when the route was matched
 via a regex rule (where the trigger doesn't equal the canonical command name).
@@ -51,12 +51,12 @@ class DispatchResult(NamedTuple):
 
 def _resolve_role(user: "User") -> str:
     """
-    BUG 20 fix: Returns the effective role for a user.
+    Returns the effective role for a user.
     If the user's platform ID appears in OMNIKERNAL_ADMINS, they get 'admin'.
 
-    BUG 157 fix: only elevate if current role is objectively weaker than 'admin'.
+    only elevate if current role is objectively weaker than 'admin'.
 
-    BUG 261 fix: fetch admins dynamically instead of caching global constant.
+    fetch admins dynamically instead of caching global constant.
     """
     admins = {
         uid.strip()
@@ -72,7 +72,7 @@ def _resolve_role(user: "User") -> str:
 class EventDispatcher:
     """
     Coordinates the "Process" pipeline.
-    DB-backed in Phase 2. Uses CommandRouter for route resolution (Phase 3).
+    DB-backed & Uses CommandRouter for route resolution.
     """
 
     def __init__(
@@ -95,7 +95,7 @@ class EventDispatcher:
             DispatchResult(result, tool_id, command_name) on a matched route, or
             None if the text doesn't start with '!' or no route is found.
 
-        BUG 53 fix: tool_id is taken directly from the resolved route dict so
+        tool_id is taken directly from the resolved route dict so
         that regex-triggered routes return the correct id to the caller.
         """
         if not sanitized_text.startswith("!"):

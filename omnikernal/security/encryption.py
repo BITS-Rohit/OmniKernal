@@ -4,7 +4,7 @@ Encryption Engine — Symmetric Fernet Encryption
 Handles encryption and decryption of sensitive strings like API keys.
 Requires OMNIKERNAL_SECRET_KEY in the environment.
 
-BUG 37 fix: When OMNIKERNAL_SECRET_KEY is not set, the engine now persists
+When OMNIKERNAL_SECRET_KEY is not set, the engine now persists
 a generated dev key to `.dev.key` in the current working directory. This
 means that restarting the process will reload the same key rather than
 generating a new one each time, preventing silent data loss across restarts.
@@ -25,7 +25,7 @@ _DEV_KEY_FILE = Path(__file__).resolve().parent.parent.parent / ".dev.key"
 
 def _load_or_create_dev_key() -> str:
     """
-    BUG 37 fix: Loads an existing dev key file or creates and persists a new one.
+    Loads an existing dev key file or creates and persists a new one.
     This ensures a consistent key across process restarts in development.
     """
     # if file is empty or malformed, recreate it to prevent crash.
@@ -69,7 +69,7 @@ class EncryptionEngine:
                         'Generate one with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
                     )
 
-                # BUG 37 fix: persist dev key to .dev.key so restarts reuse the same key
+                # persist dev key to .dev.key so restarts reuse the same key
                 key = _load_or_create_dev_key()
                 os.environ["OMNIKERNAL_SECRET_KEY"] = key
                 logger.warning(

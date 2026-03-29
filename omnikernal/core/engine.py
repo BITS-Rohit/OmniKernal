@@ -4,12 +4,12 @@ OmniKernal — Core Engine Lifecycle
 Orchestrates the full boot/shutdown sequence and the message processing
 pipeline (sanitize → dispatch → log → reply).
 
-BUG 62 fix: OmniKernal now accepts `session_factory` (an async_sessionmaker)
+OmniKernal now accepts `session_factory` (an async_sessionmaker)
 in addition to a top-level `repository`. A fresh OmniRepository is created
 *per process() call*, preventing concurrent CoopMode tasks from racing on a
 shared AsyncSession and causing SQLAlchemy IllegalStateError.
 
-BUG 53 fix: EventDispatcher.dispatch() now returns a DispatchResult namedtuple
+EventDispatcher.dispatch() now returns a DispatchResult namedtuple
 that includes the resolved tool_id. This lets the engine feed the correct id to
 ApiWatchdog for regex-triggered commands (previously, the engine tried to
 resolve the tool by the raw user trigger, which missed regex routes).
@@ -110,7 +110,7 @@ class OmniKernal:
         # Initialize DB
         await init_db()
 
-        # Profile Activation (Phase 5)
+        # Profile Activation 
         if not self.profile_manager.get_profile(self.profile_name):
             self.logger.info(f"First run: creating profile '{self.profile_name}'.")
             self.profile_manager.create(self.profile_name, self.adapter.platform_name)
@@ -121,7 +121,7 @@ class OmniKernal:
             f"Profile '{self.profile_name}' activated. headless={self.headless}"
         )
 
-        # Plugin Discovery (Phase 3)
+        # Plugin Discovery 
         loader = PluginEngine(self.repository, platform_name=self.adapter.platform_name)
         await loader.discover_and_load()
 
@@ -155,7 +155,7 @@ class OmniKernal:
             await self.stop()
 
     async def stop(self) -> None:
-        """Graceful shutdown. BUG 67: Always set stop event to abort boot."""
+        """Graceful shutdown.Always set stop event to abort boot."""
         self.logger.info("Stopping OmniKernal...")
         was_running = self.is_running
         self.is_running = False
@@ -196,7 +196,7 @@ class OmniKernal:
     async def process(self, msg: "Message") -> None:
         """Public processing pipeline — called by SelfMode and CoopMode.
 
-        BUG 62 fix: If a session_factory was supplied, we create a brand-new
+        If a session_factory was supplied, we create a brand-new
         session (and repository) for this call. CoopMode can therefore invoke
         process() concurrently for multiple approved messages without two tasks
         sharing the same AsyncSession.
@@ -231,7 +231,7 @@ class OmniKernal:
     ) -> None:
         """Core pipeline using either a fresh session or an existing repo.
 
-        When session_factory is used (BUG 62 path), we create a new dispatcher
+        When session_factory is used , we create a new dispatcher
         bound to the fresh session's repo. For the legacy path (no session_factory),
         we re-use self.dispatcher which may have been injected by tests or set
         at boot time.
@@ -244,7 +244,7 @@ class OmniKernal:
         # Reuse self.dispatcher when the legacy no-session path is taken — this
         # preserves test injection of mock dispatchers.
         if session is not None:
-            # BUG 68: pass the shared cache to the per-request dispatcher
+            # pass the shared cache to the per-request dispatcher
             dispatcher = EventDispatcher(
                 repo, logger=self.logger, rules_cache=self._rules_cache
             )

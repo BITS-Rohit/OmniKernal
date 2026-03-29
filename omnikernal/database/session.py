@@ -40,8 +40,8 @@ _db_initialized: bool = False
 async def init_db() -> None:
     """
     Initializes the database schema.
-    In Phase 2, we use Base.metadata.create_all().
-    In Phase 3+, we will use Alembic migrations.
+    we use Base.metadata.create_all().
+    we will use Alembic migrations in Future.
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

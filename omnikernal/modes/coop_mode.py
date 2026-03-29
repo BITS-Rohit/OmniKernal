@@ -4,7 +4,7 @@ CoopMode — Human-in-the-Loop Execution Mode
 Messages are held in a pending queue until a human explicitly approves
 or rejects them. Only approved messages are routed through the Core pipeline.
 
-BUG 22 fix: approval tasks are now tracked in self._active_tasks and
+approval tasks are now tracked in self._active_tasks and
 cancelled on loop exit to prevent orphaned tasks surviving shutdown.
 """
 
@@ -27,7 +27,7 @@ class CoopMode:
     Approval: approve(msg_id) releases message to core.process().
     Rejection: reject(msg_id) discards message with a log entry.
 
-    BUG 22 fix: all background approval tasks are tracked and canceled
+    all background approval tasks are tracked and canceled
     when the polling loop exits, ensuring deterministic shutdown.
     """
 
