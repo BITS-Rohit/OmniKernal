@@ -24,7 +24,7 @@ class ApiWatchdog:
         self.logger = core_logger.bind(subsystem="watchdog")
 
     async def record_failure(self, api_url: str, tool_id: int, error_msg: str) -> None:
-        """Records a failure and quarantines if threshold reached. BUG 183 sanitized."""
+        """Records a failure and quarantines if threshold reached."""
         # Sanitize error message to prevent log injection
         from omnikernal.security.sanitizer import CommandSanitizer
 
