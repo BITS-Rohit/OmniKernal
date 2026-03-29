@@ -73,7 +73,9 @@ class CommandContext:
                 "Repository or tool_id not configured in CommandContext."
             )
 
-        encrypted_key = await self._repository.get_api_key(self._tool_id, service=service)
+        encrypted_key = await self._repository.get_api_key(
+            self._tool_id, service=service
+        )
         if not encrypted_key:
             raise ValueError(
                 f"No API key configured for service '{service}' (tool_id={self._tool_id}). "

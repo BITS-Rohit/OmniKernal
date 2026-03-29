@@ -7,7 +7,8 @@ consistent error handling.
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import cast, Any
+from typing import Any, cast
+
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -133,8 +134,6 @@ class OmniRepository:
 
     async def set_plugin_inactive(self, name: str) -> None:
         """Marks a plugin as inactive."""
-        from sqlalchemy import update
-
         await self.session.execute(
             update(Plugin).where(Plugin.name == name).values(is_active=False)
         )
@@ -142,7 +141,6 @@ class OmniRepository:
 
     async def deactivate_missing_plugins(self, active_names: list[str]) -> None:
         """Marks plugins NOT in the list as inactive."""
-        from sqlalchemy import update
 
         await self.session.execute(
             update(Plugin)
@@ -289,7 +287,7 @@ class OmniRepository:
         # Removed redundant local imports
         await self.session.execute(
             update(DeadApi)
-            .where(DeadApi.api_url == url, DeadApi.reactivated == False)
+            .where(DeadApi.api_url == url, DeadApi.reactivated.is_(False))
             .values(reactivated=True)
         )
         await self.session.commit()

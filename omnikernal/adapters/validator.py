@@ -5,7 +5,7 @@ Validates adapter pack descriptors (adapter.yaml) and ensures
 the entry class fully implements the PlatformAdapter ABC contract.
 """
 
-import inspect  
+import inspect
 from typing import Any
 
 import yaml

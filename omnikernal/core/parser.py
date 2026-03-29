@@ -44,7 +44,7 @@ class CommandParser:
         Conversion logic:
           1. Check cache for pre-compiled regex.
           2. Split pattern on <arg_name> tokens, collecting literal segments.
-          3. re.escape() each literal segment 
+          3. re.escape() each literal segment
           4. All placeholders except the last → "(?P<arg_name>.+?)".
           5. Compile and cache.
         """

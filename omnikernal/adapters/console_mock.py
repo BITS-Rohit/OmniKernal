@@ -13,6 +13,7 @@ from omnikernal.core.contracts.message import Message
 from omnikernal.core.contracts.user import User
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
+
 @AdapterLoader.register_adapter("console")
 class ConsoleMockAdapter(PlatformAdapter):
     """

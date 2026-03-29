@@ -11,7 +11,8 @@ Usage:
     adapter = loader.load("console")
 """
 
-from typing import Any, Callable, Type
+from collections.abc import Callable
+from typing import Any
 
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 from omnikernal.core.logger import core_logger
@@ -30,15 +31,16 @@ class AdapterLoader:
         adapter = loader.load("console")
     """
 
-    _registry: dict[str, Type[PlatformAdapter]] = {}
+    _registry: dict[str, type[PlatformAdapter]] = {}
 
     def __init__(self) -> None:
         self.logger = core_logger.bind(subsystem="adapter_loader")
 
-
     # Todo , Class level logger for static event like register decorator.
     @classmethod
-    def register_adapter(cls, name: str) -> Callable[[Type[PlatformAdapter]], Type[PlatformAdapter]]:
+    def register_adapter(
+        cls, name: str
+    ) -> Callable[[type[PlatformAdapter]], type[PlatformAdapter]]:
         """
         Registers an adapter class under the given name.
         Works as Decorator.
@@ -54,19 +56,20 @@ class AdapterLoader:
             TypeError: If cls is not a subclass of PlatformAdapter.
         """
 
-        def wrapper(adapter_cls: Type[PlatformAdapter]):
+        def wrapper(adapter_cls: type[PlatformAdapter]) -> type[PlatformAdapter]:
             """
             decorator for adapter class.
             :param adapter_cls:
             :return:
             """
             if not issubclass(adapter_cls, PlatformAdapter):
-                raise TypeError(f"Cannot register '{name}': {adapter_cls!r} is not a PlatformAdapter subclass.")
+                raise TypeError(
+                    f"Cannot register '{name}': {adapter_cls!r} is not a PlatformAdapter subclass."
+                )
 
             if name not in cls._registry:
                 cls._registry[name] = adapter_cls
             return adapter_cls
-
         return wrapper
 
     def load(self, name: str, **kwargs: Any) -> PlatformAdapter:

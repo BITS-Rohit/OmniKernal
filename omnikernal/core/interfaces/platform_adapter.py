@@ -25,8 +25,8 @@ class PlatformAdapter(ABC):
     The Core never sees the underlying SDK — only this interface.
     """
 
-    def __init__(self, **kwargs: Any) -> None:
-        ...
+    @abstractmethod
+    def __init__(self, **kwargs: Any) -> None: ...
 
     @abstractmethod
     async def connect(self) -> None:

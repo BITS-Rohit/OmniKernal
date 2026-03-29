@@ -104,9 +104,7 @@ class ExecutionLog(Base):
     command_name: Mapped[str] = mapped_column(String(50))
     raw_input: Mapped[str] = mapped_column(Text)
     success: Mapped[bool] = mapped_column(Boolean)
-    response_time_ms: Mapped[float | None] = mapped_column(
-        Float, nullable=True
-    )
+    response_time_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
@@ -156,9 +154,7 @@ class ToolRequirement(Base):
     tool_id: Mapped[int] = mapped_column(
         ForeignKey("tools.id", ondelete="CASCADE"), index=True
     )
-    service: Mapped[str] = mapped_column(
-        String(50), default="default", index=True
-    )
+    service: Mapped[str] = mapped_column(String(50), default="default", index=True)
     api_key_value: Mapped[str] = mapped_column(Text)  # Stored ENCRYPTED
 
     __table_args__ = (UniqueConstraint("tool_id", "service", name="uq_tool_service"),)

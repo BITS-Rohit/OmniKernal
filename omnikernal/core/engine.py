@@ -16,6 +16,7 @@ resolve the tool by the raw user trigger, which missed regex routes).
 """
 
 import asyncio
+import contextlib
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal, Optional
 
@@ -28,7 +29,6 @@ from omnikernal.core.router import RulesCache
 from omnikernal.database.repository import OmniRepository
 from omnikernal.database.session import dispose_db, init_db
 from omnikernal.modes.mode_manager import ModeManager
-from omnikernal.profiles.manager import ProfileManager
 from omnikernal.security.sanitizer import CommandSanitizer
 from omnikernal.security.watchdog import ApiWatchdog
 
@@ -70,7 +70,6 @@ class OmniKernal:
         self._session_factory = session_factory
         self.profile_name = profile_name
         self.mode = mode
-        self.profile_manager = ProfileManager(profiles_dir)
         self.mode_manager = ModeManager()
         self.dispatcher: EventDispatcher | None = None
         self.watchdog = ApiWatchdog(repository)
@@ -110,19 +109,19 @@ class OmniKernal:
         # Initialize DB
         await init_db()
 
-        # Profile Activation 
-        if not self.profile_manager.get_profile(self.profile_name):
-            self.logger.info(f"First run: creating profile '{self.profile_name}'.")
-            self.profile_manager.create(self.profile_name, self.adapter.platform_name)
+        # Profile Activation
+        # if not self.profile_manager.get_profile(self.profile_name):
+        #     self.logger.info(f"First run: creating profile '{self.profile_name}'.")
+        #     self.profile_manager.create(self.profile_name, self.adapter.platform_name)
 
-        meta = self.profile_manager.activate(self.profile_name)
-        self.headless = meta.get("headless", False)
-        self.logger.info(
-            f"Profile '{self.profile_name}' activated. headless={self.headless}"
-        )
+        # meta = self.profile_manager.activate(self.profile_name)
+        # self.headless = meta.get("headless", False)
+        # self.logger.info(
+            # f"Profile '{self.profile_name}' activated. headless={self.headless}"
+        # )
 
-        # Plugin Discovery 
-        loader = PluginEngine(self.repository, platform_name=self.adapter.platform_name)
+        # Plugin Discovery
+        loader = PluginEngine(self.repository, platform_name=self.adapter.platform_name, plugins_dir="plugins")
         await loader.discover_and_load()
 
         self.dispatcher = EventDispatcher(
@@ -164,11 +163,9 @@ class OmniKernal:
         if not was_running:
             self.logger.info("OmniKernal stop() called before full boot. Aborted.")
             # if we acquired it, avoiding stale locks if the process doesn't exit immediately.
-            try:
-                self.profile_manager.deactivate(self.profile_name)
-            except Exception:
-                pass
-            return
+            # with contextlib.suppress(Exception):
+                # self.profile_manager.deactivate(self.profile_name)
+            # return
 
         # Stop execution mode
         await self.mode_manager.stop()
@@ -180,10 +177,10 @@ class OmniKernal:
             self.logger.warning(f"Adapter disconnect failure: {e}")
 
         # Profile Deactivation
-        try:
-            self.profile_manager.deactivate(self.profile_name)
-        except Exception as e:
-            self.logger.warning(f"Profile deactivation warning: {e}")
+        # try:
+            # self.profile_manager.deactivate(self.profile_name)
+        # except Exception as e:
+            # self.logger.warning(f"Profile deactivation warning: {e}")
 
         await dispose_db()
 

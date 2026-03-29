@@ -150,7 +150,7 @@ class CommandRouter:
             "pattern": tool.pattern,
             "handler_path": tool.handler_path,
             "plugin_name": tool.plugin_name,
-            "required_role": tool.required_role
+            "required_role": tool.required_role,
         }
 
     async def list_commands(self) -> list[str]:

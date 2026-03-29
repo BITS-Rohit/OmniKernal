@@ -25,12 +25,12 @@ via a regex rule (where the trigger doesn't equal the canonical command name).
 
 import importlib
 import inspect
-from omnikernal.core.contracts.user import ROLE
 import os
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from omnikernal.core.contracts.command_context import CommandContext
 from omnikernal.core.contracts.command_result import CommandResult
+from omnikernal.core.contracts.user import ROLE
 from omnikernal.core.parser import CommandParser
 from omnikernal.core.permissions import PermissionValidator
 from omnikernal.core.router import CommandRouter
@@ -63,9 +63,8 @@ def _resolve_role(user: "User") -> str:
         for uid in os.getenv("OMNIKERNAL_ADMINS", "").split(",")
         if uid.strip()
     }
-    if user.id in admins:
-        if not PermissionValidator.check_role(user.role, ROLE.ADMIN):
-            return ROLE.ADMIN
+    if user.id in admins and not PermissionValidator.check_role(user.role, ROLE.ADMIN):
+        return ROLE.ADMIN
     return user.role
 
 
@@ -109,7 +108,7 @@ class EventDispatcher:
         if not route:
             return None
 
-        effective_role : ROLE = ROLE(_resolve_role(user))
+        effective_role: ROLE = ROLE(_resolve_role(user))
         required_role = route.get("required_role", ROLE.ADMIN)
         if not PermissionValidator.check_role(
             effective_role, required_role=required_role

@@ -8,8 +8,10 @@ role string rather than a User object. This lets the dispatcher pass the
 effective_role (after OMNIKERNAL_ADMINS elevation) without needing to mutate
 the frozen User dataclass.
 """
-from typing import TYPE_CHECKING
+
 import logging
+from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     pass
 from omnikernal.core.contracts.user import ROLE
@@ -20,14 +22,10 @@ LEVEL_SYNONYMS = {
     "administrator": "admin",
 }
 
-ROLE_LEVELS = {
-    ROLE.ANY: 0,
-    ROLE.USER: 10,
-    ROLE.MODERATOR: 50,
-    ROLE.ADMIN: 100
-}
+ROLE_LEVELS = {ROLE.ANY: 0, ROLE.USER: 10, ROLE.MODERATOR: 50, ROLE.ADMIN: 100}
 
 # Todo , Add the correct logger ,
+
 
 class PermissionValidator:
     """
@@ -61,8 +59,10 @@ class PermissionValidator:
         try:
             req_role = ROLE(mapped_req)
         except ValueError:
-            logging.info(f"Invalid role at required role detected - {required_role} , fallback to Admin Role Checking.")
-            return False # Deny Access
+            logging.info(
+                f"Invalid role at required role detected - {required_role} , fallback to Admin Role Checking."
+            )
+            return False  # Deny Access
 
         user_lvl = ROLE_LEVELS.get(user_role, 0)
         req_lvl = ROLE_LEVELS.get(req_role, 100)  # Default to 100 (admin)

@@ -40,9 +40,9 @@ class CoopMode:
         # Approval signals: msg_id -> asyncio.Event
         self._approval_events: dict[str, asyncio.Event] = {}
         self._rejected: set[str] = set()
-        #track all background tasks so we can cancel on shutdown
+        # track all background tasks so we can cancel on shutdown
         self._active_tasks: set[asyncio.Task[None]] = set()
-        #track IDs mid-processing to prevent duplicate task spawn
+        # track IDs mid-processing to prevent duplicate task spawn
         self._processing_ids: set[str] = set()
 
     @property
@@ -158,7 +158,7 @@ class CoopMode:
                     self.logger.warning(f"CoopMode error: {e}. Retrying in 2s.")
                     await asyncio.sleep(2)
         finally:
-            #cancel all pending approval tasks on exit
+            # cancel all pending approval tasks on exit
             if self._active_tasks:
                 self.logger.info(
                     f"CoopMode cleanup: cancelling {len(self._active_tasks)} "
