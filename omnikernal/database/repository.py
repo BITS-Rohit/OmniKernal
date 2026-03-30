@@ -100,9 +100,7 @@ class OmniRepository:
 
     async def get_tool_by_command(self, command_name: str) -> Tool | None:
         """Looks up a tool by its !command trigger."""
-        result = await self.session.execute(
-            select(Tool).where(Tool.command_name == command_name)
-        )
+        result = await self.session.execute(select(Tool).where(Tool.command_name == command_name))
         return result.scalar_one_or_none()
 
     async def get_tool_by_id(self, tool_id: int) -> Tool | None:
@@ -132,20 +130,25 @@ class OmniRepository:
         )
         return result.scalars().all()
 
-    async def set_plugin_inactive(self, name: str) -> None:
-        """Marks a plugin as inactive."""
-        await self.session.execute(
-            update(Plugin).where(Plugin.name == name).values(is_active=False)
-        )
+    async def set_plugin_inactive(self, plugin_name: str | list[str]) -> None:
+        """Marks one or more plugins as inactive."""
+        if isinstance(plugin_name, str):
+            stmt = update(Plugin).where(Plugin.name == plugin_name)
+        else:
+            if not plugin_name:
+                return
+            stmt = update(Plugin).where(Plugin.name.in_(plugin_name))
+
+        await self.session.execute(stmt.values(is_active=False))
         await self.session.commit()
+
+
 
     async def deactivate_missing_plugins(self, active_names: list[str]) -> None:
         """Marks plugins NOT in the list as inactive."""
 
         await self.session.execute(
-            update(Plugin)
-            .where(Plugin.name.notin_(active_names))
-            .values(is_active=False)
+            update(Plugin).where(Plugin.name.notin_(active_names)).values(is_active=False)
         )
         await self.session.commit()
 
@@ -181,9 +184,7 @@ class OmniRepository:
 
     # --- API Health Watchdog ---
 
-    async def increment_error(
-        self, url: str, tool_id: int | None, error_msg: str
-    ) -> bool:
+    async def increment_error(self, url: str, tool_id: int | None, error_msg: str) -> bool:
         """
         Increments failure count. Quarantines and logs to DeadApi if threshold reached.
         Returns True if the API is now quarantined as a result of this error.
@@ -202,9 +203,7 @@ class OmniRepository:
         )
 
         # Fresh fetch to avoid identity-map stale counter values
-        result = await self.session.execute(
-            select(ApiHealth).where(ApiHealth.url == url)
-        )
+        result = await self.session.execute(select(ApiHealth).where(ApiHealth.url == url))
         health = result.scalar_one_or_none()
 
         if not health:
@@ -218,10 +217,7 @@ class OmniRepository:
             await self.session.flush()
 
         is_newly_dead = False
-        if (
-            health.consecutive_failures >= health.error_threshold
-            and not health.is_quarantined
-        ):
+        if health.consecutive_failures >= health.error_threshold and not health.is_quarantined:
             health.is_quarantined = True
             is_newly_dead = True
 
@@ -254,9 +250,7 @@ class OmniRepository:
 
         health.consecutive_failures = 0
         health.last_success = datetime.now(UTC)
-        health.is_quarantined = (
-            False  # watchdog recovery path: one success clears quarantine
-        )
+        health.is_quarantined = False  # watchdog recovery path: one success clears quarantine
 
         await self.session.commit()
 
@@ -307,9 +301,7 @@ class OmniRepository:
         if req:
             req.api_key_value = api_key
         else:
-            req = ToolRequirement(
-                tool_id=tool_id, service=service, api_key_value=api_key
-            )
+            req = ToolRequirement(tool_id=tool_id, service=service, api_key_value=api_key)
             self.session.add(req)
         await self.session.commit()
 

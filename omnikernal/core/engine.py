@@ -116,11 +116,15 @@ class OmniKernal:
         # meta = self.profile_manager.activate(self.profile_name)
         # self.headless = meta.get("headless", False)
         # self.logger.info(
-            # f"Profile '{self.profile_name}' activated. headless={self.headless}"
+        # f"Profile '{self.profile_name}' activated. headless={self.headless}"
         # )
 
         # Plugin Discovery
-        loader = PluginEngine(self.repository, platform_name=self.adapter.platform_name, plugins_dir="plugins")
+        loader = PluginEngine(
+            self.repository,
+            platform_name=self.adapter.platform_name,
+            plugins_dir="plugins",
+        )
         await loader.discover_and_load()
 
         self.dispatcher = EventDispatcher(
@@ -163,7 +167,7 @@ class OmniKernal:
             self.logger.info("OmniKernal stop() called before full boot. Aborted.")
             # if we acquired it, avoiding stale locks if the process doesn't exit immediately.
             # with contextlib.suppress(Exception):
-                # self.profile_manager.deactivate(self.profile_name)
+            # self.profile_manager.deactivate(self.profile_name)
             # return
 
         # Stop execution mode
@@ -177,9 +181,9 @@ class OmniKernal:
 
         # Profile Deactivation
         # try:
-            # self.profile_manager.deactivate(self.profile_name)
+        # self.profile_manager.deactivate(self.profile_name)
         # except Exception as e:
-            # self.logger.warning(f"Profile deactivation warning: {e}")
+        # self.logger.warning(f"Profile deactivation warning: {e}")
 
         await dispose_db()
 

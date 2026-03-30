@@ -111,12 +111,16 @@ class PluginEngine:
             else:
                 if name is not None:
                     failed_plugins.append(name)
+        if failed_plugins:
+            self.repo.set_plugin_inactive(failed_plugins)
 
         # cleanup any plugins in DB that are NO LONGER on disk.
         if found_names:
             await self.repo.deactivate_missing_plugins(found_names)
 
-    async def _load_plugin(self, plugin_folder: str, path: str) -> tuple[str | None, bool]:
+    async def _load_plugin(
+        self, plugin_folder: str, path: str
+    ) -> tuple[str | None, bool]:
         """
         Loads a single plugin folder.
 

@@ -70,6 +70,7 @@ class AdapterLoader:
             if name not in cls._registry:
                 cls._registry[name] = adapter_cls
             return adapter_cls
+
         return wrapper
 
     def load(self, name: str, **kwargs: Any) -> PlatformAdapter:

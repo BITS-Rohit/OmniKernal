@@ -19,6 +19,7 @@ Call invalidate_route_cache() after inserting a new routing rule.
 """
 
 import re
+from collections import defaultdict
 from collections.abc import Sequence
 from typing import Any
 
@@ -72,7 +73,7 @@ class CommandRouter:
         else:
             self._local_cache = value
 
-    def invalidate_route_cache(self) -> None:
+    def clear_route_cache(self) -> None:
         """Clears the cached routing rules."""
         if self._shared_cache:
             self._shared_cache.rules = None
@@ -137,9 +138,6 @@ class CommandRouter:
                 # Maybe we should consider deleting that malformed regex to remove with tool & handle state association
                 continue
 
-        # Exact command name lookup (fallback)
-        # exact match using normalized trigger
-        # We lower() it here to handle cases where dispatcher didn't, or DB changed.
         tool = await self.repository.get_tool_by_command(command_trigger.lower())
         if not tool:
             return None
@@ -153,8 +151,10 @@ class CommandRouter:
             "required_role": tool.required_role,
         }
 
-    async def list_commands(self) -> list[str]:
-        """Returns all registered commands from the tools table."""
-        # TODO , More structurize to Plugin : {cmds name}
+    async def list_commands(self) -> dict[str, list[str]]:
+        """Returns all registered commands, grouped by plugin."""
         tools = await self.repository.get_all_tools()
-        return [t.command_name for t in tools]
+        grouped = defaultdict(list)
+        for t in tools:
+            grouped[t.plugin_name].append(t.command_name)
+        return dict(grouped)
