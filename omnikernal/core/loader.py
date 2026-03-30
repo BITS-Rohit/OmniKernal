@@ -186,6 +186,7 @@ class PluginEngine:
                     self.logger.warning(
                         f"Skipping Registering of Plugin for '{manifest.name}': commands.yaml is empty or malformed."
                     )
+                    return manifest.name, False
                 else:
                     commands_raw = cmd_cfg.get("commands", {})
                     if not isinstance(commands_raw, dict):

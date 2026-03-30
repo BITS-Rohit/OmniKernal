@@ -16,7 +16,6 @@ resolve the tool by the raw user trigger, which missed regex routes).
 """
 
 import asyncio
-import contextlib
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal, Optional
 
