@@ -15,15 +15,15 @@ from enum import StrEnum
 class ROLE(StrEnum):
     """
     ROLE enum representing the permission role.
+    ADMIN > MODERATOR > USER
     """
 
-    USER = "user"
-    ADMIN = "admin"
-    ANY = "any"
-    MODERATOR = "moderator"
+    USER = "USER"
+    ADMIN = "ADMIN"
+    MODERATOR = "MODERATOR"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class User:
     """
     A user who interacted with the bot on a platform.
@@ -40,12 +40,46 @@ class User:
     platform: str
     role: ROLE = ROLE.USER
 
+    @classmethod
+    def from_dict(cls, data: dict) -> User:
+        return cls(
+            id=data["id"],
+            display_name=data["display_name"],
+            platform=data["platform"],
+            role=data["role"],
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "display_name": self.display_name,
+            "platform": self.platform,
+            "role": self.role,
+        }
+
     @property
     def is_admin(self) -> bool:
-        """Return True if this user has admin role (or higher)."""
-        from omnikernal.core.permissions import PermissionValidator
+        """Return True if this user has admin role."""
+        return self.role == ROLE.ADMIN
 
-        return PermissionValidator.check_role(self.role, ROLE.ADMIN)
+    @property
+    def is_user(self) -> bool:
+        """Return True if this user has user role."""
+        return self.role == ROLE.USER
+
+    @property
+    def is_moderator(self)-> bool:
+        """Return True if this user has moderator role."""
+        return self.role == ROLE.MODERATOR
+
+    def __str__(self) -> str:
+        return f"User(id={self.id},\
+                name={self.display_name},\
+                platform={self.platform}, \
+                role={self.role})"
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, name={self.display_name!r}, platform={self.platform!r}, role={self.role!r})"
+        return f"User(id={self.id!r},\
+                name={self.display_name!r},\
+                platform={self.platform!r}, \
+                role={self.role!r})"

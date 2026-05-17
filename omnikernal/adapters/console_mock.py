@@ -64,9 +64,7 @@ class ConsoleMockAdapter(PlatformAdapter):
         msg = Message(
             id=f"mock_{len(self._message_queue)}",
             raw_text=raw_text,
-            user=User(
-                id=user_id, display_name="TestUser", platform="console", role="admin"
-            ),
+            user=User(id=user_id, display_name="TestUser", platform="console", role="admin"),
             timestamp=datetime.now(UTC),
             platform="console",
         )

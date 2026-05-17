@@ -89,9 +89,7 @@ class AdapterLoader:
         """
         if name not in self._registry:
             available = list(self._registry.keys())
-            raise KeyError(
-                f"No adapter registered under '{name}'. Available: {available}"
-            )
+            raise KeyError(f"No adapter registered under '{name}'. Available: {available}")
 
         cls = self._registry[name]
         self.logger.info(f"Loading adapter: '{name}' ({cls.__name__})")

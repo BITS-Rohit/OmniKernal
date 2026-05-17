@@ -83,9 +83,7 @@ class SelfMode:
                 ) and not isinstance(e, (ConnectionError, TimeoutError))
 
                 if is_likely_fatal:
-                    self.logger.error(
-                        f"SelfMode: fatal error ({error_type}): {e}. Stopping loop."
-                    )
+                    self.logger.error(f"SelfMode: fatal error ({error_type}): {e}. Stopping loop.")
                     # Stop the engine rather than silently retry forever
                     if core.is_running:
                         asyncio.create_task(core.stop())

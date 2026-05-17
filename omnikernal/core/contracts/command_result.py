@@ -13,9 +13,10 @@ They return a CommandResult and the Core handles' delivery.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class CommandResult:
     """
     The result of a command handler execution.
@@ -64,6 +65,29 @@ class CommandResult:
                         its URL here so the Core can feed it to ApiWatchdog.
         """
         return cls(ok=False, error_reason=reason, api_url=api_url)
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the CommandResult to a dictionary.
+        """
+        return {
+            "ok": self.ok,
+            "reply": self.reply,
+            "error_reason": self.error_reason,
+            "api_url": self.api_url,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> CommandResult:
+        """
+        Create a CommandResult from a dictionary.
+        """
+        return cls(
+            ok=data["ok"],
+            reply=data.get("reply"),
+            error_reason=data.get("error_reason"),
+            api_url=data.get("api_url"),
+        )
 
     def __repr__(self) -> str:
         if self.ok:

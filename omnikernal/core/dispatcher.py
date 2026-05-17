@@ -1,184 +1,174 @@
-"""
-EventDispatcher — Command Routing & Execution Pipeline
+# """
+# EventDispatcher — Command Routing & Execution Pipeline
 
-Coordinates the "Process" pipeline:
-    sanitized text → route lookup → permission check → parse → execute
+# Coordinates the "Process" pipeline:
+#     sanitized text → route lookup → permission check → parse → execute
 
-Uses CommandRouter for route resolution instead of calling
-OmniRepository directly — respects the architectural layering.
+# Uses CommandRouter for route resolution instead of calling
+# OmniRepository directly — respects the architectural layering.
 
-Re-checks user role against OMNIKERNAL_ADMINS env var before
-permission validation so admin features are actually reachable.
+# Re-checks user role against OMNIKERNAL_ADMINS env var before
+# permission validation so admin features are actually reachable.
 
-Permission check now uses effective_role (after OMNIKERNAL_ADMINS
-elevation) instead of user.role (original frozen field).
+# Permission check now uses effective_role (after OMNIKERNAL_ADMINS
+# elevation) instead of user.role (original frozen field).
 
-Handler import path is prefixed with the plugin root module
-(plugins.<plugin_name>.) so importlib resolves handlers correctly for
-all plugins, not just echo which happened to be a top-level package.
+# Handler import path is prefixed with the plugin root module
+# (plugins.<plugin_name>.) so importlib resolves handlers correctly for
+# all plugins, not just echo which happened to be a top-level package.
 
-dispatch() now returns a DispatchResult namedtuple that carries
-both the CommandResult AND the resolved tool_id and command_name. This lets
-the engine record the correct watchdog failure even when the route was matched
-via a regex rule (where the trigger doesn't equal the canonical command name).
-"""
+# dispatch() now returns a DispatchResult namedtuple that carries
+# both the CommandResult AND the resolved tool_id and command_name. This lets
+# the engine record the correct watchdog failure even when the route was matched
+# via a regex rule (where the trigger doesn't equal the canonical command name).
+# """
 
-import importlib
-import inspect
-import os
-from typing import TYPE_CHECKING, Any, NamedTuple
+# import importlib
+# import inspect
+# import os
+# from typing import TYPE_CHECKING, Any, NamedTuple
 
-from omnikernal.core.contracts.command_context import CommandContext
-from omnikernal.core.contracts.command_result import CommandResult
-from omnikernal.core.contracts.user import ROLE
-from omnikernal.core.parser import CommandParser
-from omnikernal.core.permissions import PermissionValidator
-from omnikernal.core.router import CommandRouter
-from omnikernal.security.encryption import EncryptionEngine
+# from omnikernal.core.contracts.command_context import CommandContext
+# from omnikernal.core.contracts.command_result import CommandResult
+# from omnikernal.core.contracts.user import ROLE
+# from omnikernal.core.parser import CommandParser
+# from omnikernal.core.permissions import PermissionValidator
+# from omnikernal.core.router import CommandRouter
+# from omnikernal.security.encryption import EncryptionEngine
 
-if TYPE_CHECKING:
-    from omnikernal.core.contracts.user import User
-    from omnikernal.database.repository import OmniRepository
-
-
-# structured return value carrying route metadata alongside the
-# CommandResult. Lets callers (engine) know which tool was actually executed.
-class DispatchResult(NamedTuple):
-    result: CommandResult | None
-    tool_id: int | None  # resolved tool PK (works for regex routes)
-    command_name: str | None  # canonical command name (for audit logging)
+# if TYPE_CHECKING:
+#     from omnikernal.core.contracts.user import User
+#     from omnikernal.database.repository import OmniRepository
 
 
-def _resolve_role(user: "User") -> str:
-    """
-    Returns the effective role for a user.
-    If the user's platform ID appears in OMNIKERNAL_ADMINS, they get 'admin'.
-
-    only elevate if current role is objectively weaker than 'admin'.
-
-    fetch admins dynamically instead of caching global constant.
-    """
-    admins = {
-        uid.strip()
-        for uid in os.getenv("OMNIKERNAL_ADMINS", "").split(",")
-        if uid.strip()
-    }
-    if user.id in admins and not PermissionValidator.check_role(user.role, ROLE.ADMIN):
-        return ROLE.ADMIN
-    return user.role
+# # structured return value carrying route metadata alongside the
+# # CommandResult. Lets callers (engine) know which tool was actually executed.
+# class DispatchResult(NamedTuple):
+#     result: CommandResult | None
+#     tool_id: int | None  # resolved tool PK (works for regex routes)
+#     command_name: str | None  # canonical command name (for audit logging)
 
 
-class EventDispatcher:
-    """
-    Coordinates the "Process" pipeline.
-    DB-backed & Uses CommandRouter for route resolution.
-    """
+# def _resolve_role(user: "User") -> str:
+#     """
+#     Returns the effective role for a user.
+#     If the user's platform ID appears in OMNIKERNAL_ADMINS, they get 'admin'.
 
-    def __init__(
-        self,
-        repository: "OmniRepository",
-        logger: Any = None,
-        rules_cache: Any | None = None,
-    ):
-        self.repository = repository
-        self.router = CommandRouter(repository, cache=rules_cache)
-        self.logger = logger
+#     only elevate if current role is objectively weaker than 'admin'.
 
-    async def dispatch(
-        self, sanitized_text: str, user: "User"
-    ) -> DispatchResult | None:
-        """
-        Dispatches a sanitized command string.
+#     fetch admins dynamically instead of caching global constant.
+#     """
+#     admins = {uid.strip() for uid in os.getenv("OMNIKERNAL_ADMINS", "").split(",") if uid.strip()}
+#     if user.id in admins and not PermissionValidator.check_role(user.role, ROLE.ADMIN):
+#         return ROLE.ADMIN
+#     return user.role
 
-        Returns:
-            DispatchResult(result, tool_id, command_name) on a matched route, or
-            None if the text doesn't start with '!' or no route is found.
 
-        tool_id is taken directly from the resolved route dict so
-        that regex-triggered routes return the correct id to the caller.
-        """
-        if not sanitized_text.startswith("!"):
-            return None
+# class EventDispatcher:
+#     """
+#     Coordinates the "Process" pipeline.
+#     DB-backed & Uses CommandRouter for route resolution.
+#     """
 
-        parts = sanitized_text.split(" ", 1)
-        command_trigger = parts[0][1:].lower()
+#     def __init__(
+#         self,
+#         repository: "OmniRepository",
+#         logger: Any = None,
+#         rules_cache: Any | None = None,
+#     ):
+#         self.repository = repository
+#         self.router = CommandRouter(repository, cache=rules_cache)
+#         self.logger = logger
 
-        # 1. Lookup route via CommandRouter
-        route = await self.router.get_route(command_trigger)
-        if not route:
-            return None
+#     async def dispatch(self, sanitized_text: str, user: "User") -> DispatchResult | None:
+#         """
+#         Dispatches a sanitized command string.
 
-        effective_role: ROLE = ROLE(_resolve_role(user))
-        required_role = route.get("required_role", ROLE.ADMIN)
-        if not PermissionValidator.check_role(
-            effective_role, required_role=required_role
-        ):
-            return DispatchResult(
-                result=CommandResult.error(
-                    f"Permission denied: {required_role} level required"
-                ),
-                tool_id=route["id"],
-                command_name=route["command_name"],
-            )
+#         Returns:
+#             DispatchResult(result, tool_id, command_name) on a matched route, or
+#             None if the text doesn't start with '!' or no route is found.
 
-        # 3. Parse arguments using the pattern from the route
-        args = CommandParser.match(sanitized_text, route["pattern"])
-        if args is None:
-            return DispatchResult(
-                result=CommandResult.error(f"Usage: {route['pattern']}"),
-                tool_id=route["id"],
-                command_name=route["command_name"],
-            )
+#         tool_id is taken directly from the resolved route dict so
+#         that regex-triggered routes return the correct id to the caller.
+#         """
+#         if not sanitized_text.startswith("!"):
+#             return None
 
-        # 4. Execute handler (lazy import)
-        try:
-            raw_handler_path = route["handler_path"]  # e.g. "handlers.echo.run"
-            plugin_name = route["plugin_name"]  # e.g. "echo"
+#         parts = sanitized_text.split(" ", 1)
+#         command_trigger = parts[0][1:].lower()
 
-            # Build absolute dotted path: plugins.echo.handlers.echo
-            clean_handler = raw_handler_path.lstrip(".")
-            full_handler_path = f"plugins.{plugin_name}.{clean_handler}"
-            module_path, func_name = full_handler_path.rsplit(".", 1)
+#         # 1. Lookup route via CommandRouter
+#         route = await self.router.get_route(command_trigger)
+#         if not route:
+#             return None
 
-            module = importlib.import_module(module_path)
-            handler_func = getattr(module, func_name)
+#         effective_role: ROLE = ROLE(_resolve_role(user))
+#         required_role = route.get("required_role", ROLE.ADMIN)
+#         if not PermissionValidator.check_role(effective_role, required_role=required_role):
+#             return DispatchResult(
+#                 result=CommandResult.error(f"Permission denied: {required_role} level required"),
+#                 tool_id=route["id"],
+#                 command_name=route["command_name"],
+#             )
 
-            if not inspect.iscoroutinefunction(handler_func):
-                raise TypeError(
-                    f"Handler '{full_handler_path}' is not a coroutine function (use 'async def')."
-                )
+#         # 3. Parse arguments using the pattern from the route
+#         args = CommandParser.match(sanitized_text, route["pattern"])
+#         if args is None:
+#             return DispatchResult(
+#                 result=CommandResult.error(f"Usage: {route['pattern']}"),
+#                 tool_id=route["id"],
+#                 command_name=route["command_name"],
+#             )
 
-            # a User object to the context that reflects this role, otherwise
-            # handlers calling ctx.user.is_admin() see 'user'.
-            context_user = user
-            if effective_role != user.role:
-                from omnikernal.core.contracts.user import User
+#         # 4. Execute handler (lazy import)
+#         try:
+#             raw_handler_path = route["handler_path"]  # e.g. "handlers.echo.run"
+#             plugin_name = route["plugin_name"]  # e.g. "echo"
 
-                context_user = User(
-                    id=user.id,
-                    display_name=user.display_name,
-                    platform=user.platform,
-                    role=effective_role,
-                )
+#             # Build absolute dotted path: plugins.echo.handlers.echo
+#             clean_handler = raw_handler_path.lstrip(".")
+#             full_handler_path = f"plugins.{plugin_name}.{clean_handler}"
+#             module_path, func_name = full_handler_path.rsplit(".", 1)
 
-            ctx = CommandContext(
-                user=context_user,
-                logger=self.logger,
-                _repository=self.repository,
-                _tool_id=route["id"],
-                _decrypter=EncryptionEngine.decrypt,
-            )
-            result = await handler_func(args, ctx)
-            return DispatchResult(
-                result=result,
-                tool_id=route["id"],
-                command_name=route["command_name"],
-            )
-        except Exception as e:
-            if self.logger:
-                self.logger.error(f"Dispatcher error executing {command_trigger}: {e}")
-            return DispatchResult(
-                result=CommandResult.error(f"Execution failed: {str(e)}"),
-                tool_id=route["id"],
-                command_name=route["command_name"],
-            )
+#             module = importlib.import_module(module_path)
+#             handler_func = getattr(module, func_name)
+
+#             if not inspect.iscoroutinefunction(handler_func):
+#                 raise TypeError(
+#                     f"Handler '{full_handler_path}' is not a coroutine function (use 'async def')."
+#                 )
+
+#             # a User object to the context that reflects this role, otherwise
+#             # handlers calling ctx.user.is_admin() see 'user'.
+#             context_user = user
+#             if effective_role != user.role:
+#                 from omnikernal.core.contracts.user import User
+
+#                 context_user = User(
+#                     id=user.id,
+#                     display_name=user.display_name,
+#                     platform=user.platform,
+#                     role=effective_role,
+#                 )
+
+#             ctx = CommandContext(
+#                 user=context_user,
+#                 logger=self.logger,
+#                 _repository=self.repository,
+#                 _tool_id=route["id"],
+#                 _decrypter=EncryptionEngine.decrypt,
+#             )
+#             result = await handler_func(args, ctx)
+#             return DispatchResult(
+#                 result=result,
+#                 tool_id=route["id"],
+#                 command_name=route["command_name"]
+#             )
+#         except Exception as e:
+#             if self.logger:
+#                 self.logger.error(f"Dispatcher error executing {command_trigger}: {e}")
+#             return DispatchResult(
+#                 result=CommandResult.error(f"Execution failed: {str(e)}"),
+#                 tool_id=route["id"],
+#                 command_name=route["command_name"],
+#             )

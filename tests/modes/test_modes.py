@@ -20,9 +20,7 @@ def make_mock_msg(msg_id: str = "m1", text: str = "!echo hi") -> Message:
     return Message(
         id=msg_id,
         raw_text=text,
-        user=User(
-            id="user1", display_name="TestUser", platform="console", role="admin"
-        ),
+        user=User(id="user1", display_name="TestUser", platform="console", role="admin"),
         timestamp=datetime.now(),
         platform="console",
     )

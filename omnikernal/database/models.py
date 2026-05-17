@@ -15,7 +15,6 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    UniqueConstraint,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -55,12 +54,8 @@ class Tool(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     command_name: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     pattern: Mapped[str] = mapped_column(String(255))
-    handler_path: Mapped[str] = mapped_column(
-        String(255)
-    )  # e.g. "plugins.echo.handlers.echo"
-    plugin_name: Mapped[str] = mapped_column(
-        ForeignKey("plugins.name", ondelete="CASCADE")
-    )
+    handler_path: Mapped[str] = mapped_column(String(255))  # e.g. "plugins.echo.handlers.echo"
+    plugin_name: Mapped[str] = mapped_column(ForeignKey("plugins.name", ondelete="CASCADE"))
     required_role: Mapped[str] = mapped_column(String(20), default="user")
 
     # Metadata
@@ -108,53 +103,4 @@ class ExecutionLog(Base):
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
-class ApiHealth(Base):
-    """
-    Health tracking for external API endpoints (Dead API Watchdog).
-    """
 
-    __tablename__ = "api_health"
-
-    url: Mapped[str] = mapped_column(Text, primary_key=True)
-    consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
-    last_success: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    last_failure: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    is_quarantined: Mapped[bool] = mapped_column(Boolean, default=False)
-    error_threshold: Mapped[int] = mapped_column(Integer, default=3)
-
-
-class DeadApi(Base):
-    """
-    History and logging of quarantined APIs.
-    """
-
-    __tablename__ = "dead_apis"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    api_url: Mapped[str] = mapped_column(Text, index=True)
-    tool_id: Mapped[int | None] = mapped_column(
-        ForeignKey("tools.id", ondelete="SET NULL"), nullable=True
-    )
-    error_count: Mapped[int] = mapped_column(Integer)
-    killed_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC)
-    )
-    kill_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
-    reactivated: Mapped[bool] = mapped_column(Boolean, default=False)
-
-
-class ToolRequirement(Base):
-    """
-    Stores encrypted API keys for tools.
-    """
-
-    __tablename__ = "tool_requirements"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    tool_id: Mapped[int] = mapped_column(
-        ForeignKey("tools.id", ondelete="CASCADE"), index=True
-    )
-    service: Mapped[str] = mapped_column(String(50), default="default", index=True)
-    api_key_value: Mapped[str] = mapped_column(Text)  # Stored ENCRYPTED
-
-    __table_args__ = (UniqueConstraint("tool_id", "service", name="uq_tool_service"),)

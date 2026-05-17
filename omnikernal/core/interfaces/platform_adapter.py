@@ -10,10 +10,12 @@ Adapters are registered with AdapterLoader and instantiated on demand.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from omnikernal.core.contracts.message import Message
+    from omnikernal.core.packet import IntentPacket
 
 
 class PlatformAdapter(ABC):
@@ -29,28 +31,41 @@ class PlatformAdapter(ABC):
     def __init__(self, **kwargs: Any) -> None: ...
 
     @abstractmethod
-    async def connect(self) -> None:
+    async def connect(self) -> bool:
         """
         Start the platform session.
 
         Open a browser, connect a WebSocket, authenticate via API —
         whatever the platform requires. Core calls this once on boot.
+
+        return : True if connection is successful , False otherwise.
         """
         ...
 
     @abstractmethod
-    async def fetch_new_messages(self) -> list[Message]:
+    async def is_connected(self) -> bool:
         """
-        Return new unread messages since the last call.
+        Check if the platform session is connected.
 
-        Read the DOM, poll a socket, hit an endpoint — implementation
-        is up to the adapter. Return an empty list if no new messages.
-        Never block indefinitely — return promptly each poll cycle.
+        Required for Monitor Health over Adapter for Advance WatchDog.
         """
         ...
 
     @abstractmethod
-    async def send_message(self, to: str, content: str) -> None:
+    async def fetch_new_messages(self) -> AsyncGenerator[Message, None]:
+        """
+        Process the messages using yield.
+        It is intented for users to use yield to return the Message.
+
+        Example:
+            async def fetch_new_messages(self) -> AsyncGenerator[Message, None]:
+                for msg in await self.platform.get_messages():
+                    yield msg
+        """
+        ...
+
+    @abstractmethod
+    async def send_message(self, packet: IntentPacket) -> bool:
         """
         Send a reply to a user.
 
@@ -59,18 +74,21 @@ class PlatformAdapter(ABC):
         POSTs to an API — whatever the platform requires.
 
         Args:
-            to:      Platform-specific user/chat identifier.
-            content: The reply text to send.
+            packet : IntentPacket , full obj access mutation , gives more flexible options.
+
+        returns : True if message is sent successfully , False otherwise.
         """
         ...
 
     @abstractmethod
-    async def disconnect(self) -> None:
+    async def disconnect(self) -> bool:
         """
         Tear down the session cleanly.
 
         Close the browser, disconnect the WebSocket, release resources.
         Core calls this on shutdown.
+
+        return : True if session is disconnected successfully , False otherwise.
         """
         ...
 

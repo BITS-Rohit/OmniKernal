@@ -54,9 +54,7 @@ async def test_watchdog_quarantine_flow(watchdog, app_repo):
 
     from omnikernal.database.models import DeadApi
 
-    result = await app_repo.session.execute(
-        select(DeadApi).where(DeadApi.api_url == url)
-    )
+    result = await app_repo.session.execute(select(DeadApi).where(DeadApi.api_url == url))
     dead_log = result.scalar_one()
     assert dead_log is not None
     assert dead_log.kill_reason == "Connection Refused"

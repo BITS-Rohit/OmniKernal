@@ -50,9 +50,7 @@ class AdapterValidator:
             raise ValueError(f"Failed to read adapter descriptor: {e}") from e
 
         if not isinstance(descriptor, dict):
-            raise ValueError(
-                f"Adapter descriptor is not a valid YAML mapping: {yaml_path}"
-            )
+            raise ValueError(f"Adapter descriptor is not a valid YAML mapping: {yaml_path}")
 
         missing = self.REQUIRED_FIELDS - set(descriptor.keys())
         if missing:
@@ -80,19 +78,13 @@ class AdapterValidator:
         for method_name in self.REQUIRED_METHODS:
             method = getattr(cls, method_name, None)
             if method is None:
-                raise TypeError(
-                    f"{cls.__name__} is missing required method: {method_name}"
-                )
+                raise TypeError(f"{cls.__name__} is missing required method: {method_name}")
             if not inspect.iscoroutinefunction(method):
-                raise TypeError(
-                    f"{cls.__name__}.{method_name} must be an 'async def' (coroutine)."
-                )
+                raise TypeError(f"{cls.__name__}.{method_name} must be an 'async def' (coroutine).")
 
         # Check required properties
         for prop_name in self.REQUIRED_PROPERTIES:
             if not isinstance(getattr(cls, prop_name, None), property):
-                raise TypeError(
-                    f"{cls.__name__} is missing required property: {prop_name}"
-                )
+                raise TypeError(f"{cls.__name__} is missing required property: {prop_name}")
 
         self.logger.debug(f"Class validated: {cls.__name__}")

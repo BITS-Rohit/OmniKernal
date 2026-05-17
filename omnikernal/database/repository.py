@@ -6,21 +6,22 @@ consistent error handling.
 """
 
 from collections.abc import Sequence
-from datetime import UTC, datetime
-from typing import Any, cast
+from typing import TYPE_CHECKING
 
-from sqlalchemy import select, update
+if TYPE_CHECKING:
+    from omnikernal.core.contracts import CommandManifest, PluginManifest
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from omnikernal.core.contracts import RouteCache
+
 from .models import (
-    ApiHealth,
-    DeadApi,
     ExecutionLog,
     Plugin,
     RoutingRule,
     Tool,
-    ToolRequirement,
 )
 
 
@@ -34,68 +35,70 @@ class OmniRepository:
 
     # --- Plugin & Tool Registry ---
 
-    async def register_plugin(
-        self,
-        name: str,
-        version: str,
-        author_name: str | None = None,
-        description: str | None = None,
-    ) -> None:
-        """
-        Registers or updates a plugin entry.
+    async def register_plugins(self, plugins: list["PluginManifest"]) -> None:
+        """Registers or updates plugins in a single batch query (Upsert)."""
+        if not plugins:
+            return
 
-        BUG 52 fix: session.merge() with a new Plugin instance always resets
-        is_active to True (the model default), silently re-enabling manually
-        disabled plugins on every restart. We now load the existing record and
-        only update mutable metadata fields, preserving is_active.
-        """
-        existing = await self.session.get(Plugin, name)
-        if existing:
-            existing.version = version
-            existing.author = author_name
-            existing.description = description
-            # is_active is intentionally NOT touched — preserve disabled state
-        else:
-            plugin = Plugin(
-                name=name,
-                version=version,
-                author=author_name,
-                description=description,
-                is_active=True,
+        from sqlalchemy.dialects.sqlite import insert
+
+        stmt = insert(Plugin).values([
+            {
+                "name": p.name,
+                "version": p.version,
+                "author": p.author,
+                "description": p.description,
+                "is_active": True,
+            }
+            for p in plugins
+        ])
+
+        # ON CONFLICT UPDATE
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["name"],
+            set_=dict(
+                version=stmt.excluded.version,
+                author=stmt.excluded.author,
+                description=stmt.excluded.description,
+                # Intentionally not updating is_active to preserve user overrides
             )
-            self.session.add(plugin)
+        )
+
+        await self.session.execute(stmt)
         await self.session.commit()
 
-    async def register_tool(
-        self,
-        command_name: str,
-        pattern: str,
-        handler_path: str,
-        plugin_name: str,
-        description: str | None = None,
-        required_role: str = "user",
-    ) -> None:
-        """Registers or updates a tool entry."""
-        existing = await self.get_tool_by_command(command_name)
-        if existing:
-            # also update plugin_name to avoid stale association
-            existing.pattern = pattern
-            existing.handler_path = handler_path
-            existing.description = description
-            existing.plugin_name = plugin_name
-            existing.required_role = required_role
-            await self.session.flush()
-        else:
-            tool = Tool(
-                command_name=command_name,
-                pattern=pattern,
-                handler_path=handler_path,
-                plugin_name=plugin_name,
-                description=description,
-                required_role=required_role,
-            )
-            self.session.add(tool)
+    async def register_tools(self, tools: list["CommandManifest"]) -> None:
+        """Registers or updates tools in a single batch query (Upsert)."""
+        if not tools:
+            return
 
+        from sqlalchemy.dialects.sqlite import insert
+
+        stmt = insert(Tool).values([
+            {
+                "command_name": t.name,
+                "pattern": t.pattern,
+                "handler_path": t.handler,
+                "plugin_name": t.plugin_name,
+                "description": t.description,
+                "required_role": t.minimum_role,
+            }
+            for t in tools
+        ])
+
+        # ON CONFLICT UPDATE
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["command_name"],
+            set_=dict(
+                pattern=stmt.excluded.pattern,
+                handler_path=stmt.excluded.handler_path,
+                description=stmt.excluded.description,
+                plugin_name=stmt.excluded.plugin_name,
+                required_role=stmt.excluded.required_role,
+            )
+        )
+
+        await self.session.execute(stmt)
         await self.session.commit()
 
     async def get_tool_by_command(self, command_name: str) -> Tool | None:
@@ -111,6 +114,29 @@ class OmniRepository:
         """Returns all registered tools."""
         result = await self.session.execute(select(Tool))
         return result.scalars().all()
+
+    async def get_routing_cache(self) -> dict[str, "RouteCache"]:
+        """Returns an O(1) lookup dictionary of RouteCache objects for all ACTIVE commands."""
+
+
+        # We need joinedload to check if the parent Plugin is active
+        result = await self.session.execute(
+            select(Tool).options(joinedload(Tool.plugin))
+        )
+        tools = result.scalars().all()
+
+        cache = {}
+        for t in tools:
+            # Only cache tools whose parent plugin is active!
+            if t.plugin and t.plugin.is_active:
+                cache[t.command_name] = RouteCache(
+                    command_name=t.command_name,
+                    pattern=t.pattern,
+                    handler_path=t.handler_path,
+                    required_role=t.required_role,
+                    plugin_name=t.plugin_name,
+                )
+        return cache
 
     async def get_all_plugins(self) -> Sequence[Plugin]:
         """Returns all registered plugins (active and inactive)."""
@@ -130,26 +156,24 @@ class OmniRepository:
         )
         return result.scalars().all()
 
-    async def set_plugin_inactive(self, plugin_name: str | list[str]) -> None:
-        """Marks one or more plugins as inactive."""
-        if isinstance(plugin_name, str):
-            stmt = update(Plugin).where(Plugin.name == plugin_name)
-        else:
-            if not plugin_name:
-                return
-            stmt = update(Plugin).where(Plugin.name.in_(plugin_name))
-
-        await self.session.execute(stmt.values(is_active=False))
+    async def remove_plugins(self, plugin_names: list[str]) -> None:
+        """Hard deletes plugins and cascades to their tools."""
+        from sqlalchemy import delete
+        if not plugin_names:
+            return
+        await self.session.execute(delete(Plugin).where(Plugin.name.in_(plugin_names)))
         await self.session.commit()
 
-
-
-    async def deactivate_missing_plugins(self, active_names: list[str]) -> None:
-        """Marks plugins NOT in the list as inactive."""
-
-        await self.session.execute(
-            update(Plugin).where(Plugin.name.notin_(active_names)).values(is_active=False)
-        )
+    async def remove_missing_plugins(self, active_names: list[str]) -> None:
+        """Hard deletes plugins NOT in the list."""
+        from sqlalchemy import delete
+        if not active_names:
+            # If no active plugins, delete everything
+            await self.session.execute(delete(Plugin))
+        else:
+            await self.session.execute(
+                delete(Plugin).where(Plugin.name.notin_(active_names))
+            )
         await self.session.commit()
 
     # --- Execution Logging ---
@@ -182,143 +206,4 @@ class OmniRepository:
         self.session.add(log)
         await self.session.commit()
 
-    # --- API Health Watchdog ---
 
-    async def increment_error(self, url: str, tool_id: int | None, error_msg: str) -> bool:
-        """
-        Increments failure count. Quarantines and logs to DeadApi if threshold reached.
-        Returns True if the API is now quarantined as a result of this error.
-        """
-        #  use atomic SQL update and fetch fresh data.
-        # execute(update) does not refresh loaded objects; we must SELECT again.
-        from sqlalchemy import select
-
-        await self.session.execute(
-            update(ApiHealth)
-            .where(ApiHealth.url == url)
-            .values(
-                consecutive_failures=ApiHealth.consecutive_failures + 1,
-                last_failure=datetime.now(UTC),
-            )
-        )
-
-        # Fresh fetch to avoid identity-map stale counter values
-        result = await self.session.execute(select(ApiHealth).where(ApiHealth.url == url))
-        health = result.scalar_one_or_none()
-
-        if not health:
-            health = ApiHealth(
-                url=url,
-                consecutive_failures=1,
-                last_failure=datetime.now(UTC),
-                error_threshold=3,
-            )
-            self.session.add(health)
-            await self.session.flush()
-
-        is_newly_dead = False
-        if health.consecutive_failures >= health.error_threshold and not health.is_quarantined:
-            health.is_quarantined = True
-            is_newly_dead = True
-
-            dead_api = DeadApi(
-                api_url=url,
-                tool_id=tool_id,
-                error_count=cast(int, cast(Any, health.consecutive_failures)),
-                kill_reason=error_msg,
-            )
-            self.session.add(dead_api)
-
-        await self.session.commit()
-        return is_newly_dead
-
-    async def reset_api_health(self, url: str) -> None:
-        """
-        Resets consecutive failure count and clears quarantine after a successful call.
-        Called by ApiWatchdog.record_success().
-
-        Note: This intentionally clears is_quarantined on success — the watchdog
-        recovery flow is: 3 failures → dead, then 1 success → healthy again.
-        For a stricter "manual reactivation only" workflow, use reactivate_api() instead.
-        """
-        health = await self.session.get(ApiHealth, url)
-        if not health:
-            health = ApiHealth(
-                url=url, consecutive_failures=0, error_threshold=3, is_quarantined=False
-            )
-            self.session.add(health)
-
-        health.consecutive_failures = 0
-        health.last_success = datetime.now(UTC)
-        health.is_quarantined = False  # watchdog recovery path: one success clears quarantine
-
-        await self.session.commit()
-
-    async def update_api_health(self, url: str, success: bool) -> None:
-        """
-        Convenience method: increment_error on failure, reset on success.
-        Useful for callers that don't need the fine-grained split.
-        """
-        if success:
-            await self.reset_api_health(url)
-        else:
-            # use None instead of 0 for tool_id to avoid FK issues
-            await self.increment_error(url, tool_id=None, error_msg="health update")
-
-    async def reactivate_api(self, url: str) -> None:
-        """
-        Manually reactivates a quarantined API.
-        Must be called explicitly by an operator after the underlying issue is fixed.
-        """
-        health = await self.session.get(ApiHealth, url)
-        if health:
-            health.consecutive_failures = 0
-            health.is_quarantined = False
-            health.last_success = datetime.now(UTC)
-            await self.session.commit()
-
-        # Also mark corresponding DeadApi row as reactivated
-        # Removed redundant local imports
-        await self.session.execute(
-            update(DeadApi)
-            .where(DeadApi.api_url == url, DeadApi.reactivated.is_(False))
-            .values(reactivated=True)
-        )
-        await self.session.commit()
-
-    async def register_tool_requirement(
-        self, tool_id: int, api_key: str, service: str = "default"
-    ) -> None:
-        """Saves or updates an encrypted API key for a tool. BUG 279 (UPSERT)."""
-        service = service or "default"
-        # Since this is a specialized repo method, we handle the select/merge
-        result = await self.session.execute(
-            select(ToolRequirement).where(
-                ToolRequirement.tool_id == tool_id, ToolRequirement.service == service
-            )
-        )
-        req = result.scalar_one_or_none()
-        if req:
-            req.api_key_value = api_key
-        else:
-            req = ToolRequirement(tool_id=tool_id, service=service, api_key_value=api_key)
-            self.session.add(req)
-        await self.session.commit()
-
-    async def get_api_key(self, tool_id: int, service: str = "default") -> str | None:
-        """Fetches the encrypted API key for a tool (optional service name)."""
-        result = await self.session.execute(
-            select(ToolRequirement).where(
-                ToolRequirement.tool_id == tool_id,
-                ToolRequirement.service == (service or "default"),
-            )
-        )
-        req = result.scalar_one_or_none()
-        return req.api_key_value if req else None
-
-    async def is_api_healthy(self, url: str) -> bool:
-        """Returns False if the API is quarantined."""
-        health = await self.session.get(ApiHealth, url)
-        if health:
-            return not health.is_quarantined
-        return True

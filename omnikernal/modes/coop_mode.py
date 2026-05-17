@@ -92,8 +92,7 @@ class CoopMode:
         self._approval_events[msg_id] = event
 
         self.logger.info(
-            f"[COOP] Pending approval for msg '{msg_id}' from {msg.user.id}: "
-            f"'{msg.raw_text}'"
+            f"[COOP] Pending approval for msg '{msg_id}' from {msg.user.id}: '{msg.raw_text}'"
         )
 
         try:
@@ -182,7 +181,5 @@ class CoopMode:
             else:
                 self.logger.info(f"Skipped rejected message: {msg.id}")
         except asyncio.CancelledError:
-            self.logger.info(
-                f"Approval task for '{msg.id}' was cancelled during shutdown."
-            )
+            self.logger.info(f"Approval task for '{msg.id}' was cancelled during shutdown.")
             raise
