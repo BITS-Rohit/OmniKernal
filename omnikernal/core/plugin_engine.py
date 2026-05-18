@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -33,7 +33,7 @@ from omnikernal.core.contracts import CommandManifest, PluginManifest
 if TYPE_CHECKING:
     from omnikernal.database.repository import OmniRepository
 
-from omnikernal.omni_logger import omni_looger
+from omnikernal.core.omni_logger import omni_logger
 
 # single source of truth for the current Core version
 OMNIKERNAL_VERSION: str = "0.1.0"
@@ -78,7 +78,7 @@ class PluginEngine:
     def __init__(self, repo: OmniRepository, plugins_dir: str):
         self.repo = repo
         self.plugins_dir = plugins_dir
-        self.logger = omni_looger.bind(subsystem="plugin_engine")
+        self.logger = omni_logger.bind(subsystem="plugin_engine")
         self.found_plugins_in_dir: list[str] = []
         self.db_safe_plugins: list[PluginManifest] = []
         self.failed_plugins: list[str] = []
@@ -145,14 +145,14 @@ class PluginEngine:
             flag = False
         return flag
 
-    def _get_dict(self, file: str, is_json: bool) -> dict | None:
+    def _get_dict(self, file: str, is_json: bool) -> dict[str, Any] | None:
         try:
             if is_json:
                 with open(file, encoding="utf-8") as f:
-                    return json.load(f)
+                    return cast(dict[str, Any], json.load(f))
             else:
                 with open(file, encoding="utf-8") as f:
-                    return yaml.safe_load(f)
+                    return cast(dict[str, Any], yaml.safe_load(f))
         except UnicodeDecodeError:
             self.logger.debug(f"Wrong encoding (not UTF-8): {file}")
 
@@ -167,7 +167,7 @@ class PluginEngine:
         return None
 
     def _validate_content(
-        self, raw: dict[str, str] | None, commands: dict[str, str] | None
+        self, raw: dict[str, Any] | None, commands: dict[str, Any] | None
     ) -> bool:
 
         if not raw:
@@ -277,8 +277,8 @@ class PluginEngine:
         if not self._validate_single_plugin(manifest_json, commands_yaml):
             return None
 
-        raw: dict[str, str] | None = self._get_dict(manifest_json, True)
-        commands: dict[str, str] | None = self._get_dict(commands_yaml, False)
+        raw: dict[str, Any] | None = self._get_dict(manifest_json, True)
+        commands: dict[str, Any] | None = self._get_dict(commands_yaml, False)
 
         if not self._validate_content(raw, commands):
             return None

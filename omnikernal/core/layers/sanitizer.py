@@ -7,8 +7,11 @@ Prevents shell injection, command chaining, newline injection, and template inje
 
 import re
 
+from omnikernal.core.contracts import IntentPacket
+from omnikernal.core.interfaces import BaseLayer
 
-class CommandSanitizer:
+
+class CommandSanitizer(BaseLayer):
     """
     Security firewall for raw message text.
 
@@ -28,8 +31,7 @@ class CommandSanitizer:
     # and serve no valid purpose in bot commands.
     FORBIDDEN_CHARS = r"[;\&|`\$\\(){}<>]"
 
-    @classmethod
-    def sanitize(cls, raw_text: str) -> str:
+    async def process(self, packet: IntentPacket) -> IntentPacket:
         """
         Cleans raw input text.
 
@@ -42,12 +44,17 @@ class CommandSanitizer:
                 — includes () to close the $() substitution bypass
             5. Collapse multiple spaces into one
         """
+        raw_text = packet.message.raw_text
         if not raw_text:
-            return ""
+            return packet
 
+        packet.sanitized_text = self._clean(raw_text)
+        return packet
+
+    @classmethod
+    def _clean(cls, raw_text: str) -> str:
+        """Pure sanitization logic. Reusable and directly testable."""
         text = raw_text.strip()
         text = text.replace("\n", "").replace("\r", "")
         text = re.sub(cls.FORBIDDEN_CHARS, "", text)
-        text = re.sub(r"\s+", " ", text)
-
-        return text.strip()
+        return re.sub(r"\s+", " ", text).strip()

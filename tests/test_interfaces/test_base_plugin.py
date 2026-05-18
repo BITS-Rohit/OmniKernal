@@ -1,5 +1,7 @@
 """Test stubs for BasePlugin ABC — structural correctness only."""
 
+from typing import Any, cast
+
 import pytest
 
 from omnikernal.core.interfaces.base_plugin import BasePlugin
@@ -8,7 +10,7 @@ from omnikernal.core.interfaces.base_plugin import BasePlugin
 def test_base_plugin_is_abstract():
     """BasePlugin cannot be instantiated directly."""
     with pytest.raises(TypeError):
-        BasePlugin()  # type: ignore[abstract]
+        cast(Any, BasePlugin)()
 
 
 def test_base_plugin_missing_properties_raises():
@@ -18,7 +20,7 @@ def test_base_plugin_missing_properties_raises():
         pass
 
     with pytest.raises(TypeError):
-        IncompletePlugin()
+        cast(Any, IncompletePlugin)()
 
 
 def test_base_plugin_full_concrete_instantiates():

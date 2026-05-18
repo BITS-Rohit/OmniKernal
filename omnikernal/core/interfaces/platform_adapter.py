@@ -10,7 +10,7 @@ Adapters are registered with AdapterLoader and instantiated on demand.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -52,17 +52,23 @@ class PlatformAdapter(ABC):
         ...
 
     @abstractmethod
-    async def fetch_new_messages(self) -> AsyncGenerator[Message, None]:
+    async def fetch_new_messages(self) -> AsyncIterator[Message]:
         """
-        Process the messages using yield.
-        It is intented for users to use yield to return the Message.
+        Async generator that yields inbound messages.
+
+        Implement using `async def` + `yield`. The AdapterManager polls
+        this indefinitely while the adapter is connected.
 
         Example:
-            async def fetch_new_messages(self) -> AsyncGenerator[Message, None]:
-                for msg in await self.platform.get_messages():
-                    yield msg
+            async def fetch_new_messages(self) -> AsyncIterator[Message]:
+                while self._connected:
+                    for msg in await self.platform.get_messages():
+                        yield msg
+                    await asyncio.sleep(0.1)
         """
-        ...
+        # Required to make this an abstract async generator
+        return
+        yield  # noqa: unreachable — makes mypy treat this as AsyncIterator
 
     @abstractmethod
     async def send_message(self, packet: IntentPacket) -> bool:

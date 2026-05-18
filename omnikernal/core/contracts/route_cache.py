@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .role import ROLE
+from .user import ROLE
 
 
 @dataclass(frozen=True, slots=True)

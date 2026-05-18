@@ -20,9 +20,9 @@ import time
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from omnikernal.core.router import CommandRouter, RulesCache
 from omnikernal.database.models import Base
 from omnikernal.database.repository import OmniRepository
+from omnikernal.security.router import CommandRouter, RulesCache
 
 NUM_PLUGINS = 500
 CMDS_PER_PLUGIN = 10

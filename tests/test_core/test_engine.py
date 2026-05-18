@@ -21,8 +21,8 @@ import pytest
 from omnikernal.core.contracts.command_result import CommandResult
 from omnikernal.core.contracts.message import Message
 from omnikernal.core.contracts.user import User
-from omnikernal.core.dispatcher import DispatchResult
-from omnikernal.core.engine import OmniKernal
+from omnikernal.security.dispatcher import DispatchResult
+from omnikernal.security.engine import OmniKernal
 
 
 def _make_msg(text: str = "!echo hello integration", user_id: str = "user1") -> Message:

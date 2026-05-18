@@ -5,10 +5,11 @@ Checks if a user has sufficient roles or permissions to execute a command.
 
 """
 from omnikernal.core.contracts import ROLE
+from omnikernal.core.interfaces import BaseLayer
 
 role_order = [ROLE.USER, ROLE.MODERATOR, ROLE.ADMIN]
 
-class PermissionValidator:
+class PermissionValidator(BaseLayer):
 
     @staticmethod
     def resolve_permission(required : ROLE, actual : ROLE) -> bool:

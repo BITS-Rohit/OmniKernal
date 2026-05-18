@@ -87,3 +87,6 @@ ignore/
 
 profiles/
 omnikernal/profiles/
+omnikernal/modes/
+omnikernal/security/
+

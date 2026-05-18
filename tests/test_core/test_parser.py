@@ -1,4 +1,4 @@
-from omnikernal.core.parser import CommandParser
+from omnikernal.security.parser import CommandParser
 
 
 def test_parser_single_arg():

@@ -11,9 +11,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from omnikernal.core.contracts import User
+from .user import User
 
 if TYPE_CHECKING:
     from omnikernal.core.interfaces import PlatformAdapter
@@ -42,7 +42,7 @@ class Message:
 
 
     @classmethod
-    def from_dict(cls, data: dict) -> Message:
+    def from_dict(cls, data: dict[str , Any]) -> Message:
         """
         Create a Message from a dictionary and returns it.
         """
@@ -58,7 +58,7 @@ class Message:
         )
 
     @staticmethod
-    def _validate(data : dict)-> None:
+    def _validate(data : dict[str , str| User])-> None:
         if data["user"] is None:
             raise ValueError("User must be given in `Message` Model.")
         if data["id"] is None:
@@ -70,7 +70,7 @@ class Message:
         if data["platform"] is None:
             raise ValueError("Platform must be given in `Message` Model.")
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str , Any]:
         """
         Convert a Message to a dictionary.
         """

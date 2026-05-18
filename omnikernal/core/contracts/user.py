@@ -41,15 +41,15 @@ class User:
     role: ROLE = ROLE.USER
 
     @classmethod
-    def from_dict(cls, data: dict) -> User:
+    def from_dict(cls, data: dict[str,str| ROLE]) -> User:
         return cls(
             id=data["id"],
             display_name=data["display_name"],
             platform=data["platform"],
-            role=data["role"],
+            role=ROLE(data["role"]),
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str , str | ROLE]:
         return {
             "id": self.id,
             "display_name": self.display_name,

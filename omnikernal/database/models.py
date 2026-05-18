@@ -1,8 +1,8 @@
 """
 Database Models, SQLAlchemy Declarative Schema
 
-Defines the tables for the Microkernel registry, execution logging,
-and security watchdog (API health).
+Defines the tables for the Microkernel plugin/tool registry and execution audit log.
+Note: RoutingRule (regex-based routing) was removed — routing now uses O(1) cache.
 """
 
 from datetime import UTC, datetime
@@ -64,23 +64,6 @@ class Tool(Base):
 
     # Relationships
     plugin: Mapped["Plugin"] = relationship(back_populates="tools")
-
-
-class RoutingRule(Base):
-    """
-    Custom routing overrides (Phase 3).
-    Allows mapping a custom regex to a tool.
-    """
-
-    __tablename__ = "routing_rules"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    regex_pattern: Mapped[str] = mapped_column(String(255), unique=True)
-    tool_id: Mapped[int] = mapped_column(ForeignKey("tools.id", ondelete="CASCADE"))
-    priority: Mapped[int] = mapped_column(Integer, default=0)
-
-    # Relationships
-    tool: Mapped["Tool"] = relationship()
 
 
 class ExecutionLog(Base):

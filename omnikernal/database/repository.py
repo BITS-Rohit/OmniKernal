@@ -15,12 +15,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from omnikernal.core.contracts import RouteCache
+from omnikernal.core.contracts import ROLE, RouteCache
 
 from .models import (
     ExecutionLog,
     Plugin,
-    RoutingRule,
     Tool,
 )
 
@@ -133,7 +132,7 @@ class OmniRepository:
                     command_name=t.command_name,
                     pattern=t.pattern,
                     handler_path=t.handler_path,
-                    required_role=t.required_role,
+                    required_role=ROLE(t.required_role),
                     plugin_name=t.plugin_name,
                 )
         return cache
@@ -143,18 +142,6 @@ class OmniRepository:
         result = await self.session.execute(select(Plugin))
         return result.scalars().all()
 
-    async def get_all_routing_rules(self) -> Sequence[RoutingRule]:
-        """
-        Returns all routing rules ordered by priority (highest first).
-        used by CommandRouter for regex-based dispatch.
-        uses joined load to fetch Tool metadata in one query.
-        """
-        result = await self.session.execute(
-            select(RoutingRule)
-            .options(joinedload(RoutingRule.tool))
-            .order_by(RoutingRule.priority.desc())
-        )
-        return result.scalars().all()
 
     async def remove_plugins(self, plugin_names: list[str]) -> None:
         """Hard deletes plugins and cascades to their tools."""
@@ -190,9 +177,9 @@ class OmniRepository:
     ) -> None:
         """Adds a record to the audit trail.sanitized."""
         # Sanitize error reason specifically for audit logs to prevent injection
-        from omnikernal.security.sanitizer import CommandSanitizer
+        from omnikernal.core.layers.sanitizer import CommandSanitizer
 
-        safe_reason = CommandSanitizer.sanitize(error_reason) if error_reason else None
+        safe_reason = CommandSanitizer._clean(error_reason) if error_reason else None
 
         log = ExecutionLog(
             user_id=user_id,
@@ -205,5 +192,3 @@ class OmniRepository:
         )
         self.session.add(log)
         await self.session.commit()
-
-
