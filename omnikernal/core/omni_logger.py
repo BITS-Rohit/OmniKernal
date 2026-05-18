@@ -58,7 +58,7 @@ class ColorFormatter(logging.Formatter):
             message="%(message)s",
         )
 
-        formatter = logging.Formatter(log_fmt, datefmt=self.datefmt, style="{")
+        formatter = logging.Formatter(log_fmt, datefmt=self.datefmt, style="%")
         return formatter.format(record)
 
 

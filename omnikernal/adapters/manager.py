@@ -164,11 +164,18 @@ class AdapterManager:
         """Background producer loop for a single adapter instance."""
         self.logger.info(f"Polling started — platform='{platform_name}'")
         try:
-            async for message in adapter.fetch_new_messages():
+            async for item in adapter.fetch_new_messages():
+                # Adapters may yield (Message, flags_dict) or plain Message
+                if isinstance(item, tuple):
+                    message, flags = item
+                else:
+                    message, flags = item, None
+
                 # Attach originating adapter if not already set
                 if message.adapter is None:
                     message = dataclasses.replace(message, adapter=adapter)
-                await broker.push(message)
+
+                await broker.push(message, flags=flags)
         except asyncio.CancelledError:
             self.logger.info(f"Polling cancelled — platform='{platform_name}'")
         except Exception as exc:

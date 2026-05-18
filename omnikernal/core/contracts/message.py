@@ -38,7 +38,7 @@ class Message:
     user: User
     timestamp: datetime
     platform: str
-    adapter : PlatformAdapter | None = None
+    adapter: PlatformAdapter | None = None
 
 
     @classmethod
@@ -80,7 +80,7 @@ class Message:
             "user": self.user,
             "timestamp": self.timestamp,
             "platform": self.platform,
-            "adapter": self.adapter
+            "adapter": self.adapter,
         }
 
     def __str__(self) -> str:

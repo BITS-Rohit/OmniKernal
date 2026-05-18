@@ -89,4 +89,4 @@ profiles/
 omnikernal/profiles/
 omnikernal/modes/
 omnikernal/security/
-
+tests/smoke

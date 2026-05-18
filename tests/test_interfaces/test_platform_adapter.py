@@ -1,14 +1,19 @@
 """Test stubs for PlatformAdapter ABC — structural correctness only."""
 
+from collections.abc import AsyncIterator
+from typing import Any, cast
+
 import pytest
 
+from omnikernal.core.contracts.intent_packet import IntentPacket
+from omnikernal.core.contracts.message import Message
 from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
 
 
 def test_platform_adapter_is_abstract():
     """PlatformAdapter cannot be instantiated directly — it's an ABC."""
     with pytest.raises(TypeError):
-        PlatformAdapter()  # type: ignore[abstract]
+        cast(Any, PlatformAdapter)()
 
 
 def test_platform_adapter_concrete_missing_methods_raises():
@@ -18,19 +23,31 @@ def test_platform_adapter_concrete_missing_methods_raises():
         pass  # missing all abstract methods
 
     with pytest.raises(TypeError):
-        IncompleteAdapter()
+        cast(Any, IncompleteAdapter)()
 
 
 def test_platform_adapter_full_concrete_instantiates():
     """A fully implemented subclass instantiates without error."""
 
     class ConcreteAdapter(PlatformAdapter):
-        async def connect(self) -> None: ...
-        async def fetch_new_messages(self):
-            return []
+        def __init__(self, **kwargs: Any) -> None:
+            pass
 
-        async def send_message(self, to: str, content: str) -> None: ...
-        async def disconnect(self) -> None: ...
+        async def connect(self) -> bool:
+            return True
+
+        async def is_connected(self) -> bool:
+            return True
+
+        async def fetch_new_messages(self) -> AsyncIterator[Message]:
+            if False:
+                yield cast(Message, None)
+
+        async def send_message(self, packet: IntentPacket) -> bool:
+            return True
+
+        async def disconnect(self) -> bool:
+            return True
 
         @property
         def platform_name(self) -> str:
@@ -38,3 +55,4 @@ def test_platform_adapter_full_concrete_instantiates():
 
     adapter = ConcreteAdapter()
     assert adapter.platform_name == "mock"
+

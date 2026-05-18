@@ -27,10 +27,19 @@ class GlobalBroker:
         self.dispatcher: list[BaseLayer] = self._create_layers()
         self.logger = logger or omni_logger
 
-    async def push(self, message: Message, logger: Logger | LoggerAdapter[Any] | None = None) -> None:
+    async def push(
+        self,
+        message: Message,
+        flags: dict[str, Any] | None = None,
+        logger: Logger | LoggerAdapter[Any] | None = None,
+    ) -> None:
         if logger is None:
             logger = self.logger
-        packet = IntentPacket(message=message, logger=logger)
+        packet = IntentPacket(
+            message=message,
+            logger=logger,
+            flags=dict(flags) if flags else {},
+        )
         await self.queue.put(packet)
 
     async def start(self) -> asyncio.Task:  # type: ignore[type-arg]
