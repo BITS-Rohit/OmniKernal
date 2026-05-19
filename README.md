@@ -1,139 +1,62 @@
-# OmniKernel
+<div align="center">
+  <h1>🪐 OmniKernal</h1>
+  <p><b>Write Code Once. Run It Everywhere.</b></p>
+</div>
 
-**OmniKernel** is a secure, database-driven microkernel framework for building scalable, multi-platform automation systems.  
-It provides a modular plugin architecture that decouples platform logic from execution logic, enabling extensible and isolated automation workflows.
-
----
-
-## 🚀 Vision
-
-OmniKernel is not a bot script.  
-It is a foundation for building automation ecosystems.
-
-The framework enables:
-- Multi-platform support (via adapter layer)
-- Dynamic plugin loading
-- Structured command routing
-- Database-driven tool management
-- Multi-profile session lifecycle control
-- Secure, isolated tool execution
+<p align="center">
+  <img src="https://img.shields.io/badge/Architecture-Domain_Driven-brightgreen" alt="Architecture" />
+  <img src="https://img.shields.io/badge/State-Intent_Packet_Pipeline-blue" alt="Pipeline" />
+  <img src="https://img.shields.io/badge/Platform-Agnostic-yellow" alt="Agnostic" />
+</p>
 
 ---
 
-## 🏗 Architecture Overview
+## 🚀 The Universal Messaging Core
 
-OmniKernel follows a microkernel design:
-```
-Core Engine
-↓
-Platform Adapter Layer
-↓
-Plugin Layer
-↓
-Database Layer
-```
+OmniKernal is an advanced, strictly decoupled execution engine designed for cross-platform chat automation. 
 
-### Core Engine
-- Event dispatcher
-- Command parser
-- Permission validator
-- Plugin loader
-- Execution router
-
-### Platform Adapter Layer
-Each platform implements a common interface:
-- Send message
-- Receive message
-- User/session management
-
-This allows integration with:
-- Playwright-based automation
-- Baileys
-- Business APIs
-- Future SDKs
-
-### Plugin Layer
-Each plugin:
-- Defines commands
-- Registers metadata
-- Is version-controlled
-- Executes in isolation
-
-### Database Layer
-Stores:
-- Plugin registry
-- Tool metadata
-- Routing rules
-- Execution logs
-- Permissions
+Our core philosophy is simple: **Write Code Once, Run It Everywhere.** 
+Whether you are deploying to WhatsApp, Telegram, Discord, or a custom internal API, your plugin logic never changes. OmniKernal handles the platform complexities, protocol translations, and state management completely invisibly.
 
 ---
 
-## 🔌 Plugin Philosophy
+## 🧠 Core Architecture
 
-Plugins are:
-- Dynamically loadable
-- Strictly structured
-- Permission-aware
-- Independently executable
+OmniKernal abandons fragile, monolithic routing in favor of a **Domain-Driven, Pipeline-Based Architecture**.
 
-Command format example:
-``` 
-<command_name> <arguments>
-```
+### 1. 📦 IntentPacket Pipeline
+Every incoming message is encapsulated into a mutable `IntentPacket`. This single state object flows through the entire system — from Sanitization to Permissions, Mapping, Execution, and Response. Middlewares and AI agents mutate this state seamlessly without redundant data parsing.
 
-Example:
-```
-!ytaudio <youtube_url>
-!stats <username>
-```
+### 2. 🔌 Platform Adapters
+Adapters act as the bridge between raw platform APIs (like Baileys or WAHA) and the Core. They normalize incoming data into the strict OmniKernal `Message` contract and dispatch `IntentPacket` replies back to the target platform perfectly.
 
+### 3. 🧩 Plugin Ecosystem & DB Registry
+Plugins are packaged by business feature. OmniKernal uses a robust, database-backed registry to track plugin states, command schemas, and runtime execution metrics dynamically.
+- **Dynamic Configurations:** Admins can disable plugins or modify permission roles at runtime instantly.
+- **Agnostic Handlers:** Handlers simply receive arguments and a safe context. They never touch platform-specific SDKs.
 
 ---
 
-## 🔐 Security Principles
+## ⚙️ The Execution Flow
 
-- Tool-level isolation
-- Database-backed validation
-- Controlled execution flow
-- Profile lifecycle enforcement
-- Optional multi-process safeguards
-
----
-
-## 📈 Goals
-
-- Scalable automation
-- Platform-agnostic design
-- Research-aligned architecture
-- Production-ready foundation
-- Extensible ecosystem
+1. **Adapter Ingestion:** Platform-specific adapter receives raw socket/webhook data.
+2. **Normalization:** Data maps securely to a strict `Message` dataclass.
+3. **Global Broker:** The `Message` enters the `IntentPacket` pipeline.
+4. **Inspection Layers:** 
+   - *Sanitizer:* Strips dangerous characters completely.
+   - *Mapper:* Resolves dynamic command prefixes via optimized routing cache.
+   - *Permission:* Validates user roles against persistent database rules.
+5. **Execution Layer:** Dynamically loads and runs the specific plugin handler safely.
+6. **Response Layer:** Routes the executed output back to the originating Adapter precisely.
 
 ---
 
-## 🛠 Status
+## 👩‍💻 Contributing
 
-OmniKernel is under active development.  
-Architecture is being stabilized prior to benchmarking and research validation.
+OmniKernal operates on a strict **Domain-Driven Design (DDD)** structure. 
+Contributors must ensure all new components respect the Single Responsibility Principle and maintain strict isolation from platform-specific code. 
 
----
-
-## 📜 License
-
-MIT 
+Please read the contribution guidelines before opening pull requests.
 
 ---
-
-## 🤝 Contributing
-
-We welcome contributions focused on:
-- Adapter development
-- Plugin system improvements
-- Database optimization
-- Security hardening
-- Performance benchmarking
-
----
-
-OmniKernel is not just automation.  
-It is infrastructure.
+<p align="center">Built for scalability. Engineered for perfection.</p>
