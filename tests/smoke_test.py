@@ -2,59 +2,73 @@
 OmniKernal — Smoke Test
 
 Demonstrates the full Core Engine loop using a directly-registered adapter:
-1. Registers ConsoleMockAdapter with AdapterLoader
-2. Boots the engine with the loaded adapter
+1. Registers MockAdapter with AdapterManager
+2. Boots the GlobalBroker with the loaded adapter
 3. Injects a simulated message
-4. Runs the pipeline: Sanitize -> Parse -> Route -> Execute -> Reply
+4. Runs the pipeline: Mapping -> Sanitize -> Parse -> Execute -> Reply
 """
 
 import asyncio
 
-from omnikernal.adapters.loader import AdapterLoader
-from omnikernal.core.engine import OmniKernal
-from omnikernal.database.repository import OmniRepository
-from omnikernal.database.session import (
-    async_session_factory,
-    ensure_db_initialized,
-)
+from omnikernal.adapters.manager import AdapterManager
+from omnikernal.adapters.mock_adapter import MockAdapter
+from omnikernal.core import GlobalBroker
+from omnikernal.core.contracts import RouteCache
+from omnikernal.core.contracts.user import ROLE
+
+
+async def echo_handler(packet) -> str:
+    """Simple echo command handler executed by ExecutionLayer."""
+    return f"Echo response: {packet.message.raw_text}"
 
 
 async def run_smoke_test():
-    # 1. Initialize DB and Repository
-    print("[Core] Initializing Database...")
-    await ensure_db_initialized()
+    # 1. Setup in-memory command routing cache
+    print("[SmokeTest] Setting up routing cache...")
+    routing_cache = {
+        "echo": RouteCache(
+            command_name="echo",
+            pattern=".*",
+            handler_path="tests.smoke_test.echo_handler",
+            required_role=ROLE.ADMIN,
+            plugin_name="smoke_plugin"
+        )
+    }
 
-    async with async_session_factory() as session:
-        repo = OmniRepository(session)
+    # 2. Initialize the GlobalBroker and AdapterManager
+    print("[SmokeTest] Initializing GlobalBroker...")
+    broker = GlobalBroker(routing_cache=routing_cache)
+    manager = AdapterManager()
 
-        # 2. Register and load adapter
-        print("[Core] Loading adapter: console...")
-        loader = AdapterLoader()
+    # 3. Register and inject message into MockAdapter
+    print("[SmokeTest] Initializing MockAdapter...")
+    adapter = MockAdapter()
+    manager.register("console", adapter)
 
-        # TODO  ConsoleAdapter already has now Decorator to register it, need Fixation if error comes
-        loader.register_adapter("console")
-        adapter = loader.load("console")
+    adapter.inject_message("!echo Smoke Test is Working!")
 
-        # 3. Inject a test message
-        adapter.inject_message("!echo Smoke Test is Working!")
+    # 4. Boot broker and start all adapters
+    print("[SmokeTest] Starting Core Broker...")
+    broker_task = await broker.start()
 
-        # 4. Boot the engine
-        engine = OmniKernal(adapter, repo)
+    print("[SmokeTest] Starting Adapter Polling...")
+    await manager.start_all(broker)
 
-        print("[Core] Starting Engine...")
-        engine_task = asyncio.create_task(engine.start())
+    # Wait briefly for packet execution
+    await asyncio.sleep(0.5)
 
-        # Wait for message processing
-        await asyncio.sleep(2)
+    # 5. Stop all and clean up
+    print("[SmokeTest] Stopping Core and Adapters...")
+    await manager.stop_all()
+    await broker.stop()
+    broker_task.cancel()
 
-        print("[Core] Stopping Engine...")
-        await engine.stop()
-        await engine_task
-
-        if adapter.sent_messages:
-            print("\n[PASS] SMOKE TEST PASSED: Adapter + Engine pipeline working!")
-        else:
-            print("\n[FAIL] SMOKE TEST FAILED: No reply generated.")
+    # 6. Verify result
+    if adapter.sent_messages:
+        print(f"\n[PASS] SMOKE TEST PASSED: Received reply -> '{adapter.sent_messages[0]}'")
+    else:
+        print("\n[FAIL] SMOKE TEST FAILED: No reply generated.")
+        raise RuntimeError("Smoke test failed: No output generated.")
 
 
 if __name__ == "__main__":

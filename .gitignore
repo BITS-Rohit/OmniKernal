@@ -79,6 +79,14 @@ search_input_*.png
 before_search.png
 init_main.png
 
+
+# Cleanup for PYPI
 DOCS/
 adapter_packs/
 ignore/
+
+profiles/
+omnikernal/profiles/
+omnikernal/modes/
+omnikernal/security/
+tests/smoke

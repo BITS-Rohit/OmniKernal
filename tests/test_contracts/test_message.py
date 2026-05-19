@@ -30,9 +30,7 @@ def test_message_construction():
 
 def test_message_is_immutable():
     ts = datetime(2026, 3, 1, 12, 0, 0)
-    msg = Message(
-        id="m2", raw_text="test", user=_make_user(), timestamp=ts, platform="whatsapp"
-    )
+    msg = Message(id="m2", raw_text="test", user=_make_user(), timestamp=ts, platform="whatsapp")
     with pytest.raises(FrozenInstanceError):
         msg.raw_text = "tampered"  # type: ignore[misc]
 

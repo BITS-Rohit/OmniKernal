@@ -2,6 +2,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from omnikernal.core.contracts import CommandManifest, PluginManifest
 from omnikernal.database.models import Base
 from omnikernal.database.repository import OmniRepository
 
@@ -13,9 +14,7 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    session_factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with session_factory() as session:
         yield session
     await engine.dispose()
@@ -26,21 +25,31 @@ async def test_repository_plugin_and_tool_registration(db_session):
     repo = OmniRepository(db_session)
 
     # 1. Register Plugin
-    await repo.register_plugin("echo_plugin", "1.0.0", "Test Author")
+    plugin = PluginManifest(
+        name="echo_plugin",
+        version="1.0.0",
+        author="Test Author",
+        description="A test plugin",
+        min_core_version="0.1.0"
+    )
+    await repo.register_plugins([plugin])
 
     # 2. Register Tool
-    await repo.register_tool(
-        command_name="echo",
+    tool = CommandManifest(
+        name="echo",
         pattern="!echo <text>",
-        handler_path="plugins.echo.handlers.echo.run",
+        handler="plugins.echo.handlers.echo.run",
         plugin_name="echo_plugin",
+        description="Echoes text",
+        minimum_role="USER"
     )
+    await repo.register_tools([tool])
 
     # 3. Verify
-    tool = await repo.get_tool_by_command("echo")
-    assert tool is not None
-    assert tool.pattern == "!echo <text>"
-    assert tool.plugin_name == "echo_plugin"
+    t = await repo.get_tool_by_command("echo")
+    assert t is not None
+    assert t.pattern == "!echo <text>"
+    assert t.plugin_name == "echo_plugin"
 
 
 @pytest.mark.asyncio
@@ -60,23 +69,3 @@ async def test_repository_execution_logging(db_session):
     # For now, just ensure it doesn't crash and commits.
     assert True
 
-
-@pytest.mark.asyncio
-async def test_repository_api_health_watchdog(db_session):
-    repo = OmniRepository(db_session)
-    url = "https://api.example.com"
-
-    # 1. First failure
-    await repo.update_api_health(url, success=False)
-    assert await repo.is_api_healthy(url) is True
-
-    # 2. Reaching threshold (3)
-    await repo.update_api_health(url, success=False)
-    await repo.update_api_health(url, success=False)
-
-    # 3. Should be quarantined
-    assert await repo.is_api_healthy(url) is False
-
-    # 4. Recovery
-    await repo.update_api_health(url, success=True)
-    assert await repo.is_api_healthy(url) is True

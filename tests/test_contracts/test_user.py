@@ -1,10 +1,11 @@
 """Test stubs for User contract — construction and immutability."""
 
 from dataclasses import FrozenInstanceError
+from typing import Any, cast
 
 import pytest
 
-from omnikernal.core.contracts.user import User
+from omnikernal.core.contracts.user import ROLE, User
 
 
 def test_user_construction():
@@ -12,20 +13,21 @@ def test_user_construction():
     assert u.id == "123"
     assert u.display_name == "Alice"
     assert u.platform == "whatsapp"
-    assert u.role == "user"  # default
+    assert u.role == ROLE.USER  # default
 
 
 def test_user_admin_role():
-    u = User(id="1", display_name="Admin", platform="whatsapp", role="admin")
-    assert u.is_admin() is True
+    u = User(id="1", display_name="Admin", platform="whatsapp", role=ROLE.ADMIN)
+    assert u.is_admin is True
 
 
 def test_user_default_not_admin():
     u = User(id="2", display_name="Bob", platform="whatsapp")
-    assert u.is_admin() is False
+    assert u.is_admin is False
 
 
 def test_user_is_immutable():
     u = User(id="3", display_name="Carol", platform="whatsapp")
     with pytest.raises(FrozenInstanceError):
-        u.display_name = "Changed"  # type: ignore[misc]
+        cast(Any, u).display_name = "Changed"
+
