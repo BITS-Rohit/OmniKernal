@@ -1,4 +1,3 @@
-
 from omnikernal.core.contracts import IntentPacket, PacketState
 from omnikernal.core.interfaces import BaseLayer
 

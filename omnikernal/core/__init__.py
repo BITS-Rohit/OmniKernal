@@ -67,11 +67,11 @@ class GlobalBroker:
         from omnikernal.core.layers.sanitizer import CommandSanitizer
 
         return [
-            MappingLayer(self.routing_cache),   # Layer 1+2: route + permissions
-            CommandSanitizer(),                  # Layer 4: sanitize
-            Parser(),                            # Layer 5: parse CLI args
-            ExecutionLayer(),                    # Layer 6: execute handler
-            ResponseLayer(),                     # Layer 7: reply to user
+            MappingLayer(self.routing_cache),  # Layer 1+2: route + permissions
+            CommandSanitizer(),  # Layer 4: sanitize
+            Parser(),  # Layer 5: parse CLI args
+            ExecutionLayer(),  # Layer 6: execute handler
+            ResponseLayer(),  # Layer 7: reply to user
         ]
 
     async def stop(self, wait_for_all_tasks: bool = False) -> None:

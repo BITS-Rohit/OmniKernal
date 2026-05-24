@@ -125,15 +125,15 @@ class PluginEngine:
         await self.batch_process()
 
     async def batch_process(self) -> None:
-        await self.repo.register_plugins(self.db_safe_plugins)   # bulk upsert
-        await self.repo.register_tools(self.valid_commands)       # bulk upsert
+        await self.repo.register_plugins(self.db_safe_plugins)  # bulk upsert
+        await self.repo.register_tools(self.valid_commands)  # bulk upsert
 
         safe_names = [p.name for p in self.db_safe_plugins]
 
         if self.failed_plugins:
-            await self.repo.remove_plugins(self.failed_plugins)   # bulk delete
+            await self.repo.remove_plugins(self.failed_plugins)  # bulk delete
 
-        await self.repo.remove_missing_plugins(safe_names)        # bulk delete stale
+        await self.repo.remove_missing_plugins(safe_names)  # bulk delete stale
 
     def _validate_single_plugin(self, manifest: str, commands: str) -> bool:
         flag = True
@@ -169,7 +169,6 @@ class PluginEngine:
     def _validate_content(
         self, raw: dict[str, Any] | None, commands: dict[str, Any] | None
     ) -> bool:
-
         if not raw:
             self.logger.debug("Manifest file is empty or contains invalid data")
             return False

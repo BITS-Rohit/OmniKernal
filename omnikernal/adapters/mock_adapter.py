@@ -84,6 +84,6 @@ class MockAdapter(PlatformAdapter):
             user=User(id=user_id, display_name="TestUser", platform="console", role=ROLE.ADMIN),
             timestamp=datetime.now(UTC),
             platform="console",
-            adapter=self
+            adapter=self,
         )
         self._message_queue.put_nowait(msg)

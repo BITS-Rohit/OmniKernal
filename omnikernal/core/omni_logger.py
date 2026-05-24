@@ -42,7 +42,9 @@ class ColorFormatter(logging.Formatter):
     BOLD_RED = "\x1b[31;1m"
     RESET = "\x1b[0m"
 
-    FORMAT_STR = "{asctime} | {level_color}{levelname:<8}{reset} | \x1b[36m[{profile}]\x1b[0m | {message}"
+    FORMAT_STR = (
+        "{asctime} | {level_color}{levelname:<8}{reset} | \x1b[36m[{profile}]\x1b[0m | {message}"
+    )
 
     COLORS = {
         logging.DEBUG: GREY,

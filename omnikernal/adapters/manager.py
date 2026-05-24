@@ -74,9 +74,7 @@ class AdapterManager:
             List of items that failed validation (not PlatformAdapter instances).
             Empty list means all registered successfully.
         """
-        candidates: list[PlatformAdapter] = (
-            adapter if isinstance(adapter, list) else [adapter]
-        )
+        candidates: list[PlatformAdapter] = adapter if isinstance(adapter, list) else [adapter]
 
         failed: list[Any] = []
 
@@ -136,13 +134,9 @@ class AdapterManager:
                     )
 
                 if connected:
-                    self.logger.info(
-                        f"Adapter '{cls_name}' connected — platform '{platform_name}'"
-                    )
+                    self.logger.info(f"Adapter '{cls_name}' connected — platform '{platform_name}'")
                     active.append(adapter)
-                    task = asyncio.create_task(
-                        self._poll_adapter(platform_name, adapter, broker)
-                    )
+                    task = asyncio.create_task(self._poll_adapter(platform_name, adapter, broker))
                     self._polling_tasks.append(task)
                 else:
                     self._failed.append((platform_name, cls_name))
@@ -179,9 +173,7 @@ class AdapterManager:
         except asyncio.CancelledError:
             self.logger.info(f"Polling cancelled — platform='{platform_name}'")
         except Exception as exc:
-            self.logger.error(
-                f"Polling error — platform='{platform_name}': {exc}", exc_info=True
-            )
+            self.logger.error(f"Polling error — platform='{platform_name}': {exc}", exc_info=True)
 
     async def stop_all(self) -> None:
         """Cancel all polling tasks and disconnect all adapters cleanly."""
@@ -198,9 +190,7 @@ class AdapterManager:
                     await adapter.disconnect()
                     self.logger.info(f"Adapter disconnected — platform='{platform_name}'")
                 except Exception as exc:
-                    self.logger.warning(
-                        f"Disconnect error — platform='{platform_name}': {exc}"
-                    )
+                    self.logger.warning(f"Disconnect error — platform='{platform_name}': {exc}")
 
     # ------------------------------------------------------------------
     # Diagnostics

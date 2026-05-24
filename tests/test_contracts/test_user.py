@@ -30,4 +30,3 @@ def test_user_is_immutable():
     u = User(id="3", display_name="Carol", platform="whatsapp")
     with pytest.raises(FrozenInstanceError):
         cast(Any, u).display_name = "Changed"
-

@@ -20,18 +20,17 @@ class MappingLayer(BaseLayer):
         self.cache = cache
 
     async def process(self, packet: IntentPacket) -> IntentPacket:
-
         word = self._extract_word(packet.message.raw_text)
         route = self.cache.get(word)
 
-        if route is None :
+        if route is None:
             packet.logger.debug("No command Found, dropping...")
             packet.state = PacketState.DROPPED
             return packet
 
         if not PermissionValidator.resolve_permission(
-            required=route.required_role,actual=packet.user.role
-            ):
+            required=route.required_role, actual=packet.user.role
+        ):
             packet.logger.debug("Permission Denied, dropping...")
             packet.state = PacketState.DROPPED
             return packet

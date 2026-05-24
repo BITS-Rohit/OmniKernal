@@ -1,6 +1,7 @@
 """
 Base Layer for every Layer from Received Message State --- Done Message State.
 """
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

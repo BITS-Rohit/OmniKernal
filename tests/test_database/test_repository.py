@@ -30,7 +30,7 @@ async def test_repository_plugin_and_tool_registration(db_session):
         version="1.0.0",
         author="Test Author",
         description="A test plugin",
-        min_core_version="0.1.0"
+        min_core_version="0.1.0",
     )
     await repo.register_plugins([plugin])
 
@@ -41,7 +41,7 @@ async def test_repository_plugin_and_tool_registration(db_session):
         handler="plugins.echo.handlers.echo.run",
         plugin_name="echo_plugin",
         description="Echoes text",
-        minimum_role="USER"
+        minimum_role="USER",
     )
     await repo.register_tools([tool])
 
@@ -68,4 +68,3 @@ async def test_repository_execution_logging(db_session):
     # Verify via direct session query or if repo had a 'get_logs'
     # For now, just ensure it doesn't crash and commits.
     assert True
-

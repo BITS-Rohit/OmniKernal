@@ -79,7 +79,6 @@ class IntentPacket:
         )
 
     def to_dict(self) -> dict[str, Any]:
-
         return {
             "state": self.state.value,
             "tool_id": self.tool_id,
@@ -123,11 +122,11 @@ class IntentPacket:
         self.state = PacketState.DROPPED
 
     @property
-    def user(self)-> User:
+    def user(self) -> User:
         return self.message.user
 
     @property
-    def platform(self)-> str:
+    def platform(self) -> str:
         return self.message.platform
 
     @property
@@ -135,6 +134,4 @@ class IntentPacket:
         return self.message.raw_text
 
     def __repr__(self) -> str:
-        return (
-            f"IntentPacket(platform={self.platform!r}, state={self.state.value!r})"
-        )
+        return f"IntentPacket(platform={self.platform!r}, state={self.state.value!r})"

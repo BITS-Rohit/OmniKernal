@@ -18,6 +18,7 @@ from .user import User
 if TYPE_CHECKING:
     from omnikernal.core.interfaces import PlatformAdapter
 
+
 @dataclass(frozen=True, slots=True)
 class Message:
     """
@@ -40,9 +41,8 @@ class Message:
     platform: str
     adapter: PlatformAdapter | None = None
 
-
     @classmethod
-    def from_dict(cls, data: dict[str , Any]) -> Message:
+    def from_dict(cls, data: dict[str, Any]) -> Message:
         """
         Create a Message from a dictionary and returns it.
         """
@@ -54,11 +54,11 @@ class Message:
             user=User.from_dict(data["user"]),
             timestamp=data["timestamp"],
             platform=data["platform"] or data["user"]["platform"] or data["user"].platform,
-            adapter=data.get("adapter")
+            adapter=data.get("adapter"),
         )
 
     @staticmethod
-    def _validate(data : dict[str , str| User])-> None:
+    def _validate(data: dict[str, str | User]) -> None:
         if data["user"] is None:
             raise ValueError("User must be given in `Message` Model.")
         if data["id"] is None:
@@ -70,7 +70,7 @@ class Message:
         if data["platform"] is None:
             raise ValueError("Platform must be given in `Message` Model.")
 
-    def to_dict(self) -> dict[str , Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert a Message to a dictionary.
         """

@@ -55,4 +55,3 @@ def test_platform_adapter_full_concrete_instantiates():
 
     adapter = ConcreteAdapter()
     assert adapter.platform_name == "mock"
-

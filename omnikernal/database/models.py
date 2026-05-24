@@ -84,6 +84,3 @@ class ExecutionLog(Base):
     success: Mapped[bool] = mapped_column(Boolean)
     response_time_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-
-

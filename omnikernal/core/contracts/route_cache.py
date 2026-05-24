@@ -9,6 +9,7 @@ class RouteCache:
     Immutable cache object used by the GlobalBroker Pipeline (RouterLayer)
     for O(1) command lookup.
     """
+
     command_name: str
     pattern: str
     handler_path: str

@@ -1,13 +1,13 @@
 # OmniKernel
 
-**OmniKernel** is a secure, database-driven microkernel framework for building scalable, multi-platform automation systems.  
+**OmniKernel** is a secure, database-driven microkernel framework for building scalable, multi-platform automation systems.
 It provides a modular plugin architecture that decouples platform logic from execution logic, enabling extensible and isolated automation workflows.
 
 ---
 
 ## 🚀 Vision
 
-OmniKernel is not a bot script.  
+OmniKernel is not a bot script.
 It is a foundation for building automation ecosystems.
 
 The framework enables:
@@ -78,7 +78,7 @@ Plugins are:
 - Independently executable
 
 Command format example:
-``` 
+```
 <command_name> <arguments>
 ```
 
@@ -113,14 +113,14 @@ Example:
 
 ## 🛠 Status
 
-OmniKernel is under active development.  
+OmniKernel is under active development.
 Architecture is being stabilized prior to benchmarking and research validation.
 
 ---
 
 ## 📜 License
 
-MIT 
+MIT
 
 ---
 
@@ -135,5 +135,5 @@ We welcome contributions focused on:
 
 ---
 
-OmniKernel is not just automation.  
+OmniKernel is not just automation.
 It is infrastructure.

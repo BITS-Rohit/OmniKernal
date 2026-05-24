@@ -41,16 +41,18 @@ class OmniRepository:
 
         from sqlalchemy.dialects.sqlite import insert
 
-        stmt = insert(Plugin).values([
-            {
-                "name": p.name,
-                "version": p.version,
-                "author": p.author,
-                "description": p.description,
-                "is_active": True,
-            }
-            for p in plugins
-        ])
+        stmt = insert(Plugin).values(
+            [
+                {
+                    "name": p.name,
+                    "version": p.version,
+                    "author": p.author,
+                    "description": p.description,
+                    "is_active": True,
+                }
+                for p in plugins
+            ]
+        )
 
         # ON CONFLICT UPDATE
         stmt = stmt.on_conflict_do_update(
@@ -60,7 +62,7 @@ class OmniRepository:
                 author=stmt.excluded.author,
                 description=stmt.excluded.description,
                 # Intentionally not updating is_active to preserve user overrides
-            )
+            ),
         )
 
         await self.session.execute(stmt)
@@ -73,17 +75,19 @@ class OmniRepository:
 
         from sqlalchemy.dialects.sqlite import insert
 
-        stmt = insert(Tool).values([
-            {
-                "command_name": t.name,
-                "pattern": t.pattern,
-                "handler_path": t.handler,
-                "plugin_name": t.plugin_name,
-                "description": t.description,
-                "required_role": t.minimum_role,
-            }
-            for t in tools
-        ])
+        stmt = insert(Tool).values(
+            [
+                {
+                    "command_name": t.name,
+                    "pattern": t.pattern,
+                    "handler_path": t.handler,
+                    "plugin_name": t.plugin_name,
+                    "description": t.description,
+                    "required_role": t.minimum_role,
+                }
+                for t in tools
+            ]
+        )
 
         # ON CONFLICT UPDATE
         stmt = stmt.on_conflict_do_update(
@@ -94,7 +98,7 @@ class OmniRepository:
                 description=stmt.excluded.description,
                 plugin_name=stmt.excluded.plugin_name,
                 required_role=stmt.excluded.required_role,
-            )
+            ),
         )
 
         await self.session.execute(stmt)
@@ -117,11 +121,8 @@ class OmniRepository:
     async def get_routing_cache(self) -> dict[str, "RouteCache"]:
         """Returns an O(1) lookup dictionary of RouteCache objects for all ACTIVE commands."""
 
-
         # We need joinedload to check if the parent Plugin is active
-        result = await self.session.execute(
-            select(Tool).options(joinedload(Tool.plugin))
-        )
+        result = await self.session.execute(select(Tool).options(joinedload(Tool.plugin)))
         tools = result.scalars().all()
 
         cache = {}
@@ -142,10 +143,10 @@ class OmniRepository:
         result = await self.session.execute(select(Plugin))
         return result.scalars().all()
 
-
     async def remove_plugins(self, plugin_names: list[str]) -> None:
         """Hard deletes plugins and cascades to their tools."""
         from sqlalchemy import delete
+
         if not plugin_names:
             return
         await self.session.execute(delete(Plugin).where(Plugin.name.in_(plugin_names)))
@@ -154,13 +155,12 @@ class OmniRepository:
     async def remove_missing_plugins(self, active_names: list[str]) -> None:
         """Hard deletes plugins NOT in the list."""
         from sqlalchemy import delete
+
         if not active_names:
             # If no active plugins, delete everything
             await self.session.execute(delete(Plugin))
         else:
-            await self.session.execute(
-                delete(Plugin).where(Plugin.name.notin_(active_names))
-            )
+            await self.session.execute(delete(Plugin).where(Plugin.name.notin_(active_names)))
         await self.session.commit()
 
     # --- Execution Logging ---

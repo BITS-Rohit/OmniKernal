@@ -31,7 +31,7 @@ async def run_smoke_test():
             pattern=".*",
             handler_path="tests.smoke_test.echo_handler",
             required_role=ROLE.ADMIN,
-            plugin_name="smoke_plugin"
+            plugin_name="smoke_plugin",
         )
     }
 

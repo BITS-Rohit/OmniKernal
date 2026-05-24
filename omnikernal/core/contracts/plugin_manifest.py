@@ -63,7 +63,9 @@ class PluginManifest:
             raise ValueError("Plugin's  manifest.json file is missing required field: 'version'")
 
         if not min_core_version:
-            raise ValueError("Plugin's  manifest.json file is missing required field: 'min_core_version'")
+            raise ValueError(
+                "Plugin's  manifest.json file is missing required field: 'min_core_version'"
+            )
 
         author = data.get("author", "unknown")
         description = data.get("description", "No description provided")
@@ -83,6 +85,5 @@ class PluginManifest:
 
     def __repr__(self) -> str:
         return (
-            f"PluginManifest(name={self.name!r}, version={self.version!r}, "
-            f"author={self.author!r})"
+            f"PluginManifest(name={self.name!r}, version={self.version!r}, author={self.author!r})"
         )
