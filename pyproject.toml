@@ -91,11 +91,11 @@ database-extras = [
 "Source"      = "https://github.com/BITS-Rohit/OmniKernal"
 
 [build-system]
-requires      = ["hatchling"]
-build-backend = "hatchling.build"
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.build.targets.wheel]
-packages = ["omnikernal"]
+[tool.setuptools]
+package-dir = {"omnikernal" = "src"}
 
 # ---------------------------------------------------------------------------
 # uv dependency-groups (uv sync / uv run — replaces [project.optional-dependencies] for uv users)

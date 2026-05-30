@@ -65,3 +65,6 @@ Thumbs.db
 *.png
 ignore/
 tests/smoke
+
+# Dev tooling symlink (mypy src/ resolution shim — do not commit)
+omnikernal

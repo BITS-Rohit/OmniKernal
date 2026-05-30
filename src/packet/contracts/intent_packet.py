@@ -5,11 +5,11 @@ from logging import Logger, LoggerAdapter
 from typing import Any
 
 from omnikernal.omni_logger import omni_logger
+from omnikernal.packet.contracts.user import ROLE, User
 
 from .command_result import CommandResult
 from .message import Message
 from .packet_state import PacketState
-from omnikernal.packet.contracts.user import ROLE, User
 
 
 @dataclass(slots=True)
@@ -99,8 +99,6 @@ class IntentPacket:
         Mark command as successfully executed.
         Sets result to CommandResult.success and transitions to DONE.
         """
-        from omnikernal.packet.contracts.command_result import CommandResult
-
         self.result = CommandResult.success(reply=reply)
         self.state = PacketState.DONE
 
@@ -109,8 +107,6 @@ class IntentPacket:
         Mark command as failed.
         Sets result to CommandResult.error and transitions to FAILED.
         """
-        from omnikernal.packet.contracts.command_result import CommandResult
-
         self.result = CommandResult.error(reason=reason, api_url=api_url)
         self.state = PacketState.FAILED
 

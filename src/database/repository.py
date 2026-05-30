@@ -9,13 +9,13 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from omnikernal.core.contracts import CommandManifest, PluginManifest
+    from omnikernal.packet.contracts import CommandManifest, PluginManifest
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from omnikernal.core.contracts import ROLE, RouteCache
+from omnikernal.packet.contracts import ROLE, RouteCache
 
 from .models import (
     ExecutionLog,

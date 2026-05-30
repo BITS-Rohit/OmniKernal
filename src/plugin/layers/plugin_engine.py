@@ -26,9 +26,10 @@ import json
 import os
 from typing import TYPE_CHECKING, Any, cast
 
+# pyrefly: ignore [missing-source-for-stubs]
 import yaml
 
-from omnikernal.core.contracts import CommandManifest, PluginManifest
+from omnikernal.packet.contracts import CommandManifest, PluginManifest
 
 if TYPE_CHECKING:
     from omnikernal.database.repository import OmniRepository

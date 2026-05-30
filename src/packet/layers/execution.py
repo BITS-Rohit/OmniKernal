@@ -6,9 +6,9 @@ import asyncio
 import importlib
 import inspect
 
-from omnikernal.core.contracts import IntentPacket, PacketState
+from omnikernal.packet.contracts import IntentPacket, PacketState
 from omnikernal.packet.contracts.command_result import CommandResult
-from omnikernal.plugin.interfaces import BaseLayer
+from omnikernal.packet.interfaces import BaseLayer
 
 
 class ExecutionLayer(BaseLayer):

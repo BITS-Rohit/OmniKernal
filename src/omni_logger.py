@@ -10,7 +10,7 @@ import sys
 from typing import Any
 
 
-class OmniLogger(logging.LoggerAdapter):
+class OmniLogger(logging.LoggerAdapter[logging.Logger]):
     """Custom LoggerAdapter that natively supports loguru-style .bind()"""
 
     def bind(self, **kwargs: Any) -> "OmniLogger":
@@ -101,8 +101,8 @@ def setup_logger(level: int | str = "INFO", profile_name: str = "default") -> Om
         logger.addHandler(handler)
     else:
         # Re-call safe: update existing handlers to the new level
-        for handler in logger.handlers:
-            handler.setLevel(level)
+        for h in logger.handlers:
+            h.setLevel(level)
 
     return OmniLogger(logger, {"profile": profile_name})
 

@@ -5,7 +5,7 @@ Base Layer for every Layer from Received Message State --- Done Message State.
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from omnikernal.core.contracts import IntentPacket
+    from omnikernal.packet.contracts import IntentPacket
 
 
 class BaseLayer:

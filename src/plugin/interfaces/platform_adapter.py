@@ -14,8 +14,8 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from omnikernal.packet.contracts.intent_packet import IntentPacket
     from omnikernal.packet.contracts.message import Message
-    from omnikernal.core.packet import IntentPacket
 
 
 class PlatformAdapter(ABC):
@@ -68,7 +68,7 @@ class PlatformAdapter(ABC):
         """
         # Required to make this an abstract async generator
         return
-        yield  # noqa: unreachable — makes mypy treat this as AsyncIterator
+        yield  # noqa: B901
 
     @abstractmethod
     async def send_message(self, packet: IntentPacket) -> bool:
