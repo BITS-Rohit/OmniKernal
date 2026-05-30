@@ -7,8 +7,8 @@ import importlib
 import inspect
 
 from omnikernal.core.contracts import IntentPacket, PacketState
-from omnikernal.core.contracts.command_result import CommandResult
-from omnikernal.core.interfaces import BaseLayer
+from omnikernal.packet.contracts.command_result import CommandResult
+from omnikernal.plugin.interfaces import BaseLayer
 
 
 class ExecutionLayer(BaseLayer):

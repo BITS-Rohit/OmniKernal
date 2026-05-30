@@ -15,8 +15,8 @@
 # from typing import TYPE_CHECKING, Any
 
 # if TYPE_CHECKING:
-#     from omnikernal.core.contracts.command_context import CommandContext
-#     from omnikernal.core.contracts.command_result import CommandResult
+#     from src.core.contracts.command_context import CommandContext
+#     from src.core.contracts.command_result import CommandResult
 
 
 # class BaseCommand(ABC):

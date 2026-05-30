@@ -4,8 +4,8 @@
 """
 
 from omnikernal.core.contracts import IntentPacket, PacketState, RouteCache
-from omnikernal.core.interfaces import BaseLayer
-from omnikernal.core.layers.permissions import PermissionValidator
+from omnikernal.plugin.interfaces import BaseLayer
+from omnikernal.packet.layers.permissions import PermissionValidator
 
 
 class MappingLayer(BaseLayer):

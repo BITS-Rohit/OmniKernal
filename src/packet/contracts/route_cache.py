@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .user import ROLE
+from omnikernal.packet.contracts.user import ROLE
 
 
 @dataclass(frozen=True, slots=True)

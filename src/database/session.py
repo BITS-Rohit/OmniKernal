@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from .models import Base
 
-DEFAULT_DB_URL = "sqlite+aiosqlite:///omnikernal.db"
+DEFAULT_DB_URL = "sqlite+aiosqlite:///src.db"
 DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DB_URL)
 
 
@@ -58,7 +58,7 @@ async def ensure_db_initialized() -> None:
 
     Usage::
 
-        from omnikernal.database.session import ensure_db_initialized
+        from src.database.session import ensure_db_initialized
         await ensure_db_initialized()
         async with async_session_factory() as session:
             repo = OmniRepository(session)

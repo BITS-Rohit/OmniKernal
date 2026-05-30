@@ -11,10 +11,10 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import Any
 
-from omnikernal.core.contracts.intent_packet import IntentPacket
-from omnikernal.core.contracts.message import Message
-from omnikernal.core.contracts.user import ROLE, User
-from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.packet.contracts.intent_packet import IntentPacket
+from omnikernal.packet.contracts.message import Message
+from omnikernal.packet.contracts.user import ROLE, User
+from omnikernal.plugin.interfaces import PlatformAdapter
 
 
 class MockAdapter(PlatformAdapter):

@@ -14,7 +14,7 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from omnikernal.core.contracts.message import Message
+    from omnikernal.packet.contracts.message import Message
     from omnikernal.core.packet import IntentPacket
 
 

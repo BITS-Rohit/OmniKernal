@@ -13,10 +13,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from .user import User
+from omnikernal.packet.contracts.user import User
 
 if TYPE_CHECKING:
-    from omnikernal.core.interfaces import PlatformAdapter
+    from omnikernal.plugin.interfaces import PlatformAdapter
 
 
 @dataclass(frozen=True, slots=True)

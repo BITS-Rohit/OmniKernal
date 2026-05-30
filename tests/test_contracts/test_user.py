@@ -5,7 +5,7 @@ from typing import Any, cast
 
 import pytest
 
-from omnikernal.core.contracts.user import ROLE, User
+from omnikernal.packet.contracts.user import ROLE, User
 
 
 def test_user_construction():

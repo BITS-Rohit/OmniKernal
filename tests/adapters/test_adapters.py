@@ -2,9 +2,9 @@
 Tests for AdapterManager and MockAdapter.
 """
 
-from omnikernal.adapters.manager import AdapterManager
-from omnikernal.adapters.mock_adapter import MockAdapter
-from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
+from omnikernal.plugin.adapters import AdapterManager
+from omnikernal.plugin.adapters import MockAdapter
+from omnikernal.plugin.interfaces import PlatformAdapter
 
 
 class TestAdapterManager:

@@ -4,7 +4,7 @@ from typing import Any, cast
 
 import pytest
 
-from omnikernal.core.interfaces.base_plugin import BasePlugin
+from omnikernal.plugin.interfaces.base_plugin import BasePlugin
 
 
 def test_base_plugin_is_abstract():

@@ -5,7 +5,7 @@ Ignores dropped packets or packets without a reply payload.
 """
 
 from omnikernal.core.contracts import IntentPacket, PacketState
-from omnikernal.core.interfaces import BaseLayer
+from omnikernal.plugin.interfaces import BaseLayer
 
 
 class ResponseLayer(BaseLayer):

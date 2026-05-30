@@ -33,7 +33,7 @@ from omnikernal.core.contracts import CommandManifest, PluginManifest
 if TYPE_CHECKING:
     from omnikernal.database.repository import OmniRepository
 
-from omnikernal.core.omni_logger import omni_logger
+from omnikernal.omni_logger import omni_logger
 
 # single source of truth for the current Core version
 OMNIKERNAL_VERSION: str = "0.1.0"

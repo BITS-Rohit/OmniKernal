@@ -91,7 +91,7 @@ def setup_logger(level: int | str = "INFO", profile_name: str = "default") -> Om
         omni_logger = setup_logger(level="DEBUG")       # verbose
         omni_logger = setup_logger(level=logging.WARNING)
     """
-    logger = logging.getLogger("omnikernal")
+    logger = logging.getLogger("src")
     logger.setLevel(level)
 
     if not logger.handlers:

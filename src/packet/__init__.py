@@ -1,13 +1,13 @@
-# src/core — OmniKernal Core Engine package
-
-
+"""
+Global Broker is Packet Processing's global Queue...
+"""
 import asyncio
 from logging import Logger, LoggerAdapter
 from typing import Any
 
 from omnikernal.core.contracts import IntentPacket, Message, PacketState
-from omnikernal.core.interfaces import BaseLayer
-from omnikernal.core.omni_logger import omni_logger
+from omnikernal.plugin.interfaces import BaseLayer
+from omnikernal.omni_logger import omni_logger
 
 
 class GlobalBroker:
@@ -60,11 +60,11 @@ class GlobalBroker:
                 self.queue.task_done()
 
     def _create_layers(self) -> list[BaseLayer]:
-        from omnikernal.core.layers.execution import ExecutionLayer
-        from omnikernal.core.layers.mapping import MappingLayer
-        from omnikernal.core.layers.parser import Parser
-        from omnikernal.core.layers.response import ResponseLayer
-        from omnikernal.core.layers.sanitizer import CommandSanitizer
+        from omnikernal.packet.layers import ExecutionLayer
+        from omnikernal.packet.layers import MappingLayer
+        from omnikernal.packet.layers import Parser
+        from omnikernal.packet.layers.response import ResponseLayer
+        from omnikernal.packet.layers.sanitizer import CommandSanitizer
 
         return [
             MappingLayer(self.routing_cache),  # Layer 1+2: route + permissions

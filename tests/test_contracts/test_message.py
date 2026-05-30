@@ -5,8 +5,8 @@ from datetime import datetime
 
 import pytest
 
-from omnikernal.core.contracts.message import Message
-from omnikernal.core.contracts.user import User
+from omnikernal.packet.contracts.message import Message
+from omnikernal.packet.contracts.user import User
 
 
 def _make_user() -> User:

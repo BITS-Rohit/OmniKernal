@@ -1,5 +1,5 @@
 ---
-name: omnikernal
+name: src
 description: Core interfaces, protocols, and encryption utilities for the OmniKernel SDK.
 ---
 

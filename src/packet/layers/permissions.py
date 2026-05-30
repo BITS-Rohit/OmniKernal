@@ -6,7 +6,7 @@ Checks if a user has sufficient roles or permissions to execute a command.
 """
 
 from omnikernal.core.contracts import ROLE
-from omnikernal.core.interfaces import BaseLayer
+from omnikernal.plugin.interfaces import BaseLayer
 
 role_order = [ROLE.USER, ROLE.MODERATOR, ROLE.ADMIN]
 
