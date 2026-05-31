@@ -4,7 +4,6 @@ from dataclasses import FrozenInstanceError
 from typing import Any, cast
 
 import pytest
-
 from omnikernal.packet.contracts.user import ROLE, User
 
 

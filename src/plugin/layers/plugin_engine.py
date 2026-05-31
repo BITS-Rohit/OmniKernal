@@ -28,7 +28,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 # pyrefly: ignore [missing-source-for-stubs]
 import yaml
-
 from omnikernal.packet.contracts import CommandManifest, PluginManifest
 
 if TYPE_CHECKING:

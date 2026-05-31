@@ -4,7 +4,6 @@ from collections.abc import AsyncIterator
 from typing import Any, cast
 
 import pytest
-
 from omnikernal.packet.contracts.intent_packet import IntentPacket
 from omnikernal.packet.contracts.message import Message
 from omnikernal.plugin.interfaces import PlatformAdapter

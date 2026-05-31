@@ -4,7 +4,6 @@ from dataclasses import FrozenInstanceError
 from datetime import datetime
 
 import pytest
-
 from omnikernal.packet.contracts.message import Message
 from omnikernal.packet.contracts.user import User
 

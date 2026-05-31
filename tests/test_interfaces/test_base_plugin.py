@@ -3,7 +3,6 @@
 from typing import Any, cast
 
 import pytest
-
 from omnikernal.plugin.interfaces.base_plugin import BasePlugin
 
 
