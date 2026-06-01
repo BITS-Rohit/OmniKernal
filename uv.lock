@@ -494,7 +494,7 @@ dev = [
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.23.0" },
     { name = "pytest-cov", specifier = ">=5.0.0" },
-    { name = "ruff", specifier = ">=0.14.0" },
+    { name = "ruff", specifier = ">=0.15.13" },
     { name = "types-psutil" },
     { name = "types-pyyaml" },
 ]
@@ -502,7 +502,7 @@ linting = [
     { name = "deptry", specifier = ">=0.25.1" },
     { name = "mypy", specifier = ">=1.10.0" },
     { name = "pre-commit", specifier = ">=3.7.0" },
-    { name = "ruff", specifier = ">=0.14.0" },
+    { name = "ruff", specifier = ">=0.15.13" },
 ]
 testing = [
     { name = "pytest", specifier = ">=8.0.0" },

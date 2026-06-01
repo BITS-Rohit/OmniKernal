@@ -47,7 +47,7 @@ testing = [
 ]
 # Code quality
 linting = [
-    "ruff>=0.14.0",
+    "ruff>=0.15.13",
     "mypy>=1.10.0",
     "deptry>=0.25.1",
     "pre-commit>=3.7.0",
@@ -89,7 +89,7 @@ testing = [
 ]
 # Code quality tools
 linting = [
-    "ruff>=0.14.0",
+    "ruff>=0.15.13",
     "mypy>=1.10.0",
     "deptry>=0.25.1",
     "pre-commit>=3.7.0",
