@@ -14,8 +14,8 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from omnikernal.packet.contracts.intent_packet import IntentPacket
-    from omnikernal.packet.contracts.message import Message
+    from src.packet.contracts.intent_packet import IntentPacket
+    from src.packet.contracts.message import Message
 
 
 class PlatformAdapter(ABC):

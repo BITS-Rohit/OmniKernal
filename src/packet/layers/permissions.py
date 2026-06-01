@@ -5,8 +5,8 @@ Checks if a user has sufficient roles or permissions to execute a command.
 
 """
 
-from omnikernal.packet.contracts import ROLE
-from omnikernal.packet.interfaces import BaseLayer
+from src.packet.contracts import ROLE
+from src.packet.interfaces import BaseLayer
 
 role_order = [ROLE.USER, ROLE.MODERATOR, ROLE.ADMIN]
 

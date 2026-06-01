@@ -4,9 +4,10 @@ from collections.abc import AsyncIterator
 from typing import Any, cast
 
 import pytest
-from omnikernal.packet.contracts.intent_packet import IntentPacket
-from omnikernal.packet.contracts.message import Message
-from omnikernal.plugin.interfaces import PlatformAdapter
+
+from src.packet.contracts.intent_packet import IntentPacket
+from src.packet.contracts.message import Message
+from src.plugin.interfaces import PlatformAdapter
 
 
 def test_platform_adapter_is_abstract():

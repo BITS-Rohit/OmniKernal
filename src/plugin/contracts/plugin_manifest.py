@@ -13,6 +13,7 @@ files just to discover metadata.
 from __future__ import annotations
 
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from src.omni_logger import omni_logger
@@ -29,6 +30,7 @@ class PluginManifest(BaseModel):
         author:           Plugin author name or handle. Defaults to "unknown".
         description:      Human-readable description. Defaults to "No description provided".
     """
+
     model_config = ConfigDict(frozen=True)
 
     name: str
@@ -58,15 +60,9 @@ class PluginManifest(BaseModel):
         return self.model_dump()
 
     def __str__(self) -> str:
-        return (
-            f"PluginManifest(name={self.name}, "
-            f"version={self.version}, "
-            f"author={self.author})"
-        )
+        return f"PluginManifest(name={self.name}, version={self.version}, author={self.author})"
 
     def __repr__(self) -> str:
         return (
-            f"PluginManifest(name={self.name!r}, "
-            f"version={self.version!r}, "
-            f"author={self.author!r})"
+            f"PluginManifest(name={self.name!r}, version={self.version!r}, author={self.author!r})"
         )

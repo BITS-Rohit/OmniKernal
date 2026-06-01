@@ -14,9 +14,9 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from src.omni_logger import omni_logger
 from src.packet.contracts.user import User
 from src.plugin.interfaces import PlatformAdapter
-from src.omni_logger import omni_logger
 
 
 class Message(BaseModel):
@@ -32,7 +32,13 @@ class Message(BaseModel):
         platform:  Which platform this message came from.
         adapter:   PlatformAdapter | None — platform specific adapter
     """
-    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
+
+    model_config = ConfigDict(
+        frozen=True,
+        arbitrary_types_allowed=True,
+        revalidate_instances="never",
+        from_attributes=True,
+    )
 
     id: str
     raw_text: str

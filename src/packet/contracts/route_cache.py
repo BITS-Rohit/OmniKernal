@@ -1,8 +1,9 @@
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from src.packet.contracts.user import ROLE
 from src.omni_logger import omni_logger
+from src.packet.contracts.user import ROLE
 
 
 class RouteCache(BaseModel):
@@ -10,6 +11,7 @@ class RouteCache(BaseModel):
     Immutable cache object used by the GlobalBroker Pipeline (RouterLayer)
     for O(1) command lookup.
     """
+
     model_config = ConfigDict(frozen=True)
 
     command_name: str
@@ -23,8 +25,8 @@ class RouteCache(BaseModel):
         """
         Safely parses a dictionary into a RouteCache object.
 
-        Acts as a firewall for the RouterLayer: if the dictionary contains 
-        missing fields, invalid types, or an unrecognized ROLE string, 
+        Acts as a firewall for the RouterLayer: if the dictionary contains
+        missing fields, invalid types, or an unrecognized ROLE string,
         it traps the error, logs it, and returns None instead of crashing.
         """
         try:

@@ -1,9 +1,10 @@
 import pytest
 import pytest_asyncio
-from omnikernal.database.models import Base
-from omnikernal.database.repository import OmniRepository
-from omnikernal.packet.contracts import CommandManifest, PluginManifest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from src.database.models import Base
+from src.database.repository import OmniRepository
+from src.packet.contracts import CommandManifest, PluginManifest
 
 
 @pytest_asyncio.fixture

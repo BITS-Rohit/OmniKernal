@@ -9,12 +9,12 @@ No SDK, no browser, no network — purely synthetic.
 import asyncio
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from omnikernal.packet.contracts.intent_packet import IntentPacket
-from omnikernal.packet.contracts.message import Message
-from omnikernal.packet.contracts.user import ROLE, User
-from omnikernal.plugin.interfaces import PlatformAdapter
+if TYPE_CHECKING:
+    from src.packet.contracts.intent_packet import IntentPacket
+    from src.packet.contracts.message import Message
+from src.plugin.interfaces import PlatformAdapter
 
 
 class MockAdapter(PlatformAdapter):
@@ -51,7 +51,7 @@ class MockAdapter(PlatformAdapter):
         print("[MockAdapter] Disconnected.")
         return True
 
-    async def fetch_new_messages(self) -> AsyncIterator[Message]:
+    async def fetch_new_messages(self) -> "AsyncIterator[Message]":
         """Yields messages from the queue natively without polling."""
         try:
             while not self._shutdown_event.is_set():
@@ -61,7 +61,7 @@ class MockAdapter(PlatformAdapter):
         except asyncio.CancelledError:
             pass
 
-    async def send_message(self, packet: IntentPacket) -> bool:
+    async def send_message(self, packet: "IntentPacket") -> bool:
         if packet.result is None or packet.result.reply is None:
             return False
 
@@ -78,6 +78,9 @@ class MockAdapter(PlatformAdapter):
             raw_text: The command string (e.g. "!echo hello").
             user_id: The simulated user ID.
         """
+        from src.packet.contracts.message import Message
+        from src.packet.contracts.user import ROLE, User
+
         msg = Message(
             id=f"mock_{self._message_queue.qsize()}",
             raw_text=raw_text,

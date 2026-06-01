@@ -33,52 +33,28 @@ dependencies = [
     "aiosqlite>=0.20.0",                   # Async SQLite driver
     # Configuration and serialization
     "pyyaml>=6.0.3",
-    # Logging
-    "loguru>=0.7.3",
     # Platform adapter (scaffold support)
     "playwright>=1.58.0",
-    # WhatsApp Web automation library (used by whatsapp_playwright adapter)
-    "whatsplay>=1.9.8",
-    # Process & system utils
-    "psutil>=7.0.0",
-    # Cryptography
-    "cryptography>=46.0.5",
-    "aiohttp>=3.13.3",
-    "black>=26.3.1",
-    "mypy>=1.19.1",
-    "ruff>=0.15.7",
-    "deptry>=0.25.1",
     "pydantic>=2.13.4",
 ]
 
 [project.optional-dependencies]
-# Core test suite — pytest runner, async support, coverage
+# Core test suite
 testing = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=5.0.0",
 ]
-# Code quality — linter, formatter, type checker, pre-commit hooks
+# Code quality
 linting = [
-    "ruff>=0.14.0",
     "mypy>=1.10.0",
     "deptry>=0.25.1",
     "pre-commit>=3.7.0",
 ]
-# Adapter integration testing — manual WhatsApp / Playwright smoke tests
-adapter-testing = [
-    "whatsplay>=1.9.8",   # WhatsApp Web automation (whatsapp_playwright adapter)
-]
-# Convenience group — pulls in all of the above
+# Convenience group
 dev = [
     "omnikernal[testing]",
     "omnikernal[linting]",
-    "omnikernal[adapter-testing]",
-]
-docs = [
-    "mkdocs>=1.6.0",
-    "mkdocs-material>=9.5.0",
-    "mkdocstrings[python]>=0.25.0",
 ]
 database-extras = [
     "aiosqlite>=0.20.0",   # async SQLite support
@@ -112,22 +88,14 @@ testing = [
 ]
 # Code quality tools
 linting = [
-    "ruff>=0.14.0",
     "mypy>=1.10.0",
     "deptry>=0.25.1",
     "pre-commit>=3.7.0",
-]
-# Adapter integration / smoke tests
-adapter-testing = [
-    "whatsplay>=1.9.8",   # WhatsApp Web automation (whatsapp_playwright adapter)
 ]
 # Top-level dev group — includes all sub-groups
 dev = [
     { include-group = "testing" },
     { include-group = "linting" },
-    { include-group = "adapter-testing" },
-    "mypy>=1.19.1",
-    "types-pyyaml>=6.0.12.20250915",
 ]
 
 # ---------------------------------------------------------------------------
@@ -173,10 +141,9 @@ warn_no_return = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths    = ["tests"]
-addopts      = "-v --cov=omnikernal --cov-report=term-missing"
+addopts      = "-v --cov=src --cov-report=term-missing"
 
 [tool.deptry]
-package_module_name_map = { "pyyaml" = "yaml" }
-per_rule_ignores = { "DEP002" = ["aiosqlite", "playwright", "whatsplay", "aiomysql", "asyncpg"] }
-# Also ignore dev and DOCS in PEP 621
-pep621_dev_dependency_groups = ["testing", "linting", "adapter-testing"]
+package_module_name_map = { "pyyaml" = "yaml", "aiomysql" = "aiomysql", "asyncpg" = "asyncpg" }
+per_rule_ignores = { "DEP002" = ["aiosqlite", "playwright", "aiomysql", "asyncpg"] }
+optional_dependencies_dev_groups = ["testing", "linting", "dev", "database-extras"]

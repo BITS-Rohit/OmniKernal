@@ -19,3 +19,20 @@ repos:
     -   id: ruff
         args: [ --fix ]
     -   id: ruff-format
+
+-   repo: local
+    hooks:
+    -   id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: true
+    -   id: deptry
+        name: deptry
+        entry: uv run deptry .
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false

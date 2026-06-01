@@ -4,8 +4,8 @@ Sends execution result back to user using the appropriate platform adapter.
 Ignores dropped packets or packets without a reply payload.
 """
 
-from omnikernal.packet.contracts import IntentPacket, PacketState
-from omnikernal.packet.interfaces import BaseLayer
+from src.packet.contracts import IntentPacket, PacketState
+from src.packet.interfaces import BaseLayer
 
 
 class ResponseLayer(BaseLayer):

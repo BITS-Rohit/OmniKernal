@@ -2,8 +2,8 @@
 Tests for AdapterManager and MockAdapter.
 """
 
-from omnikernal.plugin.adapters import AdapterManager, MockAdapter
-from omnikernal.plugin.interfaces import PlatformAdapter
+from src.plugin.adapters import AdapterManager, MockAdapter
+from src.plugin.interfaces import PlatformAdapter
 
 
 class TestAdapterManager:
@@ -36,6 +36,6 @@ class TestAdapterManager:
             pass
 
         bad_instance = NotAnAdapter()
-        failed = manager.register("bad", bad_instance)  # type: ignore[arg-type]
+        failed = manager.register("bad", bad_instance)
         assert len(failed) == 1
         assert failed[0] is bad_instance

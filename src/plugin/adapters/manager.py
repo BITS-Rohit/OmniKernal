@@ -25,11 +25,11 @@ import asyncio
 import dataclasses
 from typing import TYPE_CHECKING, Any
 
-from omnikernal.omni_logger import omni_logger
-from omnikernal.plugin.interfaces import PlatformAdapter
+from src.omni_logger import omni_logger
+from src.plugin.interfaces import PlatformAdapter
 
 if TYPE_CHECKING:
-    from omnikernal.packet import GlobalBroker
+    from src.packet import GlobalBroker
 
 
 class AdapterManager:

@@ -13,6 +13,7 @@ They return a CommandResult and the Core handles delivery.
 from __future__ import annotations
 
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from src.omni_logger import omni_logger
@@ -37,6 +38,7 @@ class CommandResult(BaseModel):
         api_url:        Optional. If the failure was caused by an external API, set this
                         URL so the Core can report it to ApiWatchdog. Never set on success.
     """
+
     model_config = ConfigDict(frozen=True)
 
     ok: bool

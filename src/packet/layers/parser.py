@@ -1,5 +1,5 @@
-from omnikernal.packet.contracts import IntentPacket, PacketState
-from omnikernal.packet.interfaces import BaseLayer
+from src.packet.contracts import IntentPacket, PacketState
+from src.packet.interfaces import BaseLayer
 
 
 class Parser(BaseLayer):

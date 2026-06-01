@@ -4,10 +4,11 @@ This is used to validate the command against the schema and to create a Command 
 """
 
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from src.packet.contracts.user import ROLE
 from src.omni_logger import omni_logger
+from src.packet.contracts.user import ROLE
 
 
 class CommandManifest(BaseModel):
@@ -15,6 +16,7 @@ class CommandManifest(BaseModel):
     Contract for a single command that is defined inside a plugin's commands.yaml.
     Validated safely by Pydantic at runtime to ensure Core stability.
     """
+
     model_config = ConfigDict(frozen=True, populate_by_name=True)
 
     name: str

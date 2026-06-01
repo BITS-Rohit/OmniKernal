@@ -7,8 +7,8 @@ Prevents shell injection, command chaining, newline injection, and template inje
 
 import re
 
-from omnikernal.packet.contracts import IntentPacket
-from omnikernal.packet.interfaces import BaseLayer
+from src.packet.contracts import IntentPacket
+from src.packet.interfaces import BaseLayer
 
 
 class CommandSanitizer(BaseLayer):

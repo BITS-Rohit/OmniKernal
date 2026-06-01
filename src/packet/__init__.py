@@ -6,9 +6,12 @@ import asyncio
 from logging import Logger, LoggerAdapter
 from typing import Any
 
-from omnikernal.omni_logger import omni_logger
-from omnikernal.packet.contracts import IntentPacket, Message, PacketState
-from omnikernal.packet.interfaces import BaseLayer
+from src.omni_logger import omni_logger
+from src.packet.contracts import IntentPacket, Message, PacketState
+from src.packet.interfaces import BaseLayer
+from src.packet.layers import ExecutionLayer, MappingLayer, Parser
+from src.packet.layers.response import ResponseLayer
+from src.packet.layers.sanitizer import CommandSanitizer
 
 
 class GlobalBroker:
@@ -61,10 +64,6 @@ class GlobalBroker:
                 self.queue.task_done()
 
     def _create_layers(self) -> list[BaseLayer]:
-        from omnikernal.packet.layers import ExecutionLayer, MappingLayer, Parser
-        from omnikernal.packet.layers.response import ResponseLayer
-        from omnikernal.packet.layers.sanitizer import CommandSanitizer
-
         return [
             MappingLayer(self.routing_cache),  # Layer 1+2: route + permissions
             CommandSanitizer(),  # Layer 4: sanitize

@@ -1,3 +1,3 @@
-from omnikernal.plugin.contracts.plugin_manifest import PluginManifest
+from src.plugin.contracts.plugin_manifest import PluginManifest
 
 __all__ = ["PluginManifest"]

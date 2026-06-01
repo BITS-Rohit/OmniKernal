@@ -65,8 +65,13 @@ class IntentPacket:
         data: dict[str, Any],
         logger: Logger | LoggerAdapter[Any] | None = None,
     ) -> IntentPacket:
+        msg = Message.from_dict(data["message"])
+        if msg is None:
+            raise ValueError(
+                f"Invalid message payload in IntentPacket.from_dict: {data['message']}"
+            )
         return cls(
-            message=Message.from_dict(data["message"]),
+            message=msg,
             sanitized_text=data.get("sanitized_text"),
             logger=omni_logger if logger is None else logger,
             state=PacketState(data["state"]),

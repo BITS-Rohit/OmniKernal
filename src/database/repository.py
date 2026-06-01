@@ -177,7 +177,7 @@ class OmniRepository:
     ) -> None:
         """Adds a record to the audit trail.sanitized."""
         # Sanitize error reason specifically for audit logs to prevent injection
-        from omnikernal.packet.layers.sanitizer import CommandSanitizer
+        from src.packet.layers.sanitizer import CommandSanitizer
 
         safe_reason = CommandSanitizer._clean(error_reason) if error_reason else None
 

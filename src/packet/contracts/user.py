@@ -37,6 +37,7 @@ class User(BaseModel):
         platform:     Platform this user belongs to (e.g. 'WhatsApp', 'telegram').
         role:         Permission role. Default 'user'. Elevated to 'admin' via config.
     """
+
     model_config = ConfigDict(frozen=True)
 
     id: str

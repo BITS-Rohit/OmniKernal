@@ -3,9 +3,9 @@
 2. Map the command to its handlers.
 """
 
-from omnikernal.packet.contracts import IntentPacket, PacketState, RouteCache
-from omnikernal.packet.interfaces import BaseLayer
-from omnikernal.packet.layers.permissions import PermissionValidator
+from src.packet.contracts import IntentPacket, PacketState, RouteCache
+from src.packet.interfaces import BaseLayer
+from src.packet.layers.permissions import PermissionValidator
 
 
 class MappingLayer(BaseLayer):
