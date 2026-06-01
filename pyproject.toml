@@ -48,6 +48,7 @@ dependencies = [
     "mypy>=1.19.1",
     "ruff>=0.15.7",
     "deptry>=0.25.1",
+    "pydantic>=2.13.4",
 ]
 
 [project.optional-dependencies]

@@ -41,7 +41,7 @@ async def init_db() -> None:
     """
     Initializes the database schema.
     we use Base.metadata.create_all().
-    we will use Alembic migrations in Future.
+    we will use Alembic migrations in the Future.
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

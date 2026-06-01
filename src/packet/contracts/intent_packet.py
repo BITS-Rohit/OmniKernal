@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from logging import Logger, LoggerAdapter
 from typing import Any
 
-from omnikernal.omni_logger import omni_logger
-from omnikernal.packet.contracts.user import ROLE, User
+from src.omni_logger import omni_logger
+from src.packet.contracts.user import ROLE, User
 
 from .command_result import CommandResult
 from .message import Message

@@ -1,5 +1,5 @@
 """
-Message — Frozen Dataclass Contract
+Message — Frozen Pydantic Contract
 
 Represents an inbound message returned by adapter.fetch_new_messages().
 The Core never constructs this directly — the adapter builds it from
@@ -9,18 +9,17 @@ Immutable — passed read-only through the entire processing pipeline.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from omnikernal.packet.contracts.user import User
+from pydantic import BaseModel, ConfigDict, ValidationError
 
-if TYPE_CHECKING:
-    from omnikernal.plugin.interfaces import PlatformAdapter
+from src.packet.contracts.user import User
+from src.plugin.interfaces import PlatformAdapter
+from src.omni_logger import omni_logger
 
 
-@dataclass(frozen=True, slots=True)
-class Message:
+class Message(BaseModel):
     """
     An inbound platform message ready for Core processing.
 
@@ -28,11 +27,12 @@ class Message:
         id:        Platform-specific message identifier (for dedup / ack).
         raw_text:  The original message text — NOT yet sanitized.
                    The Core passes this through CommandSanitizer before parsing.
-        user:      The User who sent this message ( id,display_name,platform ,role ).
+        user:      The User who sent this message.
         timestamp: When the message was received (platform time).
         platform:  Which platform this message came from.
         adapter:   PlatformAdapter | None — platform specific adapter
     """
+    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
 
     id: str
     raw_text: str
@@ -42,55 +42,35 @@ class Message:
     adapter: PlatformAdapter | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Message:
+    def from_dict(cls, data: dict[str, Any]) -> Message | None:
         """
-        Create a Message from a dictionary and returns it.
+        Safely parses a dictionary into a Message object.
+        Returns None instead of throwing an exception if the schema is invalid,
+        acting as a firewall for the Core application.
         """
-        Message._validate(data)
-
-        return cls(
-            id=data["id"],
-            raw_text=data["raw_text"],
-            user=User.from_dict(data["user"]),
-            timestamp=data["timestamp"],
-            platform=data["platform"] or data["user"]["platform"] or data["user"].platform,
-            adapter=data.get("adapter"),
-        )
-
-    @staticmethod
-    def _validate(data: dict[str, str | User]) -> None:
-        if data["user"] is None:
-            raise ValueError("User must be given in `Message` Model.")
-        if data["id"] is None:
-            raise ValueError("Message ID must be given in `Message` Model.")
-        if data["raw_text"] is None:
-            raise ValueError("Raw text must be given in `Message` Model.")
-        if data["timestamp"] is None:
-            raise ValueError("Timestamp must be given in `Message` Model.")
-        if data["platform"] is None:
-            raise ValueError("Platform must be given in `Message` Model.")
+        try:
+            return cls.model_validate(data)
+        except ValidationError as e:
+            omni_logger.debug(f"Dropped invalid platform payload. Schema mismatch: {e}")
+            return None
 
     def to_dict(self) -> dict[str, Any]:
         """
-        Convert a Message to a dictionary.
+        Unpacks the Pydantic model back into a standard dictionary.
+        Automatically converts nested models (like User) into dictionaries as well.
         """
-        return {
-            "id": self.id,
-            "raw_text": self.raw_text,
-            "user": self.user,
-            "timestamp": self.timestamp,
-            "platform": self.platform,
-            "adapter": self.adapter,
-        }
+        return self.model_dump()
 
     def __str__(self) -> str:
-        return f"Message( \
-            id={self.id},\
-            raw_text={self.raw_text},\
-            user={self.user},\
-            timestamp={self.timestamp},\
-            platform={self.platform}\
-        )"
+        return (
+            f"Message("
+            f"id={self.id}, "
+            f"raw_text={self.raw_text!r}, "
+            f"user={self.user}, "
+            f"timestamp={self.timestamp}, "
+            f"platform={self.platform}"
+            f")"
+        )
 
     def __repr__(self) -> str:
         preview = self.raw_text[:40] + "..." if len(self.raw_text) > 40 else self.raw_text

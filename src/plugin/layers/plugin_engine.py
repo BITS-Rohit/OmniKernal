@@ -28,12 +28,12 @@ from typing import TYPE_CHECKING, Any, cast
 
 # pyrefly: ignore [missing-source-for-stubs]
 import yaml
-from omnikernal.packet.contracts import CommandManifest, PluginManifest
+from src.packet.contracts import CommandManifest, PluginManifest
 
 if TYPE_CHECKING:
-    from omnikernal.database.repository import OmniRepository
+    from src.database.repository import OmniRepository
 
-from omnikernal.omni_logger import omni_logger
+from src.omni_logger import omni_logger
 
 # single source of truth for the current Core version
 OMNIKERNAL_VERSION: str = "0.1.0"
@@ -156,11 +156,11 @@ class PluginEngine:
         except UnicodeDecodeError:
             self.logger.debug(f"Wrong encoding (not UTF-8): {file}")
 
+        except PermissionError as e:
+            self.logger.debug(f"Permission error: {e}: {file}")
         except OSError as e:
             self.logger.debug(f"OS error: {e}: {file}")
 
-        except PermissionError as e:
-            self.logger.debug(f"Permission error: {e}: {file}")
         except Exception as e:
             self.logger.debug(f"Unknown error: {e}: {file}")
 

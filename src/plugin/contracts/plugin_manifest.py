@@ -1,5 +1,5 @@
 """
-PluginManifest — Frozen Dataclass Contract
+PluginManifest — Frozen Pydantic Contract
 
 Represents the parsed contents of a plugin's manifest.json file.
 Built by the PluginLoader when scanning the plugins/ directory.
@@ -12,78 +12,61 @@ files just to discover metadata.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+from src.omni_logger import omni_logger
 
 
-@dataclass(frozen=True, slots=True)
-class PluginManifest:
+class PluginManifest(BaseModel):
     """
     Parsed plugin identity from manifest.json.
 
     Attributes:
         name:             Unique plugin identifier. Must match folder name.
         version:          Semantic version string (e.g. '1.0.0').
-        author:           Plugin author name or handle.
-        description:      Human-readable description.
-        platform:         List of supported platforms (e.g. ['WhatsApp', 'any']).
         min_core_version: Minimum OmniKernal version required (e.g. '0.1.0').
-                          Optional — older manifests may omit this field.
+        author:           Plugin author name or handle. Defaults to "unknown".
+        description:      Human-readable description. Defaults to "No description provided".
     """
+    model_config = ConfigDict(frozen=True)
 
     name: str
     version: str
-    author: str
-    description: str
     min_core_version: str
+    author: str = "unknown"
+    description: str = "No description provided"
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> PluginManifest:
+    def from_dict(cls, data: dict[str, Any]) -> PluginManifest | None:
         """
-        Constructs a PluginManifest from a parsed manifest.json dictionary.
-        Supports both 'platform' and the legacy 'supported_platforms' key.
+        Safely constructs a PluginManifest from a parsed manifest.json dictionary.
 
-        Args:
-            data: Raw dict from json.load(manifest.json).
-
-        Returns:
-            A validated, immutable PluginManifest instance.
-
-        Raises:
-            ValueError: If required fields (name, version) are missing.
+        Traps ValidationErrors if required fields (name, version, min_core_version)
+        are missing or malformed, protecting the PluginEngine from crashing.
         """
-        name = data.get("name")
-        version = data.get("version")
-        min_core_version = data.get("min_core_version")
+        try:
+            return cls.model_validate(data)
+        except ValidationError as e:
+            omni_logger.debug(f"Failed to parse plugin manifest. Schema mismatch: {e}")
+            return None
 
-        if not name:
-            raise ValueError("Plugin's  manifest.json file is missing required field: 'name'")
-
-        if not version:
-            raise ValueError("Plugin's  manifest.json file is missing required field: 'version'")
-
-        if not min_core_version:
-            raise ValueError(
-                "Plugin's  manifest.json file is missing required field: 'min_core_version'"
-            )
-
-        author = data.get("author", "unknown")
-        description = data.get("description", "No description provided")
-
-        return cls(
-            name=name,
-            version=version,
-            author=author,
-            description=description,
-            min_core_version=min_core_version,
-        )
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Unpacks the PluginManifest model back into a standard dictionary.
+        """
+        return self.model_dump()
 
     def __str__(self) -> str:
-        return f"PluginManifest(name={self.name}, \
-            version={self.version}, \
-                author={self.author})"  # noqa: E501
+        return (
+            f"PluginManifest(name={self.name}, "
+            f"version={self.version}, "
+            f"author={self.author})"
+        )
 
     def __repr__(self) -> str:
         return (
-            f"PluginManifest(name={self.name!r}, version={self.version!r}, author={self.author!r})"
+            f"PluginManifest(name={self.name!r}, "
+            f"version={self.version!r}, "
+            f"author={self.author!r})"
         )

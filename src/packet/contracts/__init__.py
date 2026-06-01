@@ -5,14 +5,14 @@ It is phase 2 of Omnikernal...
 Packet Processing...
 """
 
-from omnikernal.packet.contracts.command_manifest import CommandManifest
-from omnikernal.packet.contracts.command_result import CommandResult
-from omnikernal.packet.contracts.intent_packet import IntentPacket
-from omnikernal.packet.contracts.message import Message
-from omnikernal.packet.contracts.packet_state import PacketState
-from omnikernal.packet.contracts.route_cache import RouteCache
-from omnikernal.packet.contracts.user import ROLE, User
-from omnikernal.plugin.contracts.plugin_manifest import PluginManifest
+from src.packet.contracts.command_manifest import CommandManifest
+from src.packet.contracts.command_result import CommandResult
+from src.packet.contracts.intent_packet import IntentPacket
+from src.packet.contracts.message import Message
+from src.packet.contracts.packet_state import PacketState
+from src.packet.contracts.route_cache import RouteCache
+from src.packet.contracts.user import ROLE, User
+from src.plugin.contracts.plugin_manifest import PluginManifest
 
 __all__ = [
     # User based

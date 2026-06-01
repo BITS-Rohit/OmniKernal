@@ -9,13 +9,13 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from omnikernal.packet.contracts import CommandManifest, PluginManifest
+    from src.packet.contracts import CommandManifest, PluginManifest
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from omnikernal.packet.contracts import ROLE, RouteCache
+from src.packet.contracts import ROLE, RouteCache
 
 from .models import (
     ExecutionLog,
@@ -118,7 +118,7 @@ class OmniRepository:
         result = await self.session.execute(select(Tool))
         return result.scalars().all()
 
-    async def get_routing_cache(self) -> dict[str, "RouteCache"]:
+    async def get_routing_cache(self) -> dict[str, RouteCache]:
         """Returns an O(1) lookup dictionary of RouteCache objects for all ACTIVE commands."""
 
         # We need joinedload to check if the parent Plugin is active

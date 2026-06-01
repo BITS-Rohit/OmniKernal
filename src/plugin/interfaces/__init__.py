@@ -1,4 +1,4 @@
-from omnikernal.plugin.interfaces.base_plugin import BasePlugin
-from omnikernal.plugin.interfaces.platform_adapter import PlatformAdapter
+from src.plugin.interfaces.base_plugin import BasePlugin
+from src.plugin.interfaces.platform_adapter import PlatformAdapter
 
 __all__ = ["BasePlugin", "PlatformAdapter"]

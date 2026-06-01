@@ -7,17 +7,18 @@ The Core reads this object to decide what to do next:
     - If .ok is False   → log the failure; if .api_url set, trigger ApiWatchdog
 
 Invariant: Handlers NEVER call send_message() directly.
-They return a CommandResult and the Core handles' delivery.
+They return a CommandResult and the Core handles delivery.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+from src.omni_logger import omni_logger
 
 
-@dataclass(frozen=True, slots=True)
-class CommandResult:
+class CommandResult(BaseModel):
     """
     The result of a command handler execution.
 
@@ -36,6 +37,7 @@ class CommandResult:
         api_url:        Optional. If the failure was caused by an external API, set this
                         URL so the Core can report it to ApiWatchdog. Never set on success.
     """
+    model_config = ConfigDict(frozen=True)
 
     ok: bool
     reply: str | None = None
@@ -66,28 +68,23 @@ class CommandResult:
         """
         return cls(ok=False, error_reason=reason, api_url=api_url)
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> CommandResult | None:
+        """
+        Safely parses a dictionary into a CommandResult object.
+        Traps ValidationErrors to prevent malformed handler returns from crashing the Core.
+        """
+        try:
+            return cls.model_validate(data)
+        except ValidationError as e:
+            omni_logger.error(f"Invalid CommandResult payload returned from handler: {e}")
+            return None
+
     def to_dict(self) -> dict[str, Any]:
         """
-        Convert the CommandResult to a dictionary.
+        Unpacks the CommandResult model back into a standard dictionary.
         """
-        return {
-            "ok": self.ok,
-            "reply": self.reply,
-            "error_reason": self.error_reason,
-            "api_url": self.api_url,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> CommandResult:
-        """
-        Create a CommandResult from a dictionary.
-        """
-        return cls(
-            ok=data["ok"],
-            reply=data.get("reply"),
-            error_reason=data.get("error_reason"),
-            api_url=data.get("api_url"),
-        )
+        return self.model_dump()
 
     def __repr__(self) -> str:
         if self.ok:
