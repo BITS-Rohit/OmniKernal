@@ -1,11 +1,11 @@
 """Test stubs for User contract — construction and immutability."""
 
-from dataclasses import FrozenInstanceError
 from typing import Any, cast
 
 import pytest
+from pydantic import ValidationError
 
-from omnikernal.core.contracts.user import ROLE, User
+from src.packet.contracts.user import ROLE, User
 
 
 def test_user_construction():
@@ -28,6 +28,5 @@ def test_user_default_not_admin():
 
 def test_user_is_immutable():
     u = User(id="3", display_name="Carol", platform="whatsapp")
-    with pytest.raises(FrozenInstanceError):
+    with pytest.raises((ValidationError, TypeError)):
         cast(Any, u).display_name = "Changed"
-

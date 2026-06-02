@@ -2,9 +2,9 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from omnikernal.core.contracts import CommandManifest, PluginManifest
-from omnikernal.database.models import Base
-from omnikernal.database.repository import OmniRepository
+from src.database.models import Base
+from src.database.repository import OmniRepository
+from src.packet.contracts import CommandManifest, PluginManifest
 
 
 @pytest_asyncio.fixture
@@ -30,7 +30,7 @@ async def test_repository_plugin_and_tool_registration(db_session):
         version="1.0.0",
         author="Test Author",
         description="A test plugin",
-        min_core_version="0.1.0"
+        min_core_version="0.1.0",
     )
     await repo.register_plugins([plugin])
 
@@ -41,7 +41,7 @@ async def test_repository_plugin_and_tool_registration(db_session):
         handler="plugins.echo.handlers.echo.run",
         plugin_name="echo_plugin",
         description="Echoes text",
-        minimum_role="USER"
+        minimum_role="USER",
     )
     await repo.register_tools([tool])
 
@@ -68,4 +68,3 @@ async def test_repository_execution_logging(db_session):
     # Verify via direct session query or if repo had a 'get_logs'
     # For now, just ensure it doesn't crash and commits.
     assert True
-

@@ -10,11 +10,10 @@ Demonstrates the full Core Engine loop using a directly-registered adapter:
 
 import asyncio
 
-from omnikernal.adapters.manager import AdapterManager
-from omnikernal.adapters.mock_adapter import MockAdapter
-from omnikernal.core import GlobalBroker
-from omnikernal.core.contracts import RouteCache
-from omnikernal.core.contracts.user import ROLE
+from src.packet import GlobalBroker
+from src.packet.contracts import RouteCache
+from src.packet.contracts.user import ROLE
+from src.plugin.adapters import AdapterManager, MockAdapter
 
 
 async def echo_handler(packet) -> str:
@@ -31,7 +30,7 @@ async def run_smoke_test():
             pattern=".*",
             handler_path="tests.smoke_test.echo_handler",
             required_role=ROLE.ADMIN,
-            plugin_name="smoke_plugin"
+            plugin_name="smoke_plugin",
         )
     }
 

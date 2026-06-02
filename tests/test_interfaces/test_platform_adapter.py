@@ -5,9 +5,9 @@ from typing import Any, cast
 
 import pytest
 
-from omnikernal.core.contracts.intent_packet import IntentPacket
-from omnikernal.core.contracts.message import Message
-from omnikernal.core.interfaces.platform_adapter import PlatformAdapter
+from src.packet.contracts.intent_packet import IntentPacket
+from src.packet.contracts.message import Message
+from src.plugin.interfaces import PlatformAdapter
 
 
 def test_platform_adapter_is_abstract():
@@ -55,4 +55,3 @@ def test_platform_adapter_full_concrete_instantiates():
 
     adapter = ConcreteAdapter()
     assert adapter.platform_name == "mock"
-

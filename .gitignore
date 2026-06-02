@@ -56,37 +56,15 @@ Thumbs.db
 *.db
 *.sqlite3
 
+# IDE specific+
 .jbeval/
 .qodo/
 .dev.key
 
-# Profile runtime data (Phase 5)
-# Keep profiles/.gitkeep but exclude all runtime subdirectories and their contents
-profiles/*/
-
-# whatsplay auto-generated debug screenshots
-init_main.png
-pocos_chats_visibles.png
-send_message_error.png
-send_file_error.png
-baileys_session_*/
-node_modules/
-
-# Screenshots & Debug
+# Screenshots & cleanup
 *.png
-search_exception_error_*.png
-search_input_*.png
-before_search.png
-init_main.png
-
-
-# Cleanup for PYPI
-DOCS/
-adapter_packs/
 ignore/
-
-profiles/
-omnikernal/profiles/
-omnikernal/modes/
-omnikernal/security/
 tests/smoke
+
+# Dev tooling symlink (mypy src/ resolution shim — do not commit)
+omnikernal
