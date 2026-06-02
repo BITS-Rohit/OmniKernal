@@ -6,9 +6,9 @@ permissions:
 
 on:
   push:
-    branches: ["main", "master", "dev"]
+    branches: ["main", "dev"]
   pull_request:
-    branches: ["main", "master", "dev"]
+    branches: ["main", "dev"]
 
 jobs:
   lint-and-typecheck:

@@ -71,6 +71,8 @@ class PluginEngine:
         failed_plugins: list[str] = []
 
         for folder in folders:
+            if folder.startswith("__") or folder.startswith("."):
+                continue
             result = self._process_plugin(folder)
             if result is None:
                 failed_plugins.append(folder)
@@ -91,6 +93,7 @@ class PluginEngine:
             self._logger.debug("-----------------------------------------------")
             self._logger.debug(f"Failed to load plugins: {failed_plugins}")
 
+        # Database Insertion.
         await PluginInsertion.persist(
             repo=self.repo,
             valid_plugins=valid_plugins,
