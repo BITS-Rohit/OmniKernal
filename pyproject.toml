@@ -152,5 +152,5 @@ addopts      = "-v --cov=src --cov-report=term-missing"
 
 [tool.deptry]
 package_module_name_map = { "pyyaml" = "yaml", "aiomysql" = "aiomysql", "asyncpg" = "asyncpg" }
-per_rule_ignores = { "DEP002" = ["aiosqlite", "playwright", "aiomysql", "asyncpg", "cryptography"] }
+per_rule_ignores = { "DEP002" = ["aiosqlite", "playwright", "aiomysql", "asyncpg"] }
 optional_dependencies_dev_groups = ["testing", "linting", "dev", "database-extras", "adapter-testing"]
